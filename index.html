@@ -50,10 +50,15 @@
 
         /* HERO */
         .hero { padding: 80px 0; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 60px; align-items: center; }
-        .hero h1 { font-size: clamp(48px, 7vw, 96px); line-height: 0.85; margin-bottom: 30px; }
+        .hero h1 { font-size: clamp(38px, 5vw, 84px); line-height: 0.9; margin-bottom: 30px; letter-spacing: -2.5px; }
         .hero h1 .outline { -webkit-text-stroke: 2px var(--black); color: transparent; }
         .hero h1 .green { color: var(--primary); text-shadow: 4px 4px 0 var(--black); }
         .hero-cta { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 30px; }
+        .subscribe-group { display: flex; gap: 10px; width: 100%; max-width: 500px; margin-top: 40px; position: relative; }
+        .subscribe-input { flex: 1; padding: 16px 20px; border: 3px solid var(--black); font-family: 'Space Mono', monospace; font-size: 15px; background: #fff; box-shadow: 6px 6px 0 var(--black); outline: none; }
+        .subscribe-input:focus { border-color: var(--primary); }
+        .subscribe-btn { background: var(--primary); color: #000; border: 3px solid var(--black); padding: 0 30px; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0 var(--black); font-size: 14px; transition: all 0.2s; white-space: nowrap; }
+        .subscribe-btn:active { box-shadow: 0 0 0 var(--black); transform: translate(6px, 6px); }
         .hero-stats-card { background: #fff; border: var(--border); box-shadow: 8px 8px 0 var(--black); padding: 36px; }
         .stat-item { padding: 12px 0; border-bottom: 2px solid var(--black); }
         .stat-item:last-child { border-bottom: none; }
@@ -155,6 +160,10 @@
         #login-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10002; display: none; align-items: center; justify-content: center; }
         .modal-box { background: var(--surface); border: 4px solid var(--black); padding: 50px; box-shadow: 15px 15px 0 var(--black); max-width: 420px; width: 100%; }
 
+        /* PASS TOGGLE */
+        .pass-group { position: relative; width: 100%; margin-bottom: 20px; }
+        .pass-toggle { position: absolute; right: 12px; top: 12px; background: none; border: none; cursor: pointer; font-size: 18px; z-index: 10; color: var(--black); }
+
         /* FOOTER */
         footer { background: var(--black); border-top: 4px solid var(--primary); padding: 60px 0 40px; color: #fff; margin-top: 80px; }
         .footer-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
@@ -168,6 +177,7 @@
 
         @media (max-width: 768px) {
             .hero { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 42px; line-height: 0.95; letter-spacing: -1.5px; }
             .grid { grid-template-columns: 1fr; }
             .admin-form-grid { grid-template-columns: 1fr; }
             .admin-form-grid .full { grid-column: span 1; }
@@ -270,11 +280,13 @@
 <section style="padding: 80px 0; background: var(--bg);">
     <div class="container hero">
         <div>
-            <h1>FIND YOUR<br><span class="outline">WEB3</span><br><span class="green">CREATOR ROLE</span></h1>
+            <h1>EARN FROM <span class="outline">WEB3</span>:<br><span class="green" style="font-size: 0.8em; display:inline-block; margin-top:8px;">FIND BOUNTIES, JOBS & PAID CAMPAIGNS</span></h1>
             <p style="font-size:16px; color:var(--muted); max-width:440px;">The unfiltered aggregator for the best roles in the decentralized economy. Built for creators, community leads, and devs.</p>
-            <div class="hero-cta">
-                <button class="btn btn-black" style="font-size:16px; padding:14px 36px;">Browse Now &rarr;</button>
-                <button class="btn btn-white" style="font-size:16px; padding:14px 36px;">Post Project</button>
+            <div class="subscribe-group">
+                <input type="email" id="sub-email" class="subscribe-input" placeholder="Enter your email for updates...">
+                <button class="subscribe-btn" id="sub-btn" onclick="handleSubscribe()">GET UPDATES</button>
+            </div>
+            <div style="margin-top:25px;">
                 <button class="btn btn-secondary" style="font-size:14px; padding:12px 24px;" onclick="openSubmitModal()">Submit Your Project &rarr;</button>
             </div>
         </div>
@@ -404,9 +416,14 @@
                         <label>Apply Link <span class="req">*</span></label>
                         <input type="url" id="s-url" placeholder="https://..." required>
                     </div>
-                    <div class="field">
-                        <label>Logo (emoji or URL)</label>
-                        <input type="text" id="s-logo" placeholder="🔷 or https://logo.png">
+                    <div class="field" style="position:relative;">
+                        <label>Logo (Emoji, URL, or Upload)</label>
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="s-logo" placeholder="🔷 or https://..." style="flex:1;">
+                            <input type="file" id="s-logo-file" accept="image/png, image/jpeg, image/gif, image/webp" style="display:none;" onchange="document.getElementById('s-logo').value = this.files[0] ? 'Image selected...' : ''; document.getElementById('s-logo-filename').textContent = this.files[0] ? this.files[0].name : ''; document.getElementById('s-logo-filename').style.display = this.files[0] ? 'block' : 'none';">
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('s-logo-file').click()" style="padding: 10px 14px; font-size:12px; margin:0; border-radius:0;"><span style="font-size:16px;">📁</span> UPLOAD</button>
+                        </div>
+                        <div id="s-logo-filename" style="font-size:11px; color:var(--primary); font-family:'Space Mono',monospace; font-weight:700; background:#000; padding:2px 8px; position:absolute; right:0; top:0; display:none;"></div>
                     </div>
                     <div class="field">
                         <label>Deadline</label>
@@ -485,9 +502,14 @@
                         <label class="admin-label">APPLY_URL</label>
                         <input type="url" class="admin-form-input" id="f-url">
                     </div>
-                    <div>
-                        <label class="admin-label">LOGO (emoji or URL)</label>
-                        <input type="text" class="admin-form-input" id="f-logo">
+                    <div style="position:relative;">
+                        <label class="admin-label">LOGO (Emoji, URL, or Upload)</label>
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" class="admin-form-input" id="f-logo" placeholder="🔷 or https://..." style="flex:1;">
+                            <input type="file" id="f-logo-file" accept="image/png, image/jpeg, image/gif, image/webp" style="display:none;" onchange="document.getElementById('f-logo').value = this.files[0] ? 'Image selected...' : ''; document.getElementById('f-logo-filename').textContent = this.files[0] ? this.files[0].name : ''; document.getElementById('f-logo-filename').style.display = this.files[0] ? 'block' : 'none';">
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('f-logo-file').click()" style="padding: 8px 12px; font-size:11px; margin:0; border-radius:0;">UPLOAD</button>
+                        </div>
+                        <div id="f-logo-filename" style="font-size:10px; color:var(--primary); font-family:'Space Mono',monospace; font-weight:700; background:#000; padding:2px 6px; position:absolute; right:0; top:0; display:none;"></div>
                     </div>
                     <div>
                         <label class="admin-label">DEADLINE</label>
@@ -529,9 +551,13 @@
 
 <!-- LOGIN -->
 <div id="login-modal">
-    <div class="modal-box">
+    <div class="modal-box" style="position:relative;">
+        <button onclick="document.getElementById('login-modal').style.display='none'" style="position:absolute; top:20px; right:25px; background:none; border:none; font-size:24px; cursor:pointer; font-weight:900; color:var(--black); z-index:100;">✕</button>
         <h2 class="bold" style="font-size:30px; margin-bottom:20px;">ACCESS BOARD</h2>
-        <input type="password" id="admin-pass" class="admin-form-input" style="background:#eee; color:#000; border-color:#000; margin-bottom:15px;" placeholder="Enter password...">
+        <div class="pass-group">
+            <input type="password" id="admin-pass" class="admin-form-input" style="background:#eee; color:#000; border-color:#000; margin-bottom:0;" placeholder="Enter password...">
+            <button type="button" class="pass-toggle" onclick="togglePass()" id="pass-eye">👁️</button>
+        </div>
         <button class="btn btn-primary" style="width:100%;" onclick="checkPass()">ENTER</button>
     </div>
 </div>
@@ -646,6 +672,32 @@
         btn.textContent = 'Submitting...';
         errEl.style.display = 'none';
 
+        let logoVal = document.getElementById('s-logo').value;
+        const fileInput = document.getElementById('s-logo-file');
+        
+        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            if (file.size > 5 * 1024 * 1024) {
+                errEl.style.display = 'block'; errEl.textContent = 'Error: Logo file must be under 5MB';
+                btn.classList.remove('btn-loading'); btn.textContent = 'Submit for Review →';
+                return false;
+            }
+            btn.textContent = 'Uploading...';
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+            const { data: uploadData, error: uploadError } = await db.storage.from('logos').upload(`public/${fileName}`, file, { upsert: false });
+            
+            if (uploadError) {
+                console.error('Upload Error:', uploadError);
+                errEl.style.display = 'block'; errEl.textContent = 'Failed to upload logo image';
+                btn.classList.remove('btn-loading'); btn.textContent = 'Submit for Review →';
+                return false;
+            }
+            const { data: urlData } = db.storage.from('logos').getPublicUrl(`public/${fileName}`);
+            logoVal = urlData.publicUrl;
+            btn.textContent = 'Submitting...';
+        }
+
         const item = {
             section: document.getElementById('s-section').value,
             project: document.getElementById('s-project').value,
@@ -653,7 +705,7 @@
             reward: document.getElementById('s-reward').value,
             description: document.getElementById('s-desc').value,
             apply_url: document.getElementById('s-url').value,
-            logo: document.getElementById('s-logo').value,
+            logo: logoVal,
             deadline: document.getElementById('s-deadline').value,
             submitted_by: document.getElementById('s-submitter').value,
             approval_status: 'pending',
@@ -685,11 +737,52 @@
         return false;
     }
 
+    // ─── Subscription ─────────────────────────────────
+    async function handleSubscribe() {
+        const input = document.getElementById('sub-email');
+        const btn = document.getElementById('sub-btn');
+        const email = input.value.trim();
+        
+        if(!email || !email.includes('@')) {
+            showToast('Please enter a valid email', 'error');
+            return;
+        }
+
+        btn.disabled = true; btn.textContent = 'SAVING...';
+        
+        try {
+            const { error } = await db.from('subscribers').insert([{ email }]);
+            if (error) {
+                if(error.code === '23505') showToast('Already subscribed!', 'success');
+                else throw error;
+            } else {
+                showToast('📧 Subscription successful!');
+            }
+            input.value = '';
+        } catch (e) {
+            console.error(e);
+            showToast('Something went wrong', 'error');
+        } finally {
+            btn.disabled = false; btn.textContent = 'GET UPDATES';
+        }
+    }
+
 
     // ─── Admin Auth ────────────────────────────────────────
     function showLogin() { document.getElementById('login-modal').style.display='flex'; }
+    function togglePass() {
+        const input = document.getElementById('admin-pass');
+        const eye = document.getElementById('pass-eye');
+        if(input.type === 'password') {
+            input.type = 'text';
+            eye.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            eye.textContent = '👁️';
+        }
+    }
     function checkPass() {
-        if(document.getElementById('admin-pass').value==='admin123') {
+        if(document.getElementById('admin-pass').value==='shuhaib6282') {
             document.getElementById('login-modal').style.display='none';
             document.getElementById('admin-panel').style.display='block';
             document.body.style.overflow='hidden';
@@ -801,7 +894,35 @@
     // ─── Admin: Add listing form ───────────────────────────
     document.getElementById('listing-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const id = document.getElementById('f-id').value;
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.disabled = true; btn.textContent = 'SAVING...';
+
+        let logoVal = document.getElementById('f-logo').value;
+        const fileInput = document.getElementById('f-logo-file');
+        
+        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Error: Logo file must be under 5MB');
+                btn.disabled = false; btn.textContent = 'SAVE (GOES LIVE IMMEDIATELY)';
+                return;
+            }
+            btn.textContent = 'UPLOADING...';
+            const fileName = `${Date.now()}_admin.${file.name.split('.').pop()}`;
+            const { data: uploadData, error: uploadError } = await db.storage.from('logos').upload(`public/${fileName}`, file);
+            
+            if (uploadError) {
+                console.error('Upload Error:', uploadError);
+                alert('Failed to upload logo image');
+                btn.disabled = false; btn.textContent = 'SAVE (GOES LIVE IMMEDIATELY)';
+                return;
+            }
+            const { data: urlData } = db.storage.from('logos').getPublicUrl(`public/${fileName}`);
+            logoVal = urlData.publicUrl;
+            btn.textContent = 'SAVING...';
+        }
+
+        const adminId = document.getElementById('f-id').value;
         const item = {
             section: document.getElementById('f-section').value,
             project: document.getElementById('f-project').value,
@@ -809,19 +930,33 @@
             reward: document.getElementById('f-reward').value,
             description: document.getElementById('f-desc').value,
             apply_url: document.getElementById('f-url').value,
-            logo: document.getElementById('f-logo').value,
+            logo: logoVal,
             deadline: document.getElementById('f-deadline').value,
-            urgency: document.getElementById('f-urgency').value,
-            featured: document.getElementById('f-featured').value==='true',
-            approval_status: 'approved' // Admin always goes live directly
+            urgency: document.getElementById('f-urgency').value || 'MEDIUM',
+            featured: document.getElementById('f-featured').value === 'true',
+            approval_status: 'approved',
+            created_at: new Date().toISOString()
         };
-        if(id) await db.from('listings').update(item).eq('id',id);
-        else await db.from('listings').insert([item]);
-        document.getElementById('listing-form').reset();
-        document.getElementById('f-id').value='';
-        showToast('✅ Listing saved & live!');
-        loadListings();
-        loadAllAdminListings();
+
+        try {
+            if (adminId) await db.from('listings').update(item).eq('id', adminId);
+            else await db.from('listings').insert([item]);
+            
+            document.getElementById('listing-form').reset();
+            document.getElementById('f-id').value = '';
+            document.getElementById('f-logo-filename').style.display = 'none';
+            showToast('✅ Listing saved & live!');
+            
+            // Refresh lists in background
+            loadListings();
+            loadAllAdminListings();
+        } catch (err) {
+            console.error(err);
+            showToast('Failed to save listing', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'SAVE (GOES LIVE IMMEDIATELY)';
+        }
     });
 
     async function editItem(id) {
