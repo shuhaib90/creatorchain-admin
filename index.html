@@ -250,6 +250,10 @@
           .nav-by { display: none; }
         }
     </style>
+    <script>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -655,7 +659,7 @@
                     <div class="mono" style="font-size:10px;color:${status?'var(--accent)':'var(--muted)'};">${deadlineLabel}</div>
                     <div style="display:flex;gap:8px;">
                         ${item.twitter_url ? `<a href="${item.twitter_url}" target="_blank" class="x-link-small" title="Follow on X">𝗫</a>` : ''}
-                        <a href="${item.apply_url||'#'}" target="_blank" class="btn btn-primary btn-sm">APPLY</a>
+                        <a href="${item.apply_url||'#'}" target="_blank" class="btn btn-primary btn-sm" onclick="window.va && window.va('track', 'Apply_Click', { project: '${item.project.replace(/'/g, "\\'")}', title: '${item.title.replace(/'/g, "\\'")}' })">APPLY</a>
                     </div>
                 </div>
             `;
@@ -671,6 +675,7 @@
 
     // ─── Submit Modal ──────────────────────────────────────
     function openSubmitModal() {
+        if (window.va) window.va('track', 'Submit_Modal_Open');
         document.getElementById('submit-modal').style.display = 'flex';
         document.getElementById('submit-form-body').innerHTML = document.getElementById('submit-form-body').innerHTML; // reset
         const form = document.getElementById('submit-form');
@@ -728,6 +733,9 @@
             const { error } = await db.from('listings').insert([item]);
             if (error) throw error;
 
+            // Track successful submission
+            if (window.va) window.va('track', 'Project_Submitted', { category: item.section, project: item.project });
+
             document.getElementById('submit-form-body').innerHTML = `
                 <div class="submit-success">
                     <div class="check">✅</div>
@@ -771,6 +779,7 @@
                 else throw error;
             } else {
                 showToast('📧 Subscription successful!');
+                if (window.va) window.va('track', 'Newsletter_Subscription', { email: email });
             }
             input.value = '';
         } catch (e) {
@@ -797,13 +806,17 @@
     }
     function checkPass() {
         if(document.getElementById('admin-pass').value==='shuhaib6282') {
+            if (window.va) window.va('track', 'Admin_Login_Success');
             document.getElementById('login-modal').style.display='none';
             document.getElementById('admin-panel').style.display='block';
             document.body.style.overflow='hidden';
             loadPendingListings();
             loadAllAdminListings();
             subscribeAdminRealtime();
-        } else { showToast('Wrong password', 'error'); }
+        } else { 
+            if (window.va) window.va('track', 'Admin_Login_Failed');
+            showToast('Wrong password', 'error'); 
+        }
     }
     function hideAdmin() { document.getElementById('admin-panel').style.display='none'; document.body.style.overflow='auto'; }
 
