@@ -23,18 +23,25 @@
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
         /* NAV */
-        nav { background: var(--primary); border-bottom: var(--border); padding: 16px 0; position: sticky; top: 0; z-index: 1000; }
-        .nav-inner { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-        .logo { font-size: 28px; font-weight: 900; text-decoration: none; color: inherit; }
+        nav { background: var(--surface); border-bottom: 3px solid var(--black); position: sticky; top: 0; z-index: 10000; padding: 15px 0; }
+        .nav-inner { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 28px; font-weight: 900; color: var(--black); text-decoration: none; text-transform: uppercase; letter-spacing: -1px; animation: logoPulse 6s infinite; cursor: pointer; }
         .logo span { -webkit-text-stroke: 1.5px var(--black); color: transparent; }
-        .nav-links { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
-        .nav-link { text-decoration: none; color: var(--black); font-weight: 700; padding: 4px 8px; font-size: 12px; position: relative; }
-        .nav-link:hover { background: var(--secondary); }
+        @keyframes logoPulse {
+            0% { color: var(--black); }
+            25% { color: var(--primary); }
+            50% { color: var(--accent); }
+            75% { color: var(--discord); }
+            100% { color: var(--black); }
+        }
+        .nav-links { display: flex; gap: 25px; align-items: center; }
+        .nav-link { text-decoration: none; color: var(--black); font-weight: 700; font-size: 14px; transition: 0.2s; }
+        .nav-link:hover { color: var(--primary); }
 
         /* BUTTONS */
-        .btn { border: var(--border); padding: 10px 20px; font-family: 'Space Mono', monospace; font-weight: 700; text-transform: uppercase; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.1s; box-shadow: var(--shadow); border-radius: 0; font-size: 13px; }
-        .btn:hover { translate: 2px 2px; box-shadow: 2px 2px 0 var(--black); }
-        .btn:active { translate: 4px 4px; box-shadow: none; }
+        .btn { border: var(--border); padding: 10px 20px; font-family: 'Space Mono', monospace; font-weight: 700; text-transform: uppercase; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: var(--shadow); border-radius: 0; font-size: 13px; }
+        .btn:hover { transform: scale(1.05) translateY(-2px); box-shadow: 6px 6px 0 var(--black); }
+        .btn:active { transform: scale(0.95) translate(4px, 4px); box-shadow: none; }
         .btn-primary { background: var(--primary); color: var(--black); }
         .btn-secondary { background: var(--secondary); color: var(--black); }
         .btn-black { background: var(--black); color: #fff; box-shadow: 4px 4px 0 var(--primary); }
@@ -115,6 +122,8 @@
         .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .info-pill { background: var(--secondary); border: 2px solid var(--black); padding: 6px 14px; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; margin-top: 10px; }
         .info-note { background: #f5f5f5; border-left: 4px solid var(--black); padding: 12px; font-size: 13px; color: var(--muted); margin-top: 10px; }
+        .x-link-small { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 2px solid var(--black); background: #000; color: #fff; text-decoration: none; font-size: 12px; transition: 0.1s; }
+        .x-link-small:hover { transform: translate(-2px, -2px); box-shadow: 2px 2px 0 var(--black); }
         .submit-success { text-align: center; padding: 50px 30px; }
         .submit-success .check { font-size: 80px; animation: pop 0.4s ease; }
         @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
@@ -186,6 +195,7 @@
             .admin-tabs { overflow-x: auto; }
         }
 
+
         .owner-credit {
           display: inline-flex;
           flex-direction: column;
@@ -250,21 +260,16 @@
 <nav>
     <div class="container nav-inner">
         <div style="display:flex; align-items:center;">
-            <a href="/" class="logo">CREATOR<span>CHAIN</span></a>
-            <span class="nav-by">
-                by 
-                <a href="https://x.com/ZenvicAlpha" target="_blank">@ZenvicAlpha</a>
-            </span>
+            <div class="logo" onclick="window.location.reload()">CREATOR<span>CHAIN</span></div>
+            <div class="nav-by">by <a href="https://x.com/ZenvicAlpha" target="_blank">@ZenvicAlpha</a></div>
         </div>
-
         <div class="nav-links">
-            <a href="#ambassador-section" class="nav-link mono">Ambassadors</a>
-            <a href="#discord-section" class="nav-link mono">Discord</a>
-            <a href="#bounty-section" class="nav-link mono">Bounties</a>
-            <a href="#developer-section" class="nav-link mono">Dev</a>
-            <a href="#campaign-section" class="nav-link mono">Campaigns</a>
-            <button class="btn btn-secondary btn-sm" onclick="openSubmitModal()">+ Submit Project</button>
-            <button class="btn btn-white btn-sm" onclick="showLogin()">Admin</button>
+            <a href="#ambassador-section" class="nav-link">AMBASSADORS</a>
+            <a href="#discord-section" class="nav-link">DISCORD</a>
+            <a href="#bounty-section" class="nav-link">BOUNTIES</a>
+            <a href="#developer-section" class="nav-link">DEVELOPER</a>
+            <a href="#campaign-section" class="nav-link">CAMPAIGNS</a>
+            <button class="btn btn-black btn-sm" onclick="openSubmitModal()">+ SUBMIT PROJECT</button>
         </div>
     </div>
 </nav>
@@ -359,8 +364,8 @@
                     @ZenvicAlpha
                 </a>
             </div>
-            <div style="margin-top:15px; color:#444;">
-                &copy; 2026 CreatorChain. Decentralized Creator Economy Platform.
+            <div style="margin-top:15px; color:#444; font-size:11px;">
+                &copy; 2026 CreatorChain. Decentralized Creator Economy Platform. • <a href="#" onclick="showLogin(); return false;" style="color:#222; text-decoration:none;">Admin Access</a>
             </div>
         </div>
 
@@ -426,8 +431,8 @@
                         <div id="s-logo-filename" style="font-size:11px; color:var(--primary); font-family:'Space Mono',monospace; font-weight:700; background:#000; padding:2px 8px; position:absolute; right:0; top:0; display:none;"></div>
                     </div>
                     <div class="field">
-                        <label>Deadline</label>
-                        <input type="text" id="s-deadline" placeholder="April 30, 2026 or TBA">
+                        <label>X (Twitter) URL</label>
+                        <input type="url" id="s-twitter" placeholder="https://x.com/...">
                     </div>
                     <div class="field">
                         <label>Your Name / Handle <span class="req">*</span></label>
@@ -524,6 +529,10 @@
                             <option value="MEDIUM">MEDIUM</option>
                         </select>
                     </div>
+                    <div class="full">
+                        <label class="admin-label">X_URL (https://x.com/...)</label>
+                        <input type="url" class="admin-form-input" id="f-twitter">
+                    </div>
                     <div>
                         <label class="admin-label">FEATURED?</label>
                         <select class="admin-form-input" id="f-featured"><option value="false">NO</option><option value="true">YES</option></select>
@@ -586,6 +595,8 @@
         catch(e) { console.error(e); return false; }
     }
 
+
+
     // ─── Public listings (APPROVED only) ──────────────────
     async function loadListings() {
         const { data, error } = await db.from('listings').select('*')
@@ -642,7 +653,10 @@
                 </div>
                 <div class="card-footer">
                     <div class="mono" style="font-size:10px;color:${status?'var(--accent)':'var(--muted)'};">${deadlineLabel}</div>
-                    <a href="${item.apply_url||'#'}" target="_blank" class="btn btn-primary btn-sm">APPLY</a>
+                    <div style="display:flex;gap:8px;">
+                        ${item.twitter_url ? `<a href="${item.twitter_url}" target="_blank" class="x-link-small" title="Follow on X">𝗫</a>` : ''}
+                        <a href="${item.apply_url||'#'}" target="_blank" class="btn btn-primary btn-sm">APPLY</a>
+                    </div>
                 </div>
             `;
             const c = document.getElementById(`${target}-cards`);
@@ -672,68 +686,68 @@
         btn.textContent = 'Submitting...';
         errEl.style.display = 'none';
 
-        let logoVal = document.getElementById('s-logo').value;
-        const fileInput = document.getElementById('s-logo-file');
-        
-        if (fileInput && fileInput.files && fileInput.files.length > 0) {
-            const file = fileInput.files[0];
-            if (file.size > 5 * 1024 * 1024) {
-                errEl.style.display = 'block'; errEl.textContent = 'Error: Logo file must be under 5MB';
-                btn.classList.remove('btn-loading'); btn.textContent = 'Submit for Review →';
-                return false;
-            }
-            btn.textContent = 'Uploading...';
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-            const { data: uploadData, error: uploadError } = await db.storage.from('logos').upload(`public/${fileName}`, file, { upsert: false });
+        try {
+            let logoVal = document.getElementById('s-logo').value;
+            const fileInput = document.getElementById('s-logo-file');
             
-            if (uploadError) {
-                console.error('Upload Error:', uploadError);
-                errEl.style.display = 'block'; errEl.textContent = 'Failed to upload logo image';
-                btn.classList.remove('btn-loading'); btn.textContent = 'Submit for Review →';
-                return false;
+            if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                if (file.size > 5 * 1024 * 1024) throw new Error('Logo file must be under 5MB');
+                
+                btn.textContent = 'Uploading...';
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+                const { error: upErr } = await db.storage.from('logos').upload(`public/${fileName}`, file, { upsert: false });
+                if (upErr) throw upErr;
+                
+                const { data: urlData } = db.storage.from('logos').getPublicUrl(`public/${fileName}`);
+                logoVal = urlData.publicUrl;
             }
-            const { data: urlData } = db.storage.from('logos').getPublicUrl(`public/${fileName}`);
-            logoVal = urlData.publicUrl;
-            btn.textContent = 'Submitting...';
-        }
 
-        const item = {
-            section: document.getElementById('s-section').value,
-            project: document.getElementById('s-project').value,
-            title: document.getElementById('s-title').value,
-            reward: document.getElementById('s-reward').value,
-            description: document.getElementById('s-desc').value,
-            apply_url: document.getElementById('s-url').value,
-            logo: logoVal,
-            deadline: document.getElementById('s-deadline').value,
-            submitted_by: document.getElementById('s-submitter').value,
-            approval_status: 'pending',
-            submitted_at: new Date().toISOString(),
-            featured: false,
-            urgency: 'MEDIUM'
-        };
+            // Safe access to fields that might not exist in public form
+            const deadlineEl = document.getElementById('s-deadline');
+            const twitterEl = document.getElementById('s-twitter');
 
-        const { data, error } = await db.from('listings').insert([item]).select().single();
-        if (error) {
+            const item = {
+                section: document.getElementById('s-section').value,
+                project: document.getElementById('s-project').value,
+                title: document.getElementById('s-title').value,
+                reward: document.getElementById('s-reward').value,
+                description: document.getElementById('s-desc').value,
+                apply_url: document.getElementById('s-url').value,
+                logo: logoVal,
+                deadline: deadlineEl ? deadlineEl.value : 'OPEN',
+                twitter_url: twitterEl ? twitterEl.value : '',
+                submitted_by: document.getElementById('s-submitter').value,
+                approval_status: 'pending',
+                submitted_at: new Date().toISOString(),
+                featured: false,
+                urgency: 'MEDIUM'
+            };
+
+            const { error } = await db.from('listings').insert([item]);
+            if (error) throw error;
+
+            document.getElementById('submit-form-body').innerHTML = `
+                <div class="submit-success">
+                    <div class="check">✅</div>
+                    <h2>Submitted Successfully!</h2>
+                    <p style="color:var(--muted);font-size:15px;max-width:380px;margin:10px auto;">Your project has been sent for review. It will go live automatically within 24 hours if approved.</p>
+                    <div class="sub-id">SUBMISSION RECEIVED</div>
+                    <div style="display:flex;gap:15px;justify-content:center;margin-top:30px;">
+                        <button class="btn btn-secondary" onclick="openSubmitModal()">Submit Another</button>
+                        <button class="btn btn-white" onclick="closeSubmitModal()">Close</button>
+                    </div>
+                </div>
+            `;
+        } catch (err) {
+            console.error('Submission Error:', err);
             errEl.style.display = 'block';
+            errEl.textContent = err.message || 'Submission failed. Please check your connection.';
+        } finally {
             btn.classList.remove('btn-loading');
             btn.textContent = 'Submit for Review \u2192';
-            return false;
         }
-
-        document.getElementById('submit-form-body').innerHTML = `
-            <div class="submit-success">
-                <div class="check">&#x2705;</div>
-                <h2>Submitted Successfully!</h2>
-                <p style="color:var(--muted);font-size:15px;max-width:380px;margin:10px auto;">Sent for review. If approved it will go live automatically within 24 hours.</p>
-                <div class="sub-id">ID: ${data.id.substring(0,8).toUpperCase()}</div>
-                <div style="display:flex;gap:15px;justify-content:center;margin-top:30px;">
-                    <button class="btn btn-secondary" onclick="openSubmitModal()">Submit Another</button>
-                    <button class="btn btn-white" onclick="closeSubmitModal()">Close</button>
-                </div>
-            </div>
-        `;
         return false;
     }
 
@@ -792,6 +806,8 @@
         } else { showToast('Wrong password', 'error'); }
     }
     function hideAdmin() { document.getElementById('admin-panel').style.display='none'; document.body.style.overflow='auto'; }
+
+    function toggleMobileMenu() { document.getElementById('nav-links').classList.toggle('active'); }
 
     function switchTab(id) {
         document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
@@ -871,19 +887,16 @@
         const c = document.getElementById('admin-list');
         c.innerHTML = `
             <table class="listings-table">
-                <thead><tr>
-                    <th>Project</th><th>Title</th><th>Section</th><th>Reward</th><th>Status</th><th>Actions</th>
-                </tr></thead>
-                <tbody>${(data||[]).map(l=>`
-                    <tr>
-                        <td>${l.project}</td>
-                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.title}</td>
-                        <td class="mono" style="font-size:11px;">${l.section}</td>
-                        <td class="mono" style="font-size:12px;">${l.reward||'—'}</td>
-                        <td><span class="status-badge status-${l.approval_status||'pending'}">${(l.approval_status||'pending').toUpperCase()}</span></td>
-                        <td style="display:flex;gap:8px;">
-                            <button class="btn btn-white btn-sm" onclick="editItem('${l.id}');switchTab('tab-add')">EDIT</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteItem('${l.id}')">DEL</button>
+                <thead><tr><th>PROJECT</th><th>SECTION</th><th>REWARD</th><th>STATUS</th><th>ACTIONS</th></tr></thead>
+                <tbody>${data.map(l => `
+                    <tr id="ar-${l.id}">
+                        <td data-label="Project"><strong style="color:var(--primary)">${l.project}</strong><br><span style="font-size:11px;color:#666;">${l.title}</span></td>
+                        <td data-label="Section"><span class="mono">${l.section.toUpperCase()}</span></td>
+                        <td data-label="Reward">${l.reward||'TBA'}</td>
+                        <td data-label="Status"><span class="status-badge status-${l.approval_status}">${l.approval_status.toUpperCase()}</span></td>
+                        <td data-label="Actions">
+                            <button class="btn btn-white btn-sm" onclick="editItem('${l.id}');switchTab('tab-add')">✏️</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteItem('${l.id}')">🗑️</button>
                         </td>
                     </tr>
                 `).join('')}</tbody>
@@ -902,11 +915,6 @@
         
         if (fileInput && fileInput.files && fileInput.files.length > 0) {
             const file = fileInput.files[0];
-            if (file.size > 5 * 1024 * 1024) {
-                alert('Error: Logo file must be under 5MB');
-                btn.disabled = false; btn.textContent = 'SAVE (GOES LIVE IMMEDIATELY)';
-                return;
-            }
             btn.textContent = 'UPLOADING...';
             const fileName = `${Date.now()}_admin.${file.name.split('.').pop()}`;
             const { data: uploadData, error: uploadError } = await db.storage.from('logos').upload(`public/${fileName}`, file);
@@ -914,7 +922,7 @@
             if (uploadError) {
                 console.error('Upload Error:', uploadError);
                 alert('Failed to upload logo image');
-                btn.disabled = false; btn.textContent = 'SAVE (GOES LIVE IMMEDIATELY)';
+                btn.disabled = false; btn.textContent = 'SAVE';
                 return;
             }
             const { data: urlData } = db.storage.from('logos').getPublicUrl(`public/${fileName}`);
@@ -932,6 +940,7 @@
             apply_url: document.getElementById('f-url').value,
             logo: logoVal,
             deadline: document.getElementById('f-deadline').value,
+            twitter_url: document.getElementById('f-twitter')?.value || '',
             urgency: document.getElementById('f-urgency').value || 'MEDIUM',
             featured: document.getElementById('f-featured').value === 'true',
             approval_status: 'approved',
@@ -971,6 +980,7 @@
             document.getElementById('f-url').value=data.apply_url||'';
             document.getElementById('f-logo').value=data.logo||'';
             document.getElementById('f-deadline').value=data.deadline||'';
+            document.getElementById('f-twitter').value=data.twitter_url||'';
             document.getElementById('f-urgency').value=data.urgency||'';
             document.getElementById('f-featured').value=(data.featured||false).toString();
         }
@@ -993,9 +1003,6 @@
     document.addEventListener('DOMContentLoaded', async () => {
         if(!initSupabase()) return;
         await loadListings();
-        db.channel('public-live')
-            .on('postgres_changes', { event:'*', schema:'public', table:'listings' }, () => loadListings())
-            .subscribe();
     });
 </script>
 </body>
