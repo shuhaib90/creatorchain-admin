@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<!-- CreatorChain v1.0 — shuhaib90 -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreatorChain | Web3 Opportunity Board</title>
+    
+    <!-- 1. Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- 2. Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+    <style>
+        :root {
+            --bg: #050810;
+            --card: #0d1428;
+            --card-hover: #141f3d;
+            --green: #00f5a0;
+            --cyan: #00d4ff;
+            --purple: #a855f7;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.03);
+            --gradient: linear-gradient(135deg, var(--green), var(--cyan));
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, .syne {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+        }
+
+        .mono {
+            font-family: 'DM Mono', monospace;
+        }
+
+        /* Ticker */
+        .ticker-wrap {
+            height: 40px;
+            background: rgba(245, 158, 11, 0.1);
+            border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .ticker {
+            display: inline-block;
+            white-space: nowrap;
+            animation: ticker 30s linear infinite;
+        }
+
+        .ticker span {
+            margin-right: 48px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .ticker strong {
+            color: var(--amber);
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Nav */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(5, 8, 16, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+        }
+
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .nav-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 100px 0 80px;
+            text-align: center;
+            background: radial-gradient(circle at top, rgba(0, 245, 160, 0.05) 0%, transparent 60%);
+        }
+
+        .hero h1 {
+            font-size: 72px;
+            margin-bottom: 24px;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 48px;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 64px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card h2 {
+            font-size: 40px;
+            color: var(--text-main);
+        }
+
+        .stat-card p {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--green);
+        }
+
+        /* Sections */
+        section {
+            padding: 80px 0;
+        }
+
+        .section-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--cyan);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        .section-title {
+            font-size: 32px;
+            margin-bottom: 40px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+
+        .card.featured {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #0d1428, #1a233b);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+        }
+
+        .featured-badge {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: var(--purple);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        /* Urgency Badges */
+        .urgency-badge {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .urgency-CRITICAL {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--red);
+            border: 1px solid var(--red);
+            animation: red-pulse 1.5s infinite;
+        }
+
+        @keyframes red-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .urgency-HIGH { background: rgba(245, 158, 11, 0.2); color: var(--amber); border: 1px solid var(--amber); }
+        .urgency-MEDIUM { background: rgba(34, 197, 94, 0.2); color: var(--green); border: 1px solid var(--green); }
+
+        .card-header {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .card-logo {
+            width: 56px;
+            height: 56px;
+            background: var(--glass);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .card-project {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .card-title {
+            font-size: 20px;
+            margin: 4px 0;
+            color: var(--text-main);
+        }
+
+        .card-desc {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            flex-grow: 1;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+
+        .reward-box { display: flex; flex-direction: column; }
+        .reward-val { font-size: 20px; font-weight: 700; color: var(--green); font-family: 'DM Mono'; }
+        .reward-label { font-size: 12px; text-transform: uppercase; color: var(--text-muted); }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.2s;
+            font-size: 14px;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary { background: var(--green); color: var(--bg); }
+        .btn-primary:hover { transform: scale(1.05); }
+        .btn-ghost { background: var(--glass); color: white; border: 1px solid var(--border); }
+        .btn-ghost:hover { background: rgba(255,255,255,0.1); }
+
+        /* Admin Panel */
+        #admin-panel {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 1000;
+            padding: 60px 0;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .admin-form {
+            background: var(--card);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-muted); }
+        .form-input {
+            width: 100%; padding: 12px; background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border); border-radius: 8px; color: white;
+            font-family: inherit;
+        }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        /* Login Modal */
+        #login-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-box {
+            background: var(--card);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            width: 350px;
+        }
+
+        /* Empty States */
+        .empty-state {
+            padding: 60px;
+            text-align: center;
+            color: var(--text-muted);
+            border: 2px dashed var(--border);
+            border-radius: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 48px; }
+            .form-row { grid-template-columns: 1fr; }
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ticker -->
+    <div class="ticker-wrap">
+        <div class="ticker" id="ticker-content">
+            <span>🔥 <strong>Featured:</strong> Mantle Squad Bounty ($10K) 🚀</span>
+            <span>🟣 <strong>Moove:</strong> Moderator Program Live 🤝</span>
+            <span>⚡ <strong>Quip:</strong> $100K Creator Expansion 📈</span>
+            <span>✨ <strong>Starknet:</strong> Education Ecosystem Bounty 🎓</span>
+            <!-- Duplicated for loop -->
+            <span>🔥 <strong>Featured:</strong> Mantle Squad Bounty ($10K) 🚀</span>
+            <span>🟣 <strong>Moove:</strong> Moderator Program Live 🤝</span>
+            <span>⚡ <strong>Quip:</strong> $100K Creator Expansion 📈</span>
+            <span>✨ <strong>Starknet:</strong> Education Ecosystem Bounty 🎓</span>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container nav-inner">
+            <div class="logo">CREATORCHAIN</div>
+            <div>
+                <button class="btn btn-ghost" onclick="showLogin()">Admin Portal</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container">
+            <h1>Web3 Opportunity Aggregator</h1>
+            <p>The ultimate job board for Web3 creators, community managers, and developers. Find your next role in the decentralized economy.</p>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <h2 id="hero-count">0</h2>
+                    <p>Opportunities</p>
+                </div>
+                <div class="stat-card">
+                    <h2 id="hero-rewards">$233K+</h2>
+                    <p>Total Rewards</p>
+                </div>
+                <div class="stat-card">
+                    <h2 id="hero-subs">100%</h2>
+                    <p>Verified Listings</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Content Sections -->
+    <div class="container">
+        <!-- Ambassador -->
+        <section id="ambassador-section">
+            <div class="section-tag">Ambassador Programs</div>
+            <h2 class="section-title">Represent Top Protocols</h2>
+            <div class="grid" id="ambassador-cards"></div>
+        </section>
+
+        <!-- Discord -->
+        <section id="discord-section">
+            <div class="section-tag" style="color: var(--purple);">Discord Roles</div>
+            <h2 class="section-title">Community Leadership</h2>
+            <div class="grid" id="discord-cards"></div>
+        </section>
+
+        <!-- Bounties -->
+        <section id="bounty-section">
+            <div class="section-tag" style="color: var(--green);">Content Bounties</div>
+            <h2 class="section-title">Create and Earn</h2>
+            <div class="grid" id="bounty-cards"></div>
+        </section>
+
+        <!-- Developer -->
+        <section id="developer-section">
+            <div class="section-tag" style="color: var(--amber);">Developer Bounties</div>
+            <h2 class="section-title">Build the Future</h2>
+            <div class="grid" id="developer-cards"></div>
+        </section>
+
+        <!-- Campaigns -->
+        <section id="campaign-section">
+            <div class="section-tag" style="color: var(--cyan);">Project Campaigns</div>
+            <h2 class="section-title">Bite-sized Gigs</h2>
+            <div class="grid" id="campaign-cards"></div>
+        </section>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="admin-panel">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                <h2>Admin Management</h2>
+                <button class="btn btn-ghost" onclick="hideAdmin()">Close Panel</button>
+            </div>
+
+            <form class="admin-form" id="listing-form">
+                <input type="hidden" id="f-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Section</label>
+                        <select class="form-input" id="f-section">
+                            <option value="ambassador">Ambassador Program</option>
+                            <option value="discord">Discord Role</option>
+                            <option value="bounty">Content Bounty</option>
+                            <option value="developer">Developer Bounty</option>
+                            <option value="campaign">Project Campaign</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Project Name</label>
+                        <input type="text" class="form-input" id="f-project" placeholder="e.g. Mantle">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-input" id="f-title" placeholder="e.g. Content Lead">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Reward</label>
+                        <input type="text" class="form-input" id="f-reward" placeholder="e.g. $10,000">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-input" id="f-desc" rows="3"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Apply URL</label>
+                        <input type="url" class="form-input" id="f-url">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Urgency</label>
+                        <select class="form-input" id="f-urgency">
+                            <option value="">None</option>
+                            <option value="CRITICAL">Critical</option>
+                            <option value="HIGH">High</option>
+                            <option value="MEDIUM">Medium</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Logo (Emoji or URL)</label>
+                        <input type="text" class="form-input" id="f-logo" value="⚡">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Featured</label>
+                        <select class="form-input" id="f-featured">
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Opportunity</button>
+            </form>
+
+            <div style="margin-top: 40px; border-top: 1px solid var(--border); padding-top: 40px;">
+                <h3 style="margin-bottom: 20px;">Current Listings</h3>
+                <div id="admin-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal">
+        <div class="modal-box">
+            <h2 style="margin-bottom: 20px;">Admin Access</h2>
+            <input type="password" id="admin-pass" class="form-input" placeholder="Password" style="margin-bottom: 20px;">
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-primary" style="flex: 1;" onclick="checkPass()">Login</button>
+                <button class="btn btn-ghost" style="flex: 1;" onclick="hideLogin()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
+        let db;
+
+        function initSupabase() {
+            try {
+                const { createClient } = window.supabase;
+                db = createClient(SUPABASE_URL, SUPABASE_KEY);
+                console.log('✅ Supabase connected');
+                return true;
+            } catch (e) {
+                console.error('Supabase failed:', e);
+                return false;
+            }
+        }
+
+        async function loadListings() {
+            if (!db) return;
+            const { data, error } = await db.from('listings').select('*').order('created_at', { ascending: false });
+            if (error) {
+                console.error('Load error:', error);
+                return;
+            }
+
+            renderGrid(data);
+            updateStats(data);
+            renderAdminList(data);
+        }
+
+        function renderGrid(listings) {
+            const sections = ['ambassador', 'discord', 'bounty', 'developer', 'campaign'];
+            sections.forEach(sec => {
+                const container = document.getElementById(`${sec}-cards`);
+                container.innerHTML = '';
+                const filtered = listings.filter(l => l.section === sec);
+
+                if (filtered.length === 0) {
+                    container.innerHTML = `<div class="empty-state">No opportunities in this category yet.</div>`;
+                    return;
+                }
+
+                // Sort and pin featured to top
+                const sorted = [...filtered].sort((a,b) => (b.featured === true ? 1 : 0) - (a.featured === true ? 1 : 0));
+
+                sorted.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = `card ${item.featured ? 'featured' : ''}`;
+                    
+                    card.innerHTML = `
+                        ${item.featured ? '<div class="featured-badge">FEATURED</div>' : ''}
+                        ${item.urgency ? `<div class="urgency-badge urgency-${item.urgency}">${item.urgency}</div>` : ''}
+                        <div class="card-header">
+                            <div class="card-logo">${item.logo || '⚡'}</div>
+                            <div>
+                                <div class="card-project">${item.project || 'Web3 Project'}</div>
+                                <h3 class="card-title">${item.title}</h3>
+                            </div>
+                        </div>
+                        <p class="card-desc">${item.description || ''}</p>
+                        <div class="card-footer">
+                            <div class="reward-box">
+                                <span class="reward-label">Compensation</span>
+                                <span class="reward-val">${item.reward || 'TBA'}</span>
+                            </div>
+                            <a href="${item.apply_url || '#'}" target="_blank" class="btn btn-primary">Apply Now</a>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+        }
+
+        function updateStats(listings) {
+            document.getElementById('hero-count').innerText = listings.length;
+        }
+
+        function renderAdminList(listings) {
+            const container = document.getElementById('admin-list');
+            container.innerHTML = '';
+            
+            listings.forEach(item => {
+                const row = document.createElement('div');
+                row.style.cssText = 'background: var(--glass); padding: 16px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border);';
+                row.innerHTML = `
+                    <div>
+                        <strong>${item.title}</strong> @ ${item.project}
+                        <div style="font-size: 12px; color: var(--text-muted);">${item.section} • ${item.status}</div>
+                    </div>
+                    <div>
+                        <button class="btn btn-ghost" style="padding: 6px 12px; margin-right: 8px;" onclick="editItem('${item.id}')">Edit</button>
+                        <button class="btn btn-ghost" style="padding: 6px 12px; color: var(--red);" onclick="deleteItem('${item.id}')">Delete</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // Admin Auth
+        function showLogin() { document.getElementById('login-modal').style.display = 'flex'; }
+        function hideLogin() { document.getElementById('login-modal').style.display = 'none'; }
+        function checkPass() {
+            if (document.getElementById('admin-pass').value === 'admin123') {
+                hideLogin();
+                document.getElementById('admin-panel').style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            } else {
+                alert('Wrong password');
+            }
+        }
+        function hideAdmin() {
+            document.getElementById('admin-panel').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Admin CRUD
+        document.getElementById('listing-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('f-id').value;
+            const item = {
+                section: document.getElementById('f-section').value,
+                project: document.getElementById('f-project').value,
+                title: document.getElementById('f-title').value,
+                reward: document.getElementById('f-reward').value,
+                description: document.getElementById('f-desc').value,
+                apply_url: document.getElementById('f-url').value,
+                urgency: document.getElementById('f-urgency').value,
+                logo: document.getElementById('f-logo').value,
+                featured: document.getElementById('f-featured').value === 'true'
+            };
+
+            if (id) {
+                await db.from('listings').update(item).eq('id', id);
+            } else {
+                await db.from('listings').insert([item]);
+            }
+            
+            document.getElementById('listing-form').reset();
+            document.getElementById('f-id').value = '';
+            alert('Listing Saved!');
+        });
+
+        async function deleteItem(id) {
+            if (confirm('Delete this listing?')) {
+                await db.from('listings').delete().eq('id', id);
+            }
+        }
+
+        async function editItem(id) {
+            const { data } = await db.from('listings').select('*').eq('id', id).single();
+            if (data) {
+                document.getElementById('f-id').value = data.id;
+                document.getElementById('f-section').value = data.section;
+                document.getElementById('f-project').value = data.project;
+                document.getElementById('f-title').value = data.title;
+                document.getElementById('f-reward').value = data.reward;
+                document.getElementById('f-desc').value = data.description;
+                document.getElementById('f-url').value = data.apply_url;
+                document.getElementById('f-urgency').value = data.urgency;
+                document.getElementById('f-logo').value = data.logo;
+                document.getElementById('f-featured').value = data.featured.toString();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!initSupabase()) return;
+            await loadListings();
+            
+            // Realtime
+            db.channel('live')
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'listings'
+                }, () => loadListings())
+                .subscribe();
+        });
+    </script>
+</body>
+</html>
