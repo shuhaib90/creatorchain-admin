@@ -249,6 +249,35 @@
         @media (max-width: 768px) {
           .nav-by { display: none; }
         }
+
+        /* TRACKING SYSTEM CSS */
+        .status-card { border-radius: 14px; padding: 24px; margin-top: 20px; text-align: center; }
+        .status-pending { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.25); }
+        .status-approved { background: rgba(0,245,160,0.06); border: 1px solid rgba(0,245,160,0.25); }
+        .status-rejected { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.25); }
+        .status-unknown { background: rgba(100,116,139,0.06); border: 1px solid var(--border); }
+        .status-icon { font-size: 40px; margin-bottom: 12px; }
+        .status-badge { display: inline-block; padding: 4px 14px; border-radius: 99px; font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 16px; }
+        .badge-pending { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+        .badge-approved { background: rgba(0,245,160,0.12); color: #00f5a0; border: 1px solid rgba(0,245,160,0.25); }
+        .badge-rejected { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.25); }
+        .badge-unknown { background: rgba(100,116,139,0.1); color: #64748b; border: 1px solid var(--border); }
+        .status-project { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+        .status-title { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+        .status-meta { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 12px; }
+        .status-msg { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
+        .rejection-reason { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15); border-radius: 10px; padding: 14px; margin: 16px 0; text-align: left; }
+        .reason-label { font-size: 11px; font-family: 'Space Mono', monospace; color: #ef4444; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
+        .reason-text { font-size: 14px; color: var(--black); line-height: 1.6; font-style: italic; }
+        .tracking-code-box { background: rgba(0,245,160,0.06); border: 2px solid rgba(0,245,160,0.25); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center; }
+        .tracking-code { font-family: 'Space Mono', monospace; font-size: 32px; font-weight: 700; color: var(--black); letter-spacing: 6px; display: block; margin: 8px 0; }
+        .tracking-hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+        /* STATUS MODAL */
+        #status-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9500; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .status-checker-card { background: #fff; border: 4px solid var(--black); box-shadow: 12px 12px 0 var(--black); max-width: 480px; width: 100%; padding: 40px; position: relative; }
+        .status-input { width: 100%; border: 3px solid var(--black); padding: 16px; font-family: 'Space Mono', monospace; font-size: 18px; text-transform: uppercase; outline: none; margin: 20px 0; }
+        .status-input:focus { border-color: var(--primary); }
     </style>
     <script>
         window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -273,6 +302,7 @@
             <a href="#bounty-section" class="nav-link">BOUNTIES</a>
             <a href="#developer-section" class="nav-link">DEVELOPER</a>
             <a href="#campaign-section" class="nav-link">CAMPAIGNS</a>
+            <a href="#" onclick="openStatusModal(); return false;" class="nav-link">TRACK SUBMISSION</a>
             <button class="btn btn-black btn-sm" onclick="openSubmitModal()">+ SUBMIT PROJECT</button>
         </div>
     </div>
@@ -343,10 +373,12 @@
                     <a href="#ambassador-section" class="footer-link">→ Ambassador Programs</a>
                     <a href="#discord-section" class="footer-link">→ Discord Moderation</a>
                     <a href="#bounty-section" class="footer-link">→ Content Bounties</a>
+                    <a href="#" onclick="openStatusModal(); return false;" class="footer-link">→ Track Your Submission</a>
                 </div>
                 <div style="margin-top:20px;">
                     <p style="color:var(--primary); font-family:'Space Mono',monospace; font-size:11px; margin-bottom:10px;">SOCIALS</p>
                     <a href="https://x.com/ZenvicAlpha" target="_blank" class="footer-link" style="color:#fff; font-weight:700;">𝕏 @ZenvicAlpha</a>
+                    <a href="#" onclick="openStatusModal(); return false;" class="footer-link">🔍 Check your submission status →</a>
                     <a href="#" onclick="return false;" class="footer-link">💬 Discord (Soon)</a>
                     <a href="#" onclick="return false;" class="footer-link">✈️ Telegram (Soon)</a>
                 </div>
@@ -441,6 +473,10 @@
                     <div class="field">
                         <label>Your Name / Handle <span class="req">*</span></label>
                         <input type="text" id="s-submitter" placeholder="Who is submitting?" required>
+                    </div>
+                    <div class="field">
+                        <label>Contact Email</label>
+                        <input type="email" id="s-email" placeholder="For status updates">
                     </div>
                 </div>
                 <div class="info-note" style="margin-top:5px;">⚡ Submissions go to admin review before going live. Usually approved within 24 hours.</div>
@@ -562,6 +598,23 @@
     </div>
 </div>
 
+<!-- ======================== STATUS CHECKER MODAL ======================== -->
+<div id="status-modal">
+    <div class="status-checker-card">
+        <button onclick="closeStatusModal()" style="position:absolute; top:20px; right:25px; background:none; border:none; font-size:24px; cursor:pointer; font-weight:900; color:var(--black); z-index:100;">✕</button>
+        <h2 style="font-size:28px; margin-bottom:8px;">Track Your Submission</h2>
+        <p style="color:var(--muted); font-size:14px;">Enter your tracking code to see its current status.</p>
+        
+        <input type="text" id="status-input" class="status-input" placeholder="CC-XXXXXX" maxlength="9">
+        
+        <button class="btn btn-primary full" style="width:100%; padding:16px; font-size:16px;" onclick="checkSubmissionStatus()">Check Status &rarr;</button>
+        
+        <div id="status-result">
+            <!-- Results injected here -->
+        </div>
+    </div>
+</div>
+
 <!-- LOGIN -->
 <div id="login-modal">
     <div class="modal-box" style="position:relative;">
@@ -676,12 +729,116 @@
     // ─── Submit Modal ──────────────────────────────────────
     function openSubmitModal() {
         if (window.va) window.va('track', 'Submit_Modal_Open');
-        document.getElementById('submit-modal').style.display = 'flex';
-        document.getElementById('submit-form-body').innerHTML = document.getElementById('submit-form-body').innerHTML; // reset
-        const form = document.getElementById('submit-form');
-        if(form) form.reset();
+        const modal = document.getElementById('submit-modal');
+        modal.style.display = 'flex';
+        // Reset form body to original form if it was showing success
+        if (document.querySelector('.submit-success')) {
+            location.reload(); // Simplest way to reset the complex modal state
+        }
     }
     function closeSubmitModal() { document.getElementById('submit-modal').style.display = 'none'; }
+
+    // ─── Status Tracking ───────────────────────────────────
+    function openStatusModal() { document.getElementById('status-modal').style.display = 'flex'; }
+    function closeStatusModal() { document.getElementById('status-modal').style.display = 'none'; document.getElementById('status-result').innerHTML = ''; }
+
+    function generateToken() {
+        return 'CC-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+
+    async function checkSubmissionStatus() {
+        const token = document.getElementById('status-input').value.trim().toUpperCase();
+        if (!token || token.length < 5) {
+            showToast('Please enter a valid tracking code', 'error');
+            return;
+        }
+        
+        const resEl = document.getElementById('status-result');
+        resEl.innerHTML = '<p class="mono" style="margin-top:20px; color:var(--muted); font-size:11px;">🔍 Checking status...</p>';
+
+        const { data, error } = await db.from('listings').select('project, title, approval_status, rejection_reason, created_at, reviewed_at, section, reward, description, apply_url, logo, twitter_url, submitted_by, submitter_email').eq('submission_token', token).single();
+
+        if (error || !data) {
+            showStatusResult('not_found', null);
+            return;
+        }
+        showStatusResult(data.approval_status, data);
+    }
+
+    function showStatusResult(status, data) {
+        const container = document.getElementById('status-result');
+        const date = data?.created_at ? new Date(data.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Unknown';
+        const reviewDate = data?.reviewed_at ? new Date(data.reviewed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null;
+
+        const templates = {
+            pending: `
+                <div class="status-card status-pending">
+                    <div class="status-icon">🔍</div>
+                    <div class="status-badge badge-pending">UNDER REVIEW</div>
+                    <div class="status-project">${data?.project || 'Your Project'}</div>
+                    <div class="status-title">${data?.title || ''}</div>
+                    <div class="status-meta">Submitted: ${date}</div>
+                    <p class="status-msg">Your submission is in the review queue. Usually reviewed within 24–48 hours. Check back soon!</p>
+                    <button class="btn btn-white btn-sm" onclick="closeStatusModal()">Close Tracker</button>
+                </div>`,
+            approved: `
+                <div class="status-card status-approved">
+                    <div class="status-icon">✅</div>
+                    <div class="status-badge badge-approved">APPROVED & LIVE</div>
+                    <div class="status-project">${data?.project || 'Your Project'}</div>
+                    <div class="status-title">${data?.title || ''}</div>
+                    <div class="status-meta">Submitted: ${date} ${reviewDate ? ' · Approved: ' + reviewDate : ''}</div>
+                    <p class="status-msg">Your opportunity is now live on CreatorChain!</p>
+                    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                        <a href="#${data?.section}-section" class="btn btn-primary btn-sm" onclick="closeStatusModal()">View Your Listing →</a>
+                        <button class="btn btn-white btn-sm" onclick="closeStatusModal()">Close</button>
+                    </div>
+                </div>`,
+            rejected: `
+                <div class="status-card status-rejected">
+                    <div class="status-icon">❌</div>
+                    <div class="status-badge badge-rejected">NOT APPROVED</div>
+                    <div class="status-project">${data?.project || 'Your Project'}</div>
+                    <div class="status-title">${data?.title || ''}</div>
+                    <div class="status-meta">Submitted: ${date} ${reviewDate ? ' · Reviewed: ' + reviewDate : ''}</div>
+                    <div class="rejection-reason">
+                        <div class="reason-label">Reason from admin:</div>
+                        <div class="reason-text">"${data?.rejection_reason || 'Does not meet our guidelines.'}"</div>
+                    </div>
+                    <p class="status-msg">You can resubmit with changes using the button below.</p>
+                    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                        <button class="btn btn-primary btn-sm" onclick='openResubmit(${JSON.stringify(data).replace(/'/g, "&apos;")})'>Resubmit Project</button>
+                        <button class="btn btn-white btn-sm" onclick="closeStatusModal()">Close</button>
+                    </div>
+                </div>`,
+            not_found: `
+                <div class="status-card status-unknown">
+                    <div class="status-icon">⚠️</div>
+                    <div class="status-badge badge-unknown">CODE NOT FOUND</div>
+                    <p class="status-msg">No submission found with this tracking code. Double check your code (e.g., CC-X7K2PQ) and try again.</p>
+                    <button class="btn btn-white btn-sm" onclick="closeStatusModal()">Close</button>
+                </div>`
+        };
+        container.innerHTML = templates[status] || templates['not_found'];
+    }
+
+    function openResubmit(data) {
+        closeStatusModal();
+        openSubmitModal();
+        // Pre-fill form
+        setTimeout(() => {
+            document.getElementById('s-section').value = data.section;
+            document.getElementById('s-project').value = data.project;
+            document.getElementById('s-title').value = data.title;
+            document.getElementById('s-reward').value = data.reward || '';
+            document.getElementById('s-desc').value = data.description || '';
+            document.getElementById('s-url').value = data.apply_url;
+            document.getElementById('s-logo').value = data.logo || '';
+            document.getElementById('s-twitter').value = data.twitter_url || '';
+            document.getElementById('s-submitter').value = data.submitted_by;
+            document.getElementById('s-email').value = data.submitter_email || '';
+        }, 100);
+    }
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -709,10 +866,7 @@
                 logoVal = urlData.publicUrl;
             }
 
-            // Safe access to fields that might not exist in public form
-            const deadlineEl = document.getElementById('s-deadline');
-            const twitterEl = document.getElementById('s-twitter');
-
+            const token = generateToken();
             const item = {
                 section: document.getElementById('s-section').value,
                 project: document.getElementById('s-project').value,
@@ -721,9 +875,11 @@
                 description: document.getElementById('s-desc').value,
                 apply_url: document.getElementById('s-url').value,
                 logo: logoVal,
-                deadline: deadlineEl ? deadlineEl.value : 'OPEN',
-                twitter_url: twitterEl ? twitterEl.value : '',
+                deadline: 'OPEN',
+                twitter_url: document.getElementById('s-twitter').value,
                 submitted_by: document.getElementById('s-submitter').value,
+                submitter_email: document.getElementById('s-email').value,
+                submission_token: token,
                 approval_status: 'pending',
                 submitted_at: new Date().toISOString(),
                 featured: false,
@@ -733,17 +889,36 @@
             const { error } = await db.from('listings').insert([item]);
             if (error) throw error;
 
-            // Track successful submission
             if (window.va) window.va('track', 'Project_Submitted', { category: item.section, project: item.project });
 
             document.getElementById('submit-form-body').innerHTML = `
                 <div class="submit-success">
                     <div class="check">✅</div>
-                    <h2>Submitted Successfully!</h2>
-                    <p style="color:var(--muted);font-size:15px;max-width:380px;margin:10px auto;">Your project has been sent for review. It will go live automatically within 24 hours if approved.</p>
-                    <div class="sub-id">SUBMISSION RECEIVED</div>
-                    <div style="display:flex;gap:15px;justify-content:center;margin-top:30px;">
-                        <button class="btn btn-secondary" onclick="openSubmitModal()">Submit Another</button>
+                    <h2 style="margin-bottom:8px;">Submitted Successfully!</h2>
+                    <p style="color:var(--muted); font-size:14px; margin-bottom:24px;">Your opportunity has been sent for review.<br>We'll check it within 24–48 hours.</p>
+                    
+                    <div class="tracking-code-box">
+                        <span style="font-family:'Space Mono',monospace; font-size:11px; color:var(--primary); background:var(--black); padding:2px 8px; text-transform:uppercase; letter-spacing:1px;">🔖 Your Tracking Code</span>
+                        <span class="tracking-code" id="final-token">${token}</span>
+                        <p class="tracking-hint">Save this code to check your status at any time.</p>
+                    </div>
+
+                    <div style="display:flex; gap:12px; justify-content:center; margin-bottom:30px;">
+                        <button class="btn btn-black btn-sm" onclick="copyToken('${token}')" id="copy-btn">📋 Copy Code</button>
+                        <button class="btn btn-white btn-sm" onclick="closeSubmitModal(); openStatusModal();">🔍 Check Status</button>
+                    </div>
+
+                    <div style="border-top:1px solid #eee; padding-top:24px; text-align:left;">
+                        <p style="font-weight:700; font-size:13px; margin-bottom:12px;">What happens next:</p>
+                        <div style="font-size:13px; color:var(--muted); display:flex; flex-direction:column; gap:8px;">
+                            <span>⏳ <strong>Under review</strong> (24–48 hrs)</span>
+                            <span>✅ <strong>Approved</strong> → goes live instantly</span>
+                            <span>❌ <strong>Rejected</strong> → reason provided in tracker</span>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:15px; justify-content:center; margin-top:35px;">
+                        <button class="btn btn-secondary" onclick="location.reload()">Submit Another</button>
                         <button class="btn btn-white" onclick="closeSubmitModal()">Close</button>
                     </div>
                 </div>
@@ -757,6 +932,14 @@
             btn.textContent = 'Submit for Review \u2192';
         }
         return false;
+    }
+
+    function copyToken(token) {
+        navigator.clipboard.writeText(token);
+        const btn = document.getElementById('copy-btn');
+        const old = btn.textContent;
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => btn.textContent = old, 1500);
     }
 
     // ─── Subscription ─────────────────────────────────
@@ -878,8 +1061,10 @@
     }
 
     async function approveListing(id) {
-        const note = document.getElementById(`note-${id}`)?.value||'';
-        await db.from('listings').update({ approval_status:'approved', admin_note:note }).eq('id',id);
+        await db.from('listings').update({ 
+            approval_status: 'approved',
+            reviewed_at: new Date().toISOString() 
+        }).eq('id', id);
         showToast('✅ Listing approved & live!');
         document.getElementById(`pc-${id}`)?.remove();
         loadPendingListings();
@@ -887,9 +1072,24 @@
     }
 
     async function rejectListing(id) {
-        if(!confirm('Reject this submission? It will be permanently removed.')) return;
-        await db.from('listings').delete().eq('id',id);
-        showToast('🗑️ Submission rejected.','error');
+        const reason = prompt(
+            'Rejection reason (shown to submitter):\n\n' +
+            'Examples:\n' +
+            '• Reward amount not specified\n' +
+            '• Apply link is broken\n' +
+            '• Duplicate listing already exists\n' +
+            '• Not relevant to Web3 creators\n\n' +
+            'Enter reason:'
+        );
+        if (reason === null) return;
+        
+        await db.from('listings').update({ 
+            approval_status: 'rejected',
+            rejection_reason: reason || 'Does not meet our guidelines.',
+            reviewed_at: new Date().toISOString()
+        }).eq('id', id);
+        
+        showToast('❌ Submission rejected with reason.', 'error');
         document.getElementById(`pc-${id}`)?.remove();
         loadPendingListings();
     }
