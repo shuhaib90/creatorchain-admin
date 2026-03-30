@@ -1,263 +1,281 @@
 <!DOCTYPE html>
-<!-- CreatorChain v4.0 — AUTOMATED NEO-BRUTALIST — shuhaib90 -->
+<!-- CreatorChain v5.0 — WITH SUBMISSION WORKFLOW — shuhaib90 -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CREATORCHAIN | WEB3 OPPORTUNITY BOARD</title>
-    
-    <!-- 1. Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- 2. Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-
     <style>
         :root {
-            --bg: #f5f0e8;
-            --surface: #ffffff;
-            --black: #0a0a0a;
-            --primary: #00e87a;
-            --secondary: #ffe600;
-            --accent: #ff3b00;
-            --discord: #0057ff;
-            --admin: #7000ff;
-            --text: #0a0a0a;
-            --muted: #555555;
-            --border: 3px solid #0a0a0a;
-            --shadow: 4px 4px 0px #0a0a0a;
+            --bg: #f5f0e8; --surface: #ffffff; --black: #0a0a0a;
+            --primary: #00e87a; --secondary: #ffe600; --accent: #ff3b00;
+            --discord: #0057ff; --admin: #7000ff; --muted: #555555;
+            --border: 3px solid #0a0a0a; --shadow: 4px 4px 0px #0a0a0a;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: 'Space Grotesk', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            overflow-x: hidden;
-            line-height: 1.3;
-        }
-
-        h1, h2, h3, .bold { font-weight: 900; letter-spacing: -2px; text-transform: uppercase; }
+        body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: var(--black); overflow-x: hidden; line-height: 1.3; }
+        h1,h2,h3 { font-weight: 900; letter-spacing: -2px; text-transform: uppercase; }
         .mono { font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 1px; }
-
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-        /* Navigation */
-        nav {
-            background: var(--primary);
-            border-bottom: var(--border);
-            padding: 20px 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .nav-inner { display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 32px; font-weight: 900; line-height: 1; text-decoration: none; color: inherit; }
+        /* NAV */
+        nav { background: var(--primary); border-bottom: var(--border); padding: 16px 0; position: sticky; top: 0; z-index: 1000; }
+        .nav-inner { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .logo { font-size: 28px; font-weight: 900; text-decoration: none; color: inherit; }
         .logo span { -webkit-text-stroke: 1.5px var(--black); color: transparent; }
+        .nav-links { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .nav-link { text-decoration: none; color: var(--black); font-weight: 700; padding: 4px 8px; font-size: 12px; position: relative; }
+        .nav-link:hover { background: var(--secondary); }
 
-        .nav-links { display: flex; gap: 20px; align-items: center; }
-        .nav-link { 
-            text-decoration: none; color: var(--black); font-weight: 700; 
-            padding: 5px 10px; position: relative; font-size: 13px;
-        }
-        .nav-link:hover::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--secondary); z-index: -1; transform: rotate(-2deg);
-        }
-
-        /* Buttons — PRESS EFFECT */
-        .btn {
-            border: var(--border);
-            padding: 12px 24px;
-            font-family: 'Space Mono', monospace;
-            font-weight: 700;
-            text-transform: uppercase;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.1s;
-            box-shadow: var(--shadow);
-            border-radius: 0;
-        }
-        .btn:hover { translate: 2px 2px; box-shadow: 2px 2px 0px var(--black); }
+        /* BUTTONS */
+        .btn { border: var(--border); padding: 10px 20px; font-family: 'Space Mono', monospace; font-weight: 700; text-transform: uppercase; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.1s; box-shadow: var(--shadow); border-radius: 0; font-size: 13px; }
+        .btn:hover { translate: 2px 2px; box-shadow: 2px 2px 0 var(--black); }
         .btn:active { translate: 4px 4px; box-shadow: none; }
-
         .btn-primary { background: var(--primary); color: var(--black); }
-        .btn-black { background: var(--black); color: #fff; box-shadow: 4px 4px 0px var(--primary); }
-        .btn-white { background: #fff; color: var(--black); }
         .btn-secondary { background: var(--secondary); color: var(--black); }
+        .btn-black { background: var(--black); color: #fff; box-shadow: 4px 4px 0 var(--primary); }
+        .btn-white { background: #fff; color: var(--black); }
+        .btn-danger { background: var(--accent); color: #fff; }
+        .btn-sm { padding: 6px 12px; font-size: 11px; }
 
-        /* Live Ticker */
-        .ticker-wrap {
-            background: var(--secondary);
-            border-top: var(--border);
-            border-bottom: var(--border);
-            padding: 15px 0;
-            overflow: hidden;
-        }
-        .ticker {
-            display: flex;
-            gap: 60px;
-            animation: ticker 25s linear infinite;
-            white-space: nowrap;
-            width: max-content;
-        }
-        @keyframes ticker {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        .ticker span { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 14px; }
+        /* TICKER */
+        .ticker-wrap { background: var(--secondary); border-top: var(--border); border-bottom: var(--border); padding: 12px 0; overflow: hidden; }
+        .ticker { display: flex; gap: 60px; animation: ticker 60s linear infinite; white-space: nowrap; width: max-content; }
+        @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .ticker span { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 13px; }
 
-        /* Hero */
-        .hero {
-            padding: 80px 0;
-            display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
-            gap: 60px;
-            align-items: center;
-        }
-        .hero h1 { font-size: clamp(52px, 8vw, 100px); line-height: 0.85; margin-bottom: 30px; }
-        .hero h1 span.outline { -webkit-text-stroke: 2px var(--black); color: transparent; }
-        .hero h1 span.green { color: var(--primary); text-shadow: 4px 4px 0px var(--black); }
+        /* HERO */
+        .hero { padding: 80px 0; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 60px; align-items: center; }
+        .hero h1 { font-size: clamp(48px, 7vw, 96px); line-height: 0.85; margin-bottom: 30px; }
+        .hero h1 .outline { -webkit-text-stroke: 2px var(--black); color: transparent; }
+        .hero h1 .green { color: var(--primary); text-shadow: 4px 4px 0 var(--black); }
+        .hero-cta { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 30px; }
+        .hero-stats-card { background: #fff; border: var(--border); box-shadow: 8px 8px 0 var(--black); padding: 36px; }
+        .stat-item { padding: 12px 0; border-bottom: 2px solid var(--black); }
+        .stat-item:last-child { border-bottom: none; }
+        .stat-num { font-size: 52px; font-family: 'Space Mono', monospace; font-weight: 700; line-height: 1; display: block; }
+        .stat-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
 
-        .hero-stats-card {
-            background: #fff;
-            border: var(--border);
-            box-shadow: 8px 8px 0px var(--black);
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .stat-item { padding: 10px 0; border-bottom: 2px solid var(--black); }
-        .stat-num { font-size: 56px; font-family: 'Space Mono', monospace; font-weight: 700; line-height: 1; display: block; }
-        .stat-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+        /* SECTIONS */
+        section.cat-section { padding: 80px 0; position: relative; }
+        .section-num { position: absolute; top: 20px; left: -10px; font-size: 130px; font-weight: 900; color: var(--black); opacity: 0.05; z-index: -1; line-height: 1; }
+        .section-title { font-size: 56px; margin-bottom: 40px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 35px; }
 
-        /* Sections */
-        section { padding: 80px 0; position: relative; }
-        .section-num {
-            position: absolute; top: 40px; left: -20px; font-size: 140px; font-weight: 900;
-            color: var(--black); opacity: 0.05; z-index: -1; line-height: 1;
-        }
-        .section-title { font-size: 64px; margin-bottom: 40px; }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-            gap: 40px;
-        }
-
-        /* Opportunity Cards */
-        .card {
-            background: #fff;
-            border: var(--border);
-            padding: 0;
-            position: relative;
-            box-shadow: 6px 6px 0px var(--black);
-            transition: 0.1s;
-            display: flex;
-            flex-direction: column;
-        }
-        .card:hover { transform: translate(-3px, -3px); box-shadow: 9px 9px 0px var(--black); }
+        /* CARDS */
+        .card { background: #fff; border: var(--border); padding: 0; position: relative; box-shadow: 6px 6px 0 var(--black); transition: 0.1s; display: flex; flex-direction: column; }
+        .card:hover { transform: translate(-3px,-3px); box-shadow: 9px 9px 0 var(--black); }
         .card.featured { background: var(--secondary); border-width: 4px; }
-        .card.expired { opacity: 0.7; filter: grayscale(0.5); }
-
-        .card-urgency { height: 12px; width: 100%; border-bottom: 2px solid var(--black); }
+        .card.expired { opacity: 0.65; filter: grayscale(0.4); }
+        .card-urgency { height: 10px; width: 100%; border-bottom: 2px solid var(--black); }
         .urgency-CRITICAL { background: var(--accent); }
         .urgency-HIGH { background: var(--secondary); }
         .urgency-MEDIUM { background: var(--primary); }
-        
-        .card-inner { padding: 30px; flex-grow: 1; display: flex; flex-direction: column; gap: 15px; }
-        .card-stamp {
-            position: absolute; top: 20px; right: -5px; background: var(--secondary);
-            border: 2px solid var(--black); padding: 5px 10px; transform: rotate(-12deg);
-            font-family: 'Space Mono', monospace; font-weight: 700; font-size: 12px; z-index: 5;
-        }
+        .card-stamp { position: absolute; top: 18px; right: -5px; background: var(--secondary); border: 2px solid var(--black); padding: 4px 10px; transform: rotate(-12deg); font-family: 'Space Mono', monospace; font-weight: 700; font-size: 11px; z-index: 5; }
         .expired-stamp { background: var(--accent); color: #fff; transform: rotate(15deg); }
-
-        .card-logo {
-            width: 60px; height: 60px; border: 2px solid var(--black);
-            display: flex; align-items: center; justify-content: center; font-size: 28px;
-            background: #fff; overflow: hidden;
-        }
+        .card-inner { padding: 28px; flex-grow: 1; display: flex; flex-direction: column; gap: 14px; }
+        .card-logo { width: 54px; height: 54px; border: 2px solid var(--black); display: flex; align-items: center; justify-content: center; font-size: 26px; background: #fff; overflow: hidden; flex-shrink: 0; }
         .card-logo img { width: 100%; height: 100%; object-fit: cover; }
+        .reward-tag { background: var(--black); color: var(--primary); padding: 5px 14px; display: inline-block; font-family: 'Space Mono', monospace; font-weight: 700; font-size: 18px; }
+        .card-footer { padding: 18px 28px; border-top: 2px solid var(--black); display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
 
-        .reward-tag {
-            background: var(--black); color: var(--primary);
-            padding: 6px 15px; display: inline-block; font-family: 'Space Mono', monospace; font-weight: 700; font-size: 20px;
-        }
+        /* EMPTY STATE */
+        .empty-state { text-align: center; padding: 60px; border: 2px dashed #ccc; }
+        .empty-state h3 { font-size: 24px; color: var(--muted); margin-bottom: 10px; }
 
-        .card-footer {
-            padding: 20px 30px; border-top: 2px solid var(--black);
-            display: flex; justify-content: space-between; align-items: center; background: #fafafa;
-        }
+        /* TOAST */
+        #toast { position: fixed; bottom: 30px; right: 30px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; }
+        .toast-item { background: var(--black); color: #fff; padding: 14px 20px; border: 2px solid var(--primary); font-family: 'Space Mono', monospace; font-size: 13px; box-shadow: 4px 4px 0 var(--primary); animation: slideIn 0.2s ease; max-width: 320px; }
+        .toast-item.error { border-color: var(--accent); box-shadow: 4px 4px 0 var(--accent); }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
 
-        /* Admin */
-        #admin-panel {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; color: #fff; z-index: 10001; padding: 60px 0; overflow-y: auto; display: none;
-        }
-        .form-input {
-            width: 100%; background: #111; border: 2px solid #333; padding: 15px; color: #fff;
-            font-family: inherit; font-size: 16px; border-radius: 0; outline: none; margin-bottom: 20px;
-        }
-        .form-input:focus { border-color: var(--primary); }
+        /* SUBMIT MODAL */
+        #submit-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9000; display: none; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; }
+        .submit-card { background: #fff; border: 4px solid var(--black); box-shadow: 16px 16px 0 var(--black); max-width: 640px; width: 100%; margin: auto; }
+        .submit-header { background: var(--black); color: #fff; padding: 30px; border-bottom: 3px solid var(--primary); }
+        .submit-header h2 { font-size: 32px; color: var(--primary); margin-bottom: 8px; }
+        .submit-header p { color: #aaa; font-size: 14px; font-weight: 500; }
+        .submit-body { padding: 30px; }
+        .form-section-title { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--primary); background: var(--black); display: inline-block; padding: 4px 10px; margin-bottom: 20px; margin-top: 10px; }
+        .field { margin-bottom: 18px; }
+        .field label { display: block; font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; margin-bottom: 6px; color: var(--black); }
+        .field label span.req { color: var(--accent); }
+        .field input, .field select, .field textarea { width: 100%; border: 2px solid var(--black); padding: 12px; font-family: inherit; font-size: 15px; outline: none; border-radius: 0; background: #fff; }
+        .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--primary); background: #f0fff8; }
+        .field textarea { resize: vertical; min-height: 100px; }
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .info-pill { background: var(--secondary); border: 2px solid var(--black); padding: 6px 14px; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; margin-top: 10px; }
+        .info-note { background: #f5f5f5; border-left: 4px solid var(--black); padding: 12px; font-size: 13px; color: var(--muted); margin-top: 10px; }
+        .submit-success { text-align: center; padding: 50px 30px; }
+        .submit-success .check { font-size: 80px; animation: pop 0.4s ease; }
+        @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+        .submit-success h2 { font-size: 28px; margin: 20px 0 10px; }
+        .submit-success .sub-id { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); background: #f0f0f0; border: 2px solid var(--black); padding: 8px 16px; display: inline-block; margin: 10px 0; }
+        .submit-error { background: #fff0f0; border: 2px solid var(--accent); padding: 12px; margin-top: 15px; font-size: 13px; color: var(--accent); font-weight: 700; display: none; }
+        .btn-loading { opacity: 0.7; pointer-events: none; }
 
-        #login-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 10002; display: none; align-items: center; justify-content: center;
-        }
-        .modal-box {
-            background: var(--surface); border: 4px solid var(--black); padding: 50px;
-            box-shadow: 15px 15px 0px var(--black); max-width: 450px; width: 100%;
-        }
+        /* ADMIN */
+        #admin-panel { position: fixed; inset: 0; background: #0a0a0a; color: #fff; z-index: 10001; padding: 0; overflow-y: auto; display: none; }
+        .admin-inner { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+        .admin-tabs { display: flex; border-bottom: 3px solid #333; margin-bottom: 40px; }
+        .admin-tab { background: none; border: none; color: #888; font-family: 'Space Mono', monospace; font-size: 13px; padding: 14px 24px; cursor: pointer; position: relative; border-bottom: 3px solid transparent; margin-bottom: -3px; display: flex; align-items: center; gap: 8px; }
+        .admin-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .admin-tab:hover { color: #fff; }
+        .pending-badge { background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; min-width: 18px; text-align: center; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .admin-form-input { width: 100%; background: #111; border: 2px solid #333; padding: 13px; color: #fff; font-family: inherit; font-size: 15px; border-radius: 0; outline: none; margin-bottom: 18px; }
+        .admin-form-input:focus { border-color: var(--primary); }
+        .admin-label { display: block; font-family: 'Space Mono', monospace; color: var(--primary); font-size: 11px; margin-bottom: 6px; }
+        .admin-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .admin-form-grid .full { grid-column: span 2; }
+        /* Pending cards */
+        .pending-card { background: #111; border: 2px solid #333; margin-bottom: 20px; }
+        .pending-card-header { padding: 16px 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .pending-card-body { padding: 20px; }
+        .pending-meta { font-family: 'Space Mono', monospace; font-size: 11px; color: #888; margin-bottom: 4px; }
+        .pending-actions { padding: 16px 20px; border-top: 1px solid #333; display: flex; gap: 12px; align-items: center; }
+        .pending-note-input { flex: 1; background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 8px 12px; font-family: inherit; font-size: 13px; outline: none; }
+        .pending-note-input:focus { border-color: var(--primary); }
+        /* All listings table */
+        .listings-table { width: 100%; border-collapse: collapse; }
+        .listings-table th { background: #1a1a1a; color: var(--primary); font-family: 'Space Mono', monospace; font-size: 11px; text-align: left; padding: 12px 16px; border-bottom: 2px solid #333; }
+        .listings-table td { padding: 12px 16px; border-bottom: 1px solid #222; font-size: 14px; }
+        .listings-table tr:hover td { background: #111; }
+        .status-badge { font-family: 'Space Mono', monospace; font-size: 10px; padding: 3px 8px; border: 1px solid; }
+        .status-approved { color: var(--primary); border-color: var(--primary); }
+        .status-pending { color: var(--secondary); border-color: var(--secondary); }
+        .status-rejected { color: var(--accent); border-color: var(--accent); }
+
+        /* LOGIN */
+        #login-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10002; display: none; align-items: center; justify-content: center; }
+        .modal-box { background: var(--surface); border: 4px solid var(--black); padding: 50px; box-shadow: 15px 15px 0 var(--black); max-width: 420px; width: 100%; }
+
+        /* FOOTER */
+        footer { background: var(--black); border-top: 4px solid var(--primary); padding: 60px 0 40px; color: #fff; margin-top: 80px; }
+        .footer-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
+        .footer-logo { font-size: 36px; font-weight: 900; color: var(--primary); margin-bottom: 12px; }
+        .footer-logo span { -webkit-text-stroke: 1.5px #fff; color: transparent; }
+        .footer-link { color: #888; text-decoration: none; display: block; margin-bottom: 8px; font-size: 14px; }
+        .footer-link:hover { color: var(--secondary); }
+        .footer-submit-cta { background: #111; border: 2px solid var(--primary); padding: 24px; margin-top: 30px; }
+        .submit-count { font-family: 'Space Mono', monospace; font-size: 11px; color: #888; margin-top: 8px; }
+        .footer-divider { border-top: 1px solid #222; margin-top: 40px; padding-top: 20px; color: #555; font-size: 12px; text-align: center; }
 
         @media (max-width: 768px) {
             .hero { grid-template-columns: 1fr; }
             .grid { grid-template-columns: 1fr; }
+            .admin-form-grid { grid-template-columns: 1fr; }
+            .admin-form-grid .full { grid-column: span 1; }
+            .field-row { grid-template-columns: 1fr; }
+            .footer-inner { grid-template-columns: 1fr; }
+            .admin-tabs { overflow-x: auto; }
+        }
+
+        .owner-credit {
+          display: inline-flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .owner-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          color: var(--primary);
+          text-decoration: none;
+          font-weight: 700;
+          font-family: 'Space Mono', monospace;
+          padding: 6px 16px;
+          border: 2px solid var(--primary);
+          box-shadow: 4px 4px 0px var(--black);
+          transition: 0.1s;
+          background: #000;
+        }
+
+        .owner-link::before {
+          content: '𝕏';
+          font-size: 14px;
+        }
+
+        .owner-link:hover {
+          translate: -2px -2px;
+          box-shadow: 6px 6px 0px var(--black);
+        }
+
+        .nav-by {
+          font-size: 11px;
+          color: var(--muted);
+          font-family: 'Space Mono', monospace;
+          margin-left: 12px;
+          font-weight: 500;
+        }
+
+        .nav-by a {
+          color: var(--primary);
+          text-decoration: none;
+          font-weight: 700;
+        }
+
+        .nav-by a:hover {
+          text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+          .nav-by { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Nav -->
-    <nav>
-        <div class="container nav-inner">
-            <a href="/" class="logo">CREATOR<span>CHAIN</span></a>
-            <div class="nav-links">
-                <a href="#ambassador-section" class="nav-link mono">AMBASSADORS</a>
-                <a href="#discord-section" class="nav-link mono">DISCORD</a>
-                <a href="#bounty-section" class="nav-link mono">BOUNTIES</a>
-                <a href="#developer-section" class="nav-link mono">DEV</a>
-                <a href="#campaign-section" class="nav-link mono">CAMPAIGNS</a>
-                <button class="btn btn-white" style="padding: 5px 12px; font-size: 11px;" onclick="showLogin()">ADMIN</button>
-            </div>
-        </div>
-    </nav>
+<!-- Toast container -->
+<div id="toast"></div>
 
-    <!-- Live Ticker -->
-    <div class="ticker-wrap">
-        <div class="ticker" id="ticker-target">
-            <span>◆ LOADING UPDATES... ◆</span>
+<!-- NAV -->
+<nav>
+    <div class="container nav-inner">
+        <div style="display:flex; align-items:center;">
+            <a href="/" class="logo">CREATOR<span>CHAIN</span></a>
+            <span class="nav-by">
+                by 
+                <a href="https://x.com/ZenvicAlpha" target="_blank">@ZenvicAlpha</a>
+            </span>
+        </div>
+
+        <div class="nav-links">
+            <a href="#ambassador-section" class="nav-link mono">Ambassadors</a>
+            <a href="#discord-section" class="nav-link mono">Discord</a>
+            <a href="#bounty-section" class="nav-link mono">Bounties</a>
+            <a href="#developer-section" class="nav-link mono">Dev</a>
+            <a href="#campaign-section" class="nav-link mono">Campaigns</a>
+            <button class="btn btn-secondary btn-sm" onclick="openSubmitModal()">+ Submit Project</button>
+            <button class="btn btn-white btn-sm" onclick="showLogin()">Admin</button>
         </div>
     </div>
+</nav>
 
-    <!-- Hero -->
-    <section class="hero container">
-        <div class="hero-left">
-            <h1>
-                FIND YOUR<br>
-                <span class="outline">WEB3</span><br>
-                <span class="green">CREATOR ROLE</span>
-            </h1>
-            <div style="display: flex; gap: 20px;">
-                <button class="btn btn-black" style="font-size: 18px; padding: 15px 40px;">BROWSE NOW &rarr;</button>
-                <button class="btn btn-white" style="font-size: 18px; padding: 15px 40px;">POST PROJECT</button>
+<!-- TICKER -->
+<div class="ticker-wrap">
+    <div class="ticker" id="ticker-target">
+        <span>◆ LOADING LIVE OPPORTUNITIES... ◆</span>
+    </div>
+</div>
+
+<!-- HERO -->
+<section style="padding: 80px 0; background: var(--bg);">
+    <div class="container hero">
+        <div>
+            <h1>FIND YOUR<br><span class="outline">WEB3</span><br><span class="green">CREATOR ROLE</span></h1>
+            <p style="font-size:16px; color:var(--muted); max-width:440px;">The unfiltered aggregator for the best roles in the decentralized economy. Built for creators, community leads, and devs.</p>
+            <div class="hero-cta">
+                <button class="btn btn-black" style="font-size:16px; padding:14px 36px;">Browse Now &rarr;</button>
+                <button class="btn btn-white" style="font-size:16px; padding:14px 36px;">Post Project</button>
+                <button class="btn btn-secondary" style="font-size:14px; padding:12px 24px;" onclick="openSubmitModal()">Submit Your Project &rarr;</button>
             </div>
         </div>
         <div class="hero-stats-card">
@@ -266,254 +284,584 @@
                 <span class="stat-label">LIVE_ENTRIES</span>
             </div>
             <div class="stat-item">
-                <span class="stat-num" id="hero-rewards">$000K</span>
+                <span class="stat-num" id="hero-rewards">$0K</span>
                 <span class="stat-label">TOTAL_REWARD_POOL</span>
             </div>
             <div class="stat-item" style="border:none">
-                <span class="stat-num">AUTOREAL</span>
-                <span class="stat-label">LIVE_UPDATES_ENABLED</span>
+                <a href="https://x.com/Zenvicalpha" target="_blank" style="text-decoration:none; color:inherit; display:block;">
+                    <span class="stat-num" style="font-size:24px;">@ZenvicAlpha</span>
+                    <span class="stat-label">FOLLOW_ON_X</span>
+                </a>
             </div>
         </div>
+    </div>
+</section>
+
+<!-- CATEGORIES -->
+<div class="container">
+    <section class="cat-section" id="ambassador-section"><div class="section-num">01</div><h2 class="section-title">Ambassadors</h2><div class="grid" id="ambassador-cards"></div></section>
+    <section class="cat-section" id="discord-section"><div class="section-num">02</div><h2 class="section-title">Discord Roles</h2><div class="grid" id="discord-cards"></div></section>
+    <section class="cat-section" id="bounty-section"><div class="section-num">03</div><h2 class="section-title">Content Bounties</h2><div class="grid" id="bounty-cards"></div></section>
+    <section class="cat-section" id="developer-section"><div class="section-num">04</div><h2 class="section-title">Dev Bounties</h2><div class="grid" id="developer-cards"></div></section>
+    <section class="cat-section" id="campaign-section"><div class="section-num">05</div><h2 class="section-title">Campaigns</h2><div class="grid" id="campaign-cards"></div></section>
+    <section class="cat-section" id="ended-section" style="border-top: 4px solid #ccc; padding-top: 60px;">
+        <div class="section-num" style="color: var(--accent)">06</div>
+        <h2 class="section-title" style="color:var(--muted)">Ended Opportunities</h2>
+        <div class="grid" id="ended-cards"></div>
     </section>
+</div>
 
-    <!-- Sections -->
+<!-- FOOTER -->
+<footer>
     <div class="container">
-        <section id="ambassador-section"><div class="section-num">01</div><h2 class="section-title">Ambassadors</h2><div class="grid" id="ambassador-cards"></div></section>
-        <section id="discord-section"><div class="section-num">02</div><h2 class="section-title">Discord Roles</h2><div class="grid" id="discord-cards"></div></section>
-        <section id="bounty-section"><div class="section-num">03</div><h2 class="section-title">Content Bounties</h2><div class="grid" id="bounty-cards"></div></section>
-        <section id="developer-section"><div class="section-num">04</div><h2 class="section-title">Dev Bounties</h2><div class="grid" id="developer-cards"></div></section>
-        <section id="campaign-section"><div class="section-num">05</div><h2 class="section-title">Campaigns</h2><div class="grid" id="campaign-cards"></div></section>
-        
-        <!-- Lifecycle Archive -->
-        <section id="ended-section" style="border-top: 4px solid var(--black); margin-top: 100px;">
-            <div class="section-num" style="color:red">06</div>
-            <h2 class="section-title">Ended Opportunities</h2>
-            <div class="grid" id="ended-cards"></div>
-        </section>
-    </div>
+        <div class="footer-inner">
+            <div>
+                <div class="footer-logo">CREATOR<span>CHAIN</span></div>
+                <p style="color:#888; font-size:14px; max-width:300px;">The Web3 opportunity board for creators, builders, and community leaders.</p>
+                <div style="margin-top:25px;">
+                    <a href="#ambassador-section" class="footer-link">→ Ambassador Programs</a>
+                    <a href="#discord-section" class="footer-link">→ Discord Moderation</a>
+                    <a href="#bounty-section" class="footer-link">→ Content Bounties</a>
+                </div>
+                <div style="margin-top:20px;">
+                    <p style="color:var(--primary); font-family:'Space Mono',monospace; font-size:11px; margin-bottom:10px;">SOCIALS</p>
+                    <a href="https://x.com/ZenvicAlpha" target="_blank" class="footer-link" style="color:#fff; font-weight:700;">𝕏 @ZenvicAlpha</a>
+                    <a href="#" onclick="return false;" class="footer-link">💬 Discord (Soon)</a>
+                    <a href="#" onclick="return false;" class="footer-link">✈️ Telegram (Soon)</a>
+                </div>
 
-    <!-- Admin Panel -->
-    <div id="admin-panel">
-        <div class="container">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 60px;">
-                <h2 class="mono" style="font-size: 64px; color: var(--primary);">MANAGE_DATA</h2>
-                <button class="btn btn-secondary" onclick="hideAdmin()">EXIT</button>
             </div>
+            <div>
+                <div class="footer-submit-cta">
+                    <h3 style="font-size:22px; color:var(--primary);">Running a Web3 Project?</h3>
+                    <p style="color:#aaa; font-size:14px; margin: 10px 0 20px;">Submit your opportunity and reach thousands of Web3 creators.</p>
+                    <button class="btn btn-secondary" style="width:100%;" onclick="openSubmitModal()">Submit a Bounty or Opportunity &rarr;</button>
+                    <p class="submit-count" id="submission-count">Loading submissions...</p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-divider">
+            <div class="owner-credit">
+                <span>Built by</span>
+                <a href="https://x.com/ZenvicAlpha" target="_blank" class="owner-link">
+                    @ZenvicAlpha
+                </a>
+            </div>
+            <div style="margin-top:15px; color:#444;">
+                &copy; 2026 CreatorChain. Decentralized Creator Economy Platform.
+            </div>
+        </div>
 
-            <form id="listing-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                <input type="hidden" id="f-id">
+    </div>
+</footer>
+
+<!-- ======================== SUBMIT MODAL ======================== -->
+<div id="submit-modal">
+    <div class="submit-card" id="submit-card-inner">
+        <div class="submit-header">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                 <div>
-                    <label class="mono" style="color:var(--primary)">CATEGORY</label>
-                    <select class="form-input" id="f-section">
-                        <option value="ambassador">AMBASSADOR</option>
-                        <option value="discord">DISCORD</option>
-                        <option value="bounty">BOUNTY</option>
-                        <option value="developer">DEVELOPER</option>
-                        <option value="campaign">CAMPAIGN</option>
-                    </select>
+                    <h2>Submit an Opportunity</h2>
+                    <p>Your submission will be reviewed by our team before going live.<br>Usually approved within 24 hours.</p>
+                    <div class="info-pill" style="margin-top:12px;">🔍 All submissions manually reviewed</div>
                 </div>
-                <div>
-                    <label class="mono" style="color:var(--primary)">PROJECT_NAME</label>
-                    <input type="text" class="form-input" id="f-project">
+                <button onclick="closeSubmitModal()" style="background:none; border:none; color:#888; font-size:24px; cursor:pointer; margin-left:20px;">✕</button>
+            </div>
+        </div>
+        <div class="submit-body" id="submit-form-body">
+            <form id="submit-form" onsubmit="return handleSubmit(event)">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                    <div class="field">
+                        <label>Category <span class="req">*</span></label>
+                        <select id="s-section" required>
+                            <option value="">Select...</option>
+                            <option value="ambassador">Ambassador Program</option>
+                            <option value="discord">Discord Role</option>
+                            <option value="bounty">Content Bounty</option>
+                            <option value="developer">Developer Bounty</option>
+                            <option value="campaign">Project Campaign</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Project Name <span class="req">*</span></label>
+                        <input type="text" id="s-project" placeholder="e.g. Starknet" required>
+                    </div>
+                    <div class="field">
+                        <label>Position Title <span class="req">*</span></label>
+                        <input type="text" id="s-title" placeholder="e.g. Ambassador Program" required>
+                    </div>
+                    <div class="field">
+                        <label>Reward</label>
+                        <input type="text" id="s-reward" placeholder="e.g. $2,000">
+                    </div>
                 </div>
-                <div>
-                    <label class="mono" style="color:var(--primary)">POSITION_TITLE</label>
-                    <input type="text" class="form-input" id="f-title">
+                <div class="field" style="margin-top:5px;">
+                    <label>Description</label>
+                    <textarea id="s-desc" rows="3" placeholder="Describe the opportunity..."></textarea>
                 </div>
-                <div>
-                    <label class="mono" style="color:var(--primary)">COMPENSATION (e.g. $1,500)</label>
-                    <input type="text" class="form-input" id="f-reward">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                    <div class="field">
+                        <label>Apply Link <span class="req">*</span></label>
+                        <input type="url" id="s-url" placeholder="https://..." required>
+                    </div>
+                    <div class="field">
+                        <label>Logo (emoji or URL)</label>
+                        <input type="text" id="s-logo" placeholder="🔷 or https://logo.png">
+                    </div>
+                    <div class="field">
+                        <label>Deadline</label>
+                        <input type="text" id="s-deadline" placeholder="April 30, 2026 or TBA">
+                    </div>
+                    <div class="field">
+                        <label>Your Name / Handle <span class="req">*</span></label>
+                        <input type="text" id="s-submitter" placeholder="Who is submitting?" required>
+                    </div>
                 </div>
-                <div style="grid-column: span 2;">
-                    <label class="mono" style="color:var(--primary)">DESCRIPTION</label>
-                    <textarea class="form-input" id="f-desc" rows="2"></textarea>
-                </div>
-                <div>
-                    <label class="mono" style="color:var(--primary)">APPLY_LINK</label>
-                    <input type="url" class="form-input" id="f-url">
-                </div>
-                <div>
-                    <label class="mono" style="color:var(--primary)">IMAGE_LOG_URL</label>
-                    <input type="url" class="form-input" id="f-logo" placeholder="https://logo.com/icon.png">
-                </div>
-                <div>
-                    <label class="mono" style="color:var(--primary)">DEADLINE_DATE</label>
-                    <input type="date" class="form-input" id="f-deadline">
-                </div>
-                <div>
-                    <label class="mono" style="color:var(--primary)">FEATURED?</label>
-                    <select class="form-input" id="f-featured"><option value="false">NO</option><option value="true">YES</option></select>
-                </div>
-                <button type="submit" class="btn btn-primary" style="grid-column: span 2; padding: 20px; font-size: 20px;">SAVE_OPPORTUNITY</button>
+                <div class="info-note" style="margin-top:5px;">⚡ Submissions go to admin review before going live. Usually approved within 24 hours.</div>
+                <div class="submit-error" id="submit-error">Something went wrong. Please try again.</div>
+                <button type="submit" id="submit-btn" class="btn btn-primary" style="width:100%; font-size:18px; padding:18px; margin-top:20px;">Submit for Review &rarr;</button>
             </form>
-
-            <div id="admin-list" style="margin-top: 60px;"></div>
         </div>
     </div>
+</div>
 
-    <!-- Login -->
-    <div id="login-modal">
-        <div class="modal-box">
-            <h2 class="bold" style="font-size: 32px; margin-bottom: 20px;">ACCESS_BOARD</h2>
-            <input type="password" id="admin-pass" class="form-input" style="background:#eee; color:#000;">
-            <button class="btn btn-primary" style="width:100%" onclick="checkPass()">ENTER</button>
+
+<!-- ADMIN PANEL below -->
+
+<!-- ======================== ADMIN PANEL ======================== -->
+<div id="admin-panel">
+    <div class="admin-inner">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+            <div>
+                <h2 class="mono" style="font-size:48px; color:var(--primary); letter-spacing:-1px;">ADMIN_DASHBOARD</h2>
+                <p style="color:#888; font-family:'Space Mono',monospace; font-size:12px;">CreatorChain Management Console</p>
+            </div>
+            <button class="btn btn-secondary" onclick="hideAdmin()">EXIT</button>
         </div>
-    </div>
 
-    <script>
-        const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
-        let db;
+        <!-- Admin Tabs -->
+        <div class="admin-tabs">
+            <button class="admin-tab active" onclick="switchTab('tab-add')">➕ Add Listing</button>
+            <button class="admin-tab" onclick="switchTab('tab-pending')" id="pending-tab-btn">
+                📬 Pending Review
+                <span class="pending-badge" id="pending-badge" style="display:none">0</span>
+            </button>
+            <button class="admin-tab" onclick="switchTab('tab-all')">📋 All Listings</button>
+        </div>
 
-        const parseReward = (str) => {
-            if (!str) return 0;
-            const match = str.replace(/,/g, '').match(/\d+/);
-            return match ? parseInt(match[0]) : 0;
-        };
-
-        function initSupabase() {
-            try { db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); return true; } 
-            catch (e) { console.error(e); return false; }
-        }
-
-        async function loadListings() {
-            const { data, error } = await db.from('listings').select('*').order('created_at', { ascending: false });
-            if (!error) {
-                updateTicker(data);
-                updateStats(data);
-                renderGrid(data);
-                renderAdminList(data);
-            }
-        }
-
-        function updateTicker(listings) {
-            const ticker = document.getElementById('ticker-target');
-            const items = listings.slice(0, 10).map(l => `◆ ${l.project}: ${l.title} ◆`);
-            ticker.innerHTML = `<span>${items.join(' ')}</span>`.repeat(3); // Repeat for infinite loop
-        }
-
-        function updateStats(listings) {
-            const activeOnly = listings.filter(l => !l.deadline || new Date(l.deadline) > new Date());
-            document.getElementById('hero-count').innerText = activeOnly.length.toString().padStart(2, '0');
-            
-            const total = activeOnly.reduce((acc, l) => acc + parseReward(l.reward), 0);
-            document.getElementById('hero-rewards').innerText = total >= 1000 ? `$${(total/1000).toFixed(0)}K+` : `$${total}`;
-        }
-
-        // Detects if a string is a URL or an emoji/text
-        const isUrl = (s) => s && (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'));
-
-        // Parses deadline strings — handles 'April 4, 2026', '2026-04-04', 'TBA', etc.
-        const parseDeadline = (s) => {
-            if (!s || s.toUpperCase() === 'TBA' || s.trim() === '') return null;
-            const d = new Date(s);
-            return isNaN(d.getTime()) ? null : d;
-        };
-
-        function renderGrid(listings) {
-            const cats = ['ambassador', 'discord', 'bounty', 'developer', 'campaign', 'ended'];
-            cats.forEach(c => { const el = document.getElementById(`${c}-cards`); if(el) el.innerHTML = ''; });
-
-            const now = new Date();
-            const threeDaysAgo = new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000));
-
-            listings.forEach(item => {
-                const deadline = parseDeadline(item.deadline);
-                let target = item.section;
-                let status = '';
-
-                if (deadline) {
-                    if (deadline < threeDaysAgo) { target = 'ended'; }
-                    else if (deadline < now) { status = 'EXPIRED'; }
-                }
-
-                // Smart logo: URL → <img>, emoji/text → render as text
-                const logoHtml = isUrl(item.logo)
-                    ? `<img src="${item.logo}" onerror="this.parentElement.innerHTML='⚡'">` 
-                    : (item.logo || '⚡');
-
-                const deadlineLabel = deadline
-                    ? (status === 'EXPIRED' ? `EXPIRED ${deadline.toLocaleDateString()}` : deadline.toLocaleDateString())
-                    : (item.deadline || 'OPEN');
-
-                const card = document.createElement('div');
-                card.className = `card ${item.featured ? 'featured' : ''} ${status ? 'expired' : ''}`;
-                card.innerHTML = `
-                    <div class="card-urgency urgency-${item.urgency || 'MEDIUM'}"></div>
-                    <div class="card-stamp mono ${status ? 'expired-stamp' : ''}">${status || item.section}</div>
-                    <div class="card-inner">
-                        <div style="display:flex; gap:15px; align-items:center;">
-                            <div class="card-logo">${logoHtml}</div>
-                            <div>
-                                <span class="mono" style="font-size:10px; color:var(--muted)">${item.project}</span>
-                                <h3 style="font-size:18px;">${item.title}</h3>
-                            </div>
-                        </div>
-                        <p style="font-size:14px; color:var(--muted);">${item.description || 'Global opportunity for Web3 creators and community leaders.'}</p>
-                        <div class="reward-tag">${item.reward || 'TBA'}</div>
+        <!-- TAB: Add Listing -->
+        <div id="tab-add" class="tab-content active">
+            <p class="mono" style="color:#888; font-size:11px; margin-bottom:30px;">Admin-added listings are immediately LIVE. No review required.</p>
+            <form id="listing-form" style="background:#111; border:2px solid var(--primary); padding:40px;">
+                <input type="hidden" id="f-id">
+                <div class="admin-form-grid">
+                    <div>
+                        <label class="admin-label">CATEGORY</label>
+                        <select class="admin-form-input" id="f-section">
+                            <option value="ambassador">AMBASSADOR</option>
+                            <option value="discord">DISCORD</option>
+                            <option value="bounty">BOUNTY</option>
+                            <option value="developer">DEVELOPER</option>
+                            <option value="campaign">CAMPAIGN</option>
+                        </select>
                     </div>
-                    <div class="card-footer">
-                        <div class="mono" style="font-size:10px; color:${status ? 'var(--accent)' : 'var(--muted)'}">${deadlineLabel}</div>
-                        <a href="${item.apply_url || '#'}" target="_blank" class="btn btn-primary" style="padding:10px 15px; font-size:12px">APPLY</a>
+                    <div>
+                        <label class="admin-label">PROJECT_NAME</label>
+                        <input type="text" class="admin-form-input" id="f-project">
                     </div>
-                `;
-                const container = document.getElementById(`${target}-cards`);
-                if (container) container.appendChild(card);
-            });
-        }
-
-        function renderAdminList(listings) {
-            const container = document.getElementById('admin-list');
-            container.innerHTML = listings.map(l => `
-                <div style="border:2px solid #333; padding:15px; background:#111; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                    <div class="mono" style="font-size:12px;">${l.title} @ ${l.project}</div>
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn btn-white" style="padding:5px 10px; font-size:11px" onclick="editItem('${l.id}')">EDIT</button>
-                        <button class="btn btn-secondary" style="padding:5px 10px; font-size:11px; background:red; color:#fff;" onclick="deleteItem('${l.id}')">DEL</button>
+                    <div>
+                        <label class="admin-label">TITLE</label>
+                        <input type="text" class="admin-form-input" id="f-title">
                     </div>
+                    <div>
+                        <label class="admin-label">REWARD</label>
+                        <input type="text" class="admin-form-input" id="f-reward">
+                    </div>
+                    <div class="full">
+                        <label class="admin-label">DESCRIPTION</label>
+                        <textarea class="admin-form-input" id="f-desc" rows="2"></textarea>
+                    </div>
+                    <div>
+                        <label class="admin-label">APPLY_URL</label>
+                        <input type="url" class="admin-form-input" id="f-url">
+                    </div>
+                    <div>
+                        <label class="admin-label">LOGO (emoji or URL)</label>
+                        <input type="text" class="admin-form-input" id="f-logo">
+                    </div>
+                    <div>
+                        <label class="admin-label">DEADLINE</label>
+                        <input type="text" class="admin-form-input" id="f-deadline">
+                    </div>
+                    <div>
+                        <label class="admin-label">URGENCY</label>
+                        <select class="admin-form-input" id="f-urgency">
+                            <option value="">NONE</option>
+                            <option value="CRITICAL">CRITICAL</option>
+                            <option value="HIGH">HIGH</option>
+                            <option value="MEDIUM">MEDIUM</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="admin-label">FEATURED?</label>
+                        <select class="admin-form-input" id="f-featured"><option value="false">NO</option><option value="true">YES</option></select>
+                    </div>
+                    <button type="submit" class="btn btn-primary full" style="padding:18px; font-size:18px;">SAVE (GOES LIVE IMMEDIATELY)</button>
                 </div>
-            `).join('');
+            </form>
+        </div>
+
+        <!-- TAB: Pending -->
+        <div id="tab-pending" class="tab-content">
+            <p class="mono" style="color:#888; font-size:11px; margin-bottom:30px;">Submissions awaiting review. Approve to make live. Reject to remove permanently.</p>
+            <div id="pending-list">
+                <p style="color:#555; text-align:center; padding:60px 0;" class="mono">Loading pending submissions...</p>
+            </div>
+        </div>
+
+        <!-- TAB: All Listings -->
+        <div id="tab-all" class="tab-content">
+            <p class="mono" style="color:#888; font-size:11px; margin-bottom:20px;">All listings in database.</p>
+            <div id="admin-list"></div>
+        </div>
+    </div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-modal">
+    <div class="modal-box">
+        <h2 class="bold" style="font-size:30px; margin-bottom:20px;">ACCESS BOARD</h2>
+        <input type="password" id="admin-pass" class="admin-form-input" style="background:#eee; color:#000; border-color:#000; margin-bottom:15px;" placeholder="Enter password...">
+        <button class="btn btn-primary" style="width:100%;" onclick="checkPass()">ENTER</button>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
+    let db;
+
+    // ─── Helpers ──────────────────────────────────────────
+    const parseReward = (s) => { if(!s) return 0; const m = s.replace(/,/g,'').match(/\d+/); return m ? parseInt(m[0]) : 0; };
+    const isUrl = (s) => s && (s.startsWith('http')||s.startsWith('/'));
+    const parseDeadline = (s) => { if(!s||s.toUpperCase()==='TBA'||s.trim()==='') return null; const d=new Date(s); return isNaN(d.getTime())?null:d; };
+    const timeAgo = (ts) => { const d=new Date(ts),now=new Date(),diff=Math.floor((now-d)/1000); if(diff<60) return 'just now'; if(diff<3600) return `${Math.floor(diff/60)}m ago`; if(diff<86400) return `${Math.floor(diff/3600)}h ago`; return `${Math.floor(diff/86400)}d ago`; };
+
+    function showToast(msg, type='success') {
+        const el = document.createElement('div');
+        el.className = `toast-item ${type==='error'?'error':''}`;
+        el.textContent = msg;
+        document.getElementById('toast').appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+    }
+
+    function initSupabase() {
+        try { db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); return true; }
+        catch(e) { console.error(e); return false; }
+    }
+
+    // ─── Public listings (APPROVED only) ──────────────────
+    async function loadListings() {
+        const { data, error } = await db.from('listings').select('*')
+            .eq('approval_status','approved')
+            .order('created_at', { ascending: false });
+        if (error) { console.error(error); return; }
+        updateTicker(data || []);
+        updateStats(data || []);
+        renderGrid(data || []);
+        loadSubmissionCount();
+    }
+
+    function updateTicker(listings) {
+        const items = listings.slice(0,10).map(l => `◆ ${l.project}: ${l.title} ◆`);
+        const html = `<span>${items.join('  ')}</span>`.repeat(3);
+        document.getElementById('ticker-target').innerHTML = html || '<span>◆ NO LIVE LISTINGS YET ◆</span>';
+    }
+
+    function updateStats(listings) {
+        const active = listings.filter(l => !parseDeadline(l.deadline) || parseDeadline(l.deadline) > new Date());
+        document.getElementById('hero-count').innerText = active.length.toString().padStart(2,'0');
+        const total = active.reduce((acc,l) => acc+parseReward(l.reward), 0);
+        document.getElementById('hero-rewards').innerText = total>=1000 ? `$${(total/1000).toFixed(0)}K+` : `$${total}`;
+    }
+
+    function renderGrid(listings) {
+        const cats = ['ambassador','discord','bounty','developer','campaign','ended'];
+        cats.forEach(c => { const el = document.getElementById(`${c}-cards`); if(el) el.innerHTML=''; });
+        const now = new Date();
+        const threeDaysAgo = new Date(now-3*24*60*60*1000);
+
+        listings.forEach(item => {
+            const deadline = parseDeadline(item.deadline);
+            let target = item.section, status = '';
+            if(deadline) { if(deadline < threeDaysAgo) { target='ended'; } else if(deadline < now) { status='EXPIRED'; } }
+            const logoHtml = isUrl(item.logo) ? `<img src="${item.logo}" onerror="this.parentElement.innerHTML='⚡'">` : (item.logo||'⚡');
+            const deadlineLabel = deadline ? (status ? `EXPIRED ${deadline.toLocaleDateString()}` : deadline.toLocaleDateString()) : (item.deadline||'OPEN');
+
+            const card = document.createElement('div');
+            card.className = `card ${item.featured?'featured':''} ${status?'expired':''}`;
+            card.innerHTML = `
+                <div class="card-urgency urgency-${item.urgency||'MEDIUM'}"></div>
+                <div class="card-stamp mono ${status?'expired-stamp':''}">${status||item.section}</div>
+                <div class="card-inner">
+                    <div style="display:flex;gap:14px;align-items:center;">
+                        <div class="card-logo">${logoHtml}</div>
+                        <div>
+                            <span class="mono" style="font-size:10px;color:var(--muted)">${item.project}</span>
+                            <h3 style="font-size:18px;letter-spacing:-0.5px;">${item.title}</h3>
+                        </div>
+                    </div>
+                    <p style="font-size:14px;color:var(--muted)">${item.description||'Global opportunity for Web3 creators and community leaders.'}</p>
+                    <div class="reward-tag">${item.reward||'TBA'}</div>
+                </div>
+                <div class="card-footer">
+                    <div class="mono" style="font-size:10px;color:${status?'var(--accent)':'var(--muted)'};">${deadlineLabel}</div>
+                    <a href="${item.apply_url||'#'}" target="_blank" class="btn btn-primary btn-sm">APPLY</a>
+                </div>
+            `;
+            const c = document.getElementById(`${target}-cards`);
+            if(c) c.appendChild(card);
+        });
+    }
+
+    async function loadSubmissionCount() {
+        const { count } = await db.from('listings').select('*', { count:'exact', head:true });
+        document.getElementById('submission-count').textContent = `Join ${count||0} total submissions from the community`;
+    }
+
+    // ─── Submit Modal ──────────────────────────────────────
+    function openSubmitModal() {
+        document.getElementById('submit-modal').style.display = 'flex';
+        document.getElementById('submit-form-body').innerHTML = document.getElementById('submit-form-body').innerHTML; // reset
+        const form = document.getElementById('submit-form');
+        if(form) form.reset();
+    }
+    function closeSubmitModal() { document.getElementById('submit-modal').style.display = 'none'; }
+
+    async function handleSubmit(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submit-btn');
+        const errEl = document.getElementById('submit-error');
+        btn.classList.add('btn-loading');
+        btn.textContent = 'Submitting...';
+        errEl.style.display = 'none';
+
+        const item = {
+            section: document.getElementById('s-section').value,
+            project: document.getElementById('s-project').value,
+            title: document.getElementById('s-title').value,
+            reward: document.getElementById('s-reward').value,
+            description: document.getElementById('s-desc').value,
+            apply_url: document.getElementById('s-url').value,
+            logo: document.getElementById('s-logo').value,
+            deadline: document.getElementById('s-deadline').value,
+            submitted_by: document.getElementById('s-submitter').value,
+            approval_status: 'pending',
+            submitted_at: new Date().toISOString(),
+            featured: false,
+            urgency: 'MEDIUM'
+        };
+
+        const { data, error } = await db.from('listings').insert([item]).select().single();
+        if (error) {
+            errEl.style.display = 'block';
+            btn.classList.remove('btn-loading');
+            btn.textContent = 'Submit for Review \u2192';
+            return false;
         }
 
-        function showLogin() { document.getElementById('login-modal').style.display = 'flex'; }
-        function checkPass() { if(document.getElementById('admin-pass').value === 'admin123') { document.getElementById('login-modal').style.display='none'; document.getElementById('admin-panel').style.display='block'; }}
-        function hideAdmin() { document.getElementById('admin-panel').style.display='none'; }
+        document.getElementById('submit-form-body').innerHTML = `
+            <div class="submit-success">
+                <div class="check">&#x2705;</div>
+                <h2>Submitted Successfully!</h2>
+                <p style="color:var(--muted);font-size:15px;max-width:380px;margin:10px auto;">Sent for review. If approved it will go live automatically within 24 hours.</p>
+                <div class="sub-id">ID: ${data.id.substring(0,8).toUpperCase()}</div>
+                <div style="display:flex;gap:15px;justify-content:center;margin-top:30px;">
+                    <button class="btn btn-secondary" onclick="openSubmitModal()">Submit Another</button>
+                    <button class="btn btn-white" onclick="closeSubmitModal()">Close</button>
+                </div>
+            </div>
+        `;
+        return false;
+    }
 
-        document.getElementById('listing-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('f-id').value;
-            const item = {
-                section: document.getElementById('f-section').value,
-                project: document.getElementById('f-project').value,
-                title: document.getElementById('f-title').value,
-                reward: document.getElementById('f-reward').value,
-                description: document.getElementById('f-desc').value,
-                apply_url: document.getElementById('f-url').value,
-                logo: document.getElementById('f-logo').value,
-                deadline: document.getElementById('f-deadline').value,
-                featured: document.getElementById('f-featured').value === 'true'
-            };
-            if (id) await db.from('listings').update(item).eq('id', id);
-            else await db.from('listings').insert([item]);
-            document.getElementById('listing-form').reset(); document.getElementById('f-id').value = '';
-        });
 
-        async function editItem(id) {
-            const { data } = await db.from('listings').select('*').eq('id', id).single();
-            if (data) {
-                ['id', 'section', 'project', 'title', 'reward', 'desc', 'url', 'logo', 'deadline'].forEach(f => {
-                    const el = document.getElementById('f-'+f); if(el) el.value = data[f === 'desc' ? 'description' : (f === 'url' ? 'apply_url' : f)] || '';
-                });
-                document.getElementById('f-featured').value = data.featured.toString();
-            }
+    // ─── Admin Auth ────────────────────────────────────────
+    function showLogin() { document.getElementById('login-modal').style.display='flex'; }
+    function checkPass() {
+        if(document.getElementById('admin-pass').value==='admin123') {
+            document.getElementById('login-modal').style.display='none';
+            document.getElementById('admin-panel').style.display='block';
+            document.body.style.overflow='hidden';
+            loadPendingListings();
+            loadAllAdminListings();
+            subscribeAdminRealtime();
+        } else { showToast('Wrong password', 'error'); }
+    }
+    function hideAdmin() { document.getElementById('admin-panel').style.display='none'; document.body.style.overflow='auto'; }
+
+    function switchTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+        document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        const idx = ['tab-add','tab-pending','tab-all'].indexOf(id);
+        document.querySelectorAll('.admin-tab')[idx].classList.add('active');
+    }
+
+    // ─── Admin: Pending Review ─────────────────────────────
+    async function loadPendingListings() {
+        const { data } = await db.from('listings').select('*').eq('approval_status','pending').order('submitted_at',{ascending:true});
+        renderPendingCards(data||[]);
+        updatePendingBadge((data||[]).length);
+    }
+
+    function updatePendingBadge(count) {
+        const b = document.getElementById('pending-badge');
+        b.textContent = count;
+        b.style.display = count>0 ? 'inline-flex':'none';
+    }
+
+    function renderPendingCards(listings) {
+        const c = document.getElementById('pending-list');
+        if(!listings.length) { c.innerHTML='<p class="mono" style="color:#555;text-align:center;padding:60px 0;">No pending submissions. All clear! ✅</p>'; return; }
+        c.innerHTML = listings.map(l => `
+            <div class="pending-card" id="pc-${l.id}">
+                <div class="pending-card-header">
+                    <div>
+                        <span style="font-size:16px;font-weight:900;">${l.logo||'⚡'} ${l.project}</span>
+                        <span style="font-size:11px;background:var(--secondary);border:1px solid var(--black);padding:2px 8px;margin-left:10px;font-family:'Space Mono',monospace;">PENDING</span>
+                    </div>
+                    <div class="mono" style="font-size:11px;color:#888;">${timeAgo(l.submitted_at||l.created_at)}</div>
+                </div>
+                <div class="pending-card-body">
+                    <div class="pending-meta">Section: ${l.section} | Submitted by: ${l.submitted_by||'Anonymous'} | Email: ${l.submitter_email||'—'}</div>
+                    <div style="margin:12px 0;">
+                        <strong style="font-size:18px;">${l.title}</strong>
+                        <div style="margin-top:4px;"><span style="background:var(--primary);color:#000;padding:3px 10px;font-family:'Space Mono',monospace;font-size:13px;">${l.reward||'TBA'}</span>
+                        <span class="mono" style="font-size:11px;color:#888;margin-left:10px;">DEADLINE: ${l.deadline||'TBA'}</span></div>
+                    </div>
+                    <p style="color:#aaa;font-size:14px;margin-bottom:12px;">${l.description||'—'}</p>
+                    ${l.apply_url ? `<p class="pending-meta">Apply URL: <a href="${l.apply_url}" target="_blank" style="color:var(--primary);">${l.apply_url.substring(0,60)}...</a></p>` : ''}
+                    ${l.tags ? `<p class="pending-meta">Tags: ${l.tags}</p>` : ''}
+                    ${l.pro_tip ? `<p class="pending-meta">💡 ${l.pro_tip}</p>` : ''}
+                    ${l.submitter_twitter ? `<p class="pending-meta">Submitter Twitter: ${l.submitter_twitter}</p>` : ''}
+                </div>
+                <div class="pending-actions">
+                    <input class="pending-note-input" placeholder="Admin note (optional)..." id="note-${l.id}">
+                    <button class="btn btn-primary btn-sm" onclick="approveListing('${l.id}')">✅ APPROVE</button>
+                    <button class="btn btn-danger btn-sm" onclick="rejectListing('${l.id}')">❌ REJECT</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function approveListing(id) {
+        const note = document.getElementById(`note-${id}`)?.value||'';
+        await db.from('listings').update({ approval_status:'approved', admin_note:note }).eq('id',id);
+        showToast('✅ Listing approved & live!');
+        document.getElementById(`pc-${id}`)?.remove();
+        loadPendingListings();
+        loadListings();
+    }
+
+    async function rejectListing(id) {
+        if(!confirm('Reject this submission? It will be permanently removed.')) return;
+        await db.from('listings').delete().eq('id',id);
+        showToast('🗑️ Submission rejected.','error');
+        document.getElementById(`pc-${id}`)?.remove();
+        loadPendingListings();
+    }
+
+    // ─── Admin: All listings table ─────────────────────────
+    async function loadAllAdminListings() {
+        const { data } = await db.from('listings').select('*').order('created_at',{ascending:false});
+        const c = document.getElementById('admin-list');
+        c.innerHTML = `
+            <table class="listings-table">
+                <thead><tr>
+                    <th>Project</th><th>Title</th><th>Section</th><th>Reward</th><th>Status</th><th>Actions</th>
+                </tr></thead>
+                <tbody>${(data||[]).map(l=>`
+                    <tr>
+                        <td>${l.project}</td>
+                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.title}</td>
+                        <td class="mono" style="font-size:11px;">${l.section}</td>
+                        <td class="mono" style="font-size:12px;">${l.reward||'—'}</td>
+                        <td><span class="status-badge status-${l.approval_status||'pending'}">${(l.approval_status||'pending').toUpperCase()}</span></td>
+                        <td style="display:flex;gap:8px;">
+                            <button class="btn btn-white btn-sm" onclick="editItem('${l.id}');switchTab('tab-add')">EDIT</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteItem('${l.id}')">DEL</button>
+                        </td>
+                    </tr>
+                `).join('')}</tbody>
+            </table>
+        `;
+    }
+
+    // ─── Admin: Add listing form ───────────────────────────
+    document.getElementById('listing-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('f-id').value;
+        const item = {
+            section: document.getElementById('f-section').value,
+            project: document.getElementById('f-project').value,
+            title: document.getElementById('f-title').value,
+            reward: document.getElementById('f-reward').value,
+            description: document.getElementById('f-desc').value,
+            apply_url: document.getElementById('f-url').value,
+            logo: document.getElementById('f-logo').value,
+            deadline: document.getElementById('f-deadline').value,
+            urgency: document.getElementById('f-urgency').value,
+            featured: document.getElementById('f-featured').value==='true',
+            approval_status: 'approved' // Admin always goes live directly
+        };
+        if(id) await db.from('listings').update(item).eq('id',id);
+        else await db.from('listings').insert([item]);
+        document.getElementById('listing-form').reset();
+        document.getElementById('f-id').value='';
+        showToast('✅ Listing saved & live!');
+        loadListings();
+        loadAllAdminListings();
+    });
+
+    async function editItem(id) {
+        const { data } = await db.from('listings').select('*').eq('id',id).single();
+        if(data) {
+            document.getElementById('f-id').value=data.id;
+            document.getElementById('f-section').value=data.section;
+            document.getElementById('f-project').value=data.project||'';
+            document.getElementById('f-title').value=data.title||'';
+            document.getElementById('f-reward').value=data.reward||'';
+            document.getElementById('f-desc').value=data.description||'';
+            document.getElementById('f-url').value=data.apply_url||'';
+            document.getElementById('f-logo').value=data.logo||'';
+            document.getElementById('f-deadline').value=data.deadline||'';
+            document.getElementById('f-urgency').value=data.urgency||'';
+            document.getElementById('f-featured').value=(data.featured||false).toString();
         }
-        async function deleteItem(id) { if(confirm('DELETE?')) await db.from('listings').delete().eq('id', id); }
+    }
+    async function deleteItem(id) { if(confirm('DELETE?')) { await db.from('listings').delete().eq('id',id); loadListings(); loadAllAdminListings(); showToast('Deleted','error'); } }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            if (!initSupabase()) return;
-            await loadListings();
-            db.channel('live').on('postgres_changes', { event: '*', schema: 'public', table: 'listings' }, () => loadListings()).subscribe();
-        });
-    </script>
+    // ─── Admin Realtime (pending notifications) ────────────
+    function subscribeAdminRealtime() {
+        db.channel('admin-pending')
+            .on('postgres_changes', { event:'INSERT', schema:'public', table:'listings' }, (payload) => {
+                if(payload.new?.approval_status==='pending') {
+                    showToast('📬 New submission received!');
+                    loadPendingListings();
+                    loadAllAdminListings();
+                }
+            }).subscribe();
+    }
+
+    // ─── Boot ──────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', async () => {
+        if(!initSupabase()) return;
+        await loadListings();
+        db.channel('public-live')
+            .on('postgres_changes', { event:'*', schema:'public', table:'listings' }, () => loadListings())
+            .subscribe();
+    });
+</script>
 </body>
 </html>
