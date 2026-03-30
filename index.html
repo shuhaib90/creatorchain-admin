@@ -1,570 +1,362 @@
 <!DOCTYPE html>
-<!-- CreatorChain v1.0 — shuhaib90 -->
+<!-- CreatorChain v4.0 — AUTOMATED NEO-BRUTALIST — shuhaib90 -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CreatorChain | Web3 Opportunity Board</title>
+    <title>CREATORCHAIN | WEB3 OPPORTUNITY BOARD</title>
     
     <!-- 1. Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <!-- 2. Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
     <style>
         :root {
-            --bg: #050810;
-            --card: #0d1428;
-            --card-hover: #141f3d;
-            --green: #00f5a0;
-            --cyan: #00d4ff;
-            --purple: #a855f7;
-            --amber: #f59e0b;
-            --red: #ef4444;
-            --text-main: #ffffff;
-            --text-muted: #94a3b8;
-            --border: rgba(255, 255, 255, 0.1);
-            --glass: rgba(255, 255, 255, 0.03);
-            --gradient: linear-gradient(135deg, var(--green), var(--cyan));
+            --bg: #f5f0e8;
+            --surface: #ffffff;
+            --black: #0a0a0a;
+            --primary: #00e87a;
+            --secondary: #ffe600;
+            --accent: #ff3b00;
+            --discord: #0057ff;
+            --admin: #7000ff;
+            --text: #0a0a0a;
+            --muted: #555555;
+            --border: 3px solid #0a0a0a;
+            --shadow: 4px 4px 0px #0a0a0a;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Cabinet Grotesk', sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
             background-color: var(--bg);
-            color: var(--text-main);
+            color: var(--text);
             overflow-x: hidden;
-            line-height: 1.6;
+            line-height: 1.3;
         }
 
-        h1, h2, h3, h4, .syne {
-            font-family: 'Syne', sans-serif;
-            font-weight: 800;
+        h1, h2, h3, .bold { font-weight: 900; letter-spacing: -2px; text-transform: uppercase; }
+        .mono { font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 1px; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* Navigation */
+        nav {
+            background: var(--primary);
+            border-bottom: var(--border);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .nav-inner { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 32px; font-weight: 900; line-height: 1; text-decoration: none; color: inherit; }
+        .logo span { -webkit-text-stroke: 1.5px var(--black); color: transparent; }
+
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+        .nav-link { 
+            text-decoration: none; color: var(--black); font-weight: 700; 
+            padding: 5px 10px; position: relative; font-size: 13px;
+        }
+        .nav-link:hover::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--secondary); z-index: -1; transform: rotate(-2deg);
         }
 
-        .mono {
-            font-family: 'DM Mono', monospace;
-        }
-
-        /* Ticker */
-        .ticker-wrap {
-            height: 40px;
-            background: rgba(245, 158, 11, 0.1);
-            border-bottom: 1px solid rgba(245, 158, 11, 0.2);
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            white-space: nowrap;
-            position: relative;
-        }
-
-        .ticker {
-            display: inline-block;
-            white-space: nowrap;
-            animation: ticker 30s linear infinite;
-        }
-
-        .ticker span {
-            margin-right: 48px;
-            font-size: 13px;
-            font-weight: 600;
+        /* Buttons — PRESS EFFECT */
+        .btn {
+            border: var(--border);
+            padding: 12px 24px;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.1s;
+            box-shadow: var(--shadow);
+            border-radius: 0;
         }
+        .btn:hover { translate: 2px 2px; box-shadow: 2px 2px 0px var(--black); }
+        .btn:active { translate: 4px 4px; box-shadow: none; }
 
-        .ticker strong {
-            color: var(--amber);
+        .btn-primary { background: var(--primary); color: var(--black); }
+        .btn-black { background: var(--black); color: #fff; box-shadow: 4px 4px 0px var(--primary); }
+        .btn-white { background: #fff; color: var(--black); }
+        .btn-secondary { background: var(--secondary); color: var(--black); }
+
+        /* Live Ticker */
+        .ticker-wrap {
+            background: var(--secondary);
+            border-top: var(--border);
+            border-bottom: var(--border);
+            padding: 15px 0;
+            overflow: hidden;
         }
-
+        .ticker {
+            display: flex;
+            gap: 60px;
+            animation: ticker 25s linear infinite;
+            white-space: nowrap;
+            width: max-content;
+        }
         @keyframes ticker {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
         }
-
-        /* Nav */
-        nav {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(5, 8, 16, 0.85);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            padding: 16px 0;
-        }
-
-        .container {
-            max-width: 1240px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        .nav-inner {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: 900;
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+        .ticker span { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 14px; }
 
         /* Hero */
         .hero {
-            padding: 100px 0 80px;
-            text-align: center;
-            background: radial-gradient(circle at top, rgba(0, 245, 160, 0.05) 0%, transparent 60%);
+            padding: 80px 0;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 60px;
+            align-items: center;
         }
+        .hero h1 { font-size: clamp(52px, 8vw, 100px); line-height: 0.85; margin-bottom: 30px; }
+        .hero h1 span.outline { -webkit-text-stroke: 2px var(--black); color: transparent; }
+        .hero h1 span.green { color: var(--primary); text-shadow: 4px 4px 0px var(--black); }
 
-        .hero h1 {
-            font-size: 72px;
-            margin-bottom: 24px;
-            letter-spacing: -2px;
-            line-height: 1;
-        }
-
-        .hero p {
-            font-size: 20px;
-            color: var(--text-muted);
-            max-width: 700px;
-            margin: 0 auto 48px;
-        }
-
-        .hero-stats {
+        .hero-stats-card {
+            background: #fff;
+            border: var(--border);
+            box-shadow: 8px 8px 0px var(--black);
+            padding: 40px;
             display: flex;
-            justify-content: center;
-            gap: 64px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 20px;
         }
-
-        .stat-card h2 {
-            font-size: 40px;
-            color: var(--text-main);
-        }
-
-        .stat-card p {
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--green);
-        }
+        .stat-item { padding: 10px 0; border-bottom: 2px solid var(--black); }
+        .stat-num { font-size: 56px; font-family: 'Space Mono', monospace; font-weight: 700; line-height: 1; display: block; }
+        .stat-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
 
         /* Sections */
-        section {
-            padding: 80px 0;
+        section { padding: 80px 0; position: relative; }
+        .section-num {
+            position: absolute; top: 40px; left: -20px; font-size: 140px; font-weight: 900;
+            color: var(--black); opacity: 0.05; z-index: -1; line-height: 1;
         }
-
-        .section-tag {
-            display: inline-block;
-            padding: 4px 12px;
-            background: var(--glass);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            color: var(--cyan);
-            margin-bottom: 16px;
-            text-transform: uppercase;
-        }
-
-        .section-title {
-            font-size: 32px;
-            margin-bottom: 40px;
-        }
+        .section-title { font-size: 64px; margin-bottom: 40px; }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 40px;
         }
 
-        /* Cards */
+        /* Opportunity Cards */
         .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 32px;
-            transition: all 0.3s ease;
+            background: #fff;
+            border: var(--border);
+            padding: 0;
             position: relative;
+            box-shadow: 6px 6px 0px var(--black);
+            transition: 0.1s;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
+        .card:hover { transform: translate(-3px, -3px); box-shadow: 9px 9px 0px var(--black); }
+        .card.featured { background: var(--secondary); border-width: 4px; }
+        .card.expired { opacity: 0.7; filter: grayscale(0.5); }
 
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255,255,255,0.2);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        .card-urgency { height: 12px; width: 100%; border-bottom: 2px solid var(--black); }
+        .urgency-CRITICAL { background: var(--accent); }
+        .urgency-HIGH { background: var(--secondary); }
+        .urgency-MEDIUM { background: var(--primary); }
+        
+        .card-inner { padding: 30px; flex-grow: 1; display: flex; flex-direction: column; gap: 15px; }
+        .card-stamp {
+            position: absolute; top: 20px; right: -5px; background: var(--secondary);
+            border: 2px solid var(--black); padding: 5px 10px; transform: rotate(-12deg);
+            font-family: 'Space Mono', monospace; font-weight: 700; font-size: 12px; z-index: 5;
         }
-
-        .card.featured {
-            grid-column: 1 / -1;
-            background: linear-gradient(135deg, #0d1428, #1a233b);
-            border: 1px solid rgba(168, 85, 247, 0.4);
-        }
-
-        .featured-badge {
-            position: absolute;
-            top: 24px;
-            right: 24px;
-            background: var(--purple);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 1px;
-        }
-
-        /* Urgency Badges */
-        .urgency-badge {
-            font-size: 10px;
-            font-weight: 800;
-            padding: 4px 8px;
-            border-radius: 4px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: inline-block;
-            margin-bottom: 12px;
-        }
-
-        .urgency-CRITICAL {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--red);
-            border: 1px solid var(--red);
-            animation: red-pulse 1.5s infinite;
-        }
-
-        @keyframes red-pulse {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-
-        .urgency-HIGH { background: rgba(245, 158, 11, 0.2); color: var(--amber); border: 1px solid var(--amber); }
-        .urgency-MEDIUM { background: rgba(34, 197, 94, 0.2); color: var(--green); border: 1px solid var(--green); }
-
-        .card-header {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 20px;
-            align-items: center;
-        }
+        .expired-stamp { background: var(--accent); color: #fff; transform: rotate(15deg); }
 
         .card-logo {
-            width: 56px;
-            height: 56px;
-            background: var(--glass);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
+            width: 60px; height: 60px; border: 2px solid var(--black);
+            display: flex; align-items: center; justify-content: center; font-size: 28px;
+            background: #fff; overflow: hidden;
         }
+        .card-logo img { width: 100%; height: 100%; object-fit: cover; }
 
-        .card-project {
-            font-size: 14px;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        .card-title {
-            font-size: 20px;
-            margin: 4px 0;
-            color: var(--text-main);
-        }
-
-        .card-desc {
-            font-size: 15px;
-            color: var(--text-muted);
-            margin-bottom: 24px;
-            flex-grow: 1;
+        .reward-tag {
+            background: var(--black); color: var(--primary);
+            padding: 6px 15px; display: inline-block; font-family: 'Space Mono', monospace; font-weight: 700; font-size: 20px;
         }
 
         .card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid var(--border);
-            padding-top: 20px;
+            padding: 20px 30px; border-top: 2px solid var(--black);
+            display: flex; justify-content: space-between; align-items: center; background: #fafafa;
         }
 
-        .reward-box { display: flex; flex-direction: column; }
-        .reward-val { font-size: 20px; font-weight: 700; color: var(--green); font-family: 'DM Mono'; }
-        .reward-label { font-size: 12px; text-transform: uppercase; color: var(--text-muted); }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            text-decoration: none;
-            transition: 0.2s;
-            font-size: 14px;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-primary { background: var(--green); color: var(--bg); }
-        .btn-primary:hover { transform: scale(1.05); }
-        .btn-ghost { background: var(--glass); color: white; border: 1px solid var(--border); }
-        .btn-ghost:hover { background: rgba(255,255,255,0.1); }
-
-        /* Admin Panel */
+        /* Admin */
         #admin-panel {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg);
-            z-index: 1000;
-            padding: 60px 0;
-            overflow-y: auto;
-            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; color: #fff; z-index: 10001; padding: 60px 0; overflow-y: auto; display: none;
         }
-
-        .admin-form {
-            background: var(--card);
-            padding: 40px;
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .form-group { margin-bottom: 20px; }
-        .form-label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-muted); }
         .form-input {
-            width: 100%; padding: 12px; background: rgba(0,0,0,0.3);
-            border: 1px solid var(--border); border-radius: 8px; color: white;
-            font-family: inherit;
+            width: 100%; background: #111; border: 2px solid #333; padding: 15px; color: #fff;
+            font-family: inherit; font-size: 16px; border-radius: 0; outline: none; margin-bottom: 20px;
         }
+        .form-input:focus { border-color: var(--primary); }
 
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-
-        /* Login Modal */
         #login-modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 2000;
-            display: none;
-            align-items: center;
-            justify-content: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 10002; display: none; align-items: center; justify-content: center;
         }
-
         .modal-box {
-            background: var(--card);
-            padding: 40px;
-            border-radius: 20px;
-            text-align: center;
-            width: 350px;
-        }
-
-        /* Empty States */
-        .empty-state {
-            padding: 60px;
-            text-align: center;
-            color: var(--text-muted);
-            border: 2px dashed var(--border);
-            border-radius: 20px;
+            background: var(--surface); border: 4px solid var(--black); padding: 50px;
+            box-shadow: 15px 15px 0px var(--black); max-width: 450px; width: 100%;
         }
 
         @media (max-width: 768px) {
-            .hero h1 { font-size: 48px; }
-            .form-row { grid-template-columns: 1fr; }
+            .hero { grid-template-columns: 1fr; }
             .grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Ticker -->
-    <div class="ticker-wrap">
-        <div class="ticker" id="ticker-content">
-            <span>🔥 <strong>Featured:</strong> Mantle Squad Bounty ($10K) 🚀</span>
-            <span>🟣 <strong>Moove:</strong> Moderator Program Live 🤝</span>
-            <span>⚡ <strong>Quip:</strong> $100K Creator Expansion 📈</span>
-            <span>✨ <strong>Starknet:</strong> Education Ecosystem Bounty 🎓</span>
-            <!-- Duplicated for loop -->
-            <span>🔥 <strong>Featured:</strong> Mantle Squad Bounty ($10K) 🚀</span>
-            <span>🟣 <strong>Moove:</strong> Moderator Program Live 🤝</span>
-            <span>⚡ <strong>Quip:</strong> $100K Creator Expansion 📈</span>
-            <span>✨ <strong>Starknet:</strong> Education Ecosystem Bounty 🎓</span>
-        </div>
-    </div>
-
-    <!-- Navigation -->
+    <!-- Nav -->
     <nav>
         <div class="container nav-inner">
-            <div class="logo">CREATORCHAIN</div>
-            <div>
-                <button class="btn btn-ghost" onclick="showLogin()">Admin Portal</button>
+            <a href="/" class="logo">CREATOR<span>CHAIN</span></a>
+            <div class="nav-links">
+                <a href="#ambassador-section" class="nav-link mono">AMBASSADORS</a>
+                <a href="#discord-section" class="nav-link mono">DISCORD</a>
+                <a href="#bounty-section" class="nav-link mono">BOUNTIES</a>
+                <a href="#developer-section" class="nav-link mono">DEV</a>
+                <a href="#campaign-section" class="nav-link mono">CAMPAIGNS</a>
+                <button class="btn btn-white" style="padding: 5px 12px; font-size: 11px;" onclick="showLogin()">ADMIN</button>
             </div>
         </div>
     </nav>
 
+    <!-- Live Ticker -->
+    <div class="ticker-wrap">
+        <div class="ticker" id="ticker-target">
+            <span>◆ LOADING UPDATES... ◆</span>
+        </div>
+    </div>
+
     <!-- Hero -->
-    <section class="hero">
-        <div class="container">
-            <h1>Web3 Opportunity Aggregator</h1>
-            <p>The ultimate job board for Web3 creators, community managers, and developers. Find your next role in the decentralized economy.</p>
-            <div class="hero-stats">
-                <div class="stat-card">
-                    <h2 id="hero-count">0</h2>
-                    <p>Opportunities</p>
-                </div>
-                <div class="stat-card">
-                    <h2 id="hero-rewards">$233K+</h2>
-                    <p>Total Rewards</p>
-                </div>
-                <div class="stat-card">
-                    <h2 id="hero-subs">100%</h2>
-                    <p>Verified Listings</p>
-                </div>
+    <section class="hero container">
+        <div class="hero-left">
+            <h1>
+                FIND YOUR<br>
+                <span class="outline">WEB3</span><br>
+                <span class="green">CREATOR ROLE</span>
+            </h1>
+            <div style="display: flex; gap: 20px;">
+                <button class="btn btn-black" style="font-size: 18px; padding: 15px 40px;">BROWSE NOW &rarr;</button>
+                <button class="btn btn-white" style="font-size: 18px; padding: 15px 40px;">POST PROJECT</button>
+            </div>
+        </div>
+        <div class="hero-stats-card">
+            <div class="stat-item">
+                <span class="stat-num" id="hero-count">00</span>
+                <span class="stat-label">LIVE_ENTRIES</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-num" id="hero-rewards">$000K</span>
+                <span class="stat-label">TOTAL_REWARD_POOL</span>
+            </div>
+            <div class="stat-item" style="border:none">
+                <span class="stat-num">AUTOREAL</span>
+                <span class="stat-label">LIVE_UPDATES_ENABLED</span>
             </div>
         </div>
     </section>
 
-    <!-- Content Sections -->
+    <!-- Sections -->
     <div class="container">
-        <!-- Ambassador -->
-        <section id="ambassador-section">
-            <div class="section-tag">Ambassador Programs</div>
-            <h2 class="section-title">Represent Top Protocols</h2>
-            <div class="grid" id="ambassador-cards"></div>
-        </section>
-
-        <!-- Discord -->
-        <section id="discord-section">
-            <div class="section-tag" style="color: var(--purple);">Discord Roles</div>
-            <h2 class="section-title">Community Leadership</h2>
-            <div class="grid" id="discord-cards"></div>
-        </section>
-
-        <!-- Bounties -->
-        <section id="bounty-section">
-            <div class="section-tag" style="color: var(--green);">Content Bounties</div>
-            <h2 class="section-title">Create and Earn</h2>
-            <div class="grid" id="bounty-cards"></div>
-        </section>
-
-        <!-- Developer -->
-        <section id="developer-section">
-            <div class="section-tag" style="color: var(--amber);">Developer Bounties</div>
-            <h2 class="section-title">Build the Future</h2>
-            <div class="grid" id="developer-cards"></div>
-        </section>
-
-        <!-- Campaigns -->
-        <section id="campaign-section">
-            <div class="section-tag" style="color: var(--cyan);">Project Campaigns</div>
-            <h2 class="section-title">Bite-sized Gigs</h2>
-            <div class="grid" id="campaign-cards"></div>
+        <section id="ambassador-section"><div class="section-num">01</div><h2 class="section-title">Ambassadors</h2><div class="grid" id="ambassador-cards"></div></section>
+        <section id="discord-section"><div class="section-num">02</div><h2 class="section-title">Discord Roles</h2><div class="grid" id="discord-cards"></div></section>
+        <section id="bounty-section"><div class="section-num">03</div><h2 class="section-title">Content Bounties</h2><div class="grid" id="bounty-cards"></div></section>
+        <section id="developer-section"><div class="section-num">04</div><h2 class="section-title">Dev Bounties</h2><div class="grid" id="developer-cards"></div></section>
+        <section id="campaign-section"><div class="section-num">05</div><h2 class="section-title">Campaigns</h2><div class="grid" id="campaign-cards"></div></section>
+        
+        <!-- Lifecycle Archive -->
+        <section id="ended-section" style="border-top: 4px solid var(--black); margin-top: 100px;">
+            <div class="section-num" style="color:red">06</div>
+            <h2 class="section-title">Ended Opportunities</h2>
+            <div class="grid" id="ended-cards"></div>
         </section>
     </div>
 
     <!-- Admin Panel -->
     <div id="admin-panel">
         <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
-                <h2>Admin Management</h2>
-                <button class="btn btn-ghost" onclick="hideAdmin()">Close Panel</button>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 60px;">
+                <h2 class="mono" style="font-size: 64px; color: var(--primary);">MANAGE_DATA</h2>
+                <button class="btn btn-secondary" onclick="hideAdmin()">EXIT</button>
             </div>
 
-            <form class="admin-form" id="listing-form">
+            <form id="listing-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
                 <input type="hidden" id="f-id">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Section</label>
-                        <select class="form-input" id="f-section">
-                            <option value="ambassador">Ambassador Program</option>
-                            <option value="discord">Discord Role</option>
-                            <option value="bounty">Content Bounty</option>
-                            <option value="developer">Developer Bounty</option>
-                            <option value="campaign">Project Campaign</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Project Name</label>
-                        <input type="text" class="form-input" id="f-project" placeholder="e.g. Mantle">
-                    </div>
+                <div>
+                    <label class="mono" style="color:var(--primary)">CATEGORY</label>
+                    <select class="form-input" id="f-section">
+                        <option value="ambassador">AMBASSADOR</option>
+                        <option value="discord">DISCORD</option>
+                        <option value="bounty">BOUNTY</option>
+                        <option value="developer">DEVELOPER</option>
+                        <option value="campaign">CAMPAIGN</option>
+                    </select>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Title</label>
-                        <input type="text" class="form-input" id="f-title" placeholder="e.g. Content Lead">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Reward</label>
-                        <input type="text" class="form-input" id="f-reward" placeholder="e.g. $10,000">
-                    </div>
+                <div>
+                    <label class="mono" style="color:var(--primary)">PROJECT_NAME</label>
+                    <input type="text" class="form-input" id="f-project">
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Description</label>
-                    <textarea class="form-input" id="f-desc" rows="3"></textarea>
+                <div>
+                    <label class="mono" style="color:var(--primary)">POSITION_TITLE</label>
+                    <input type="text" class="form-input" id="f-title">
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Apply URL</label>
-                        <input type="url" class="form-input" id="f-url">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Urgency</label>
-                        <select class="form-input" id="f-urgency">
-                            <option value="">None</option>
-                            <option value="CRITICAL">Critical</option>
-                            <option value="HIGH">High</option>
-                            <option value="MEDIUM">Medium</option>
-                        </select>
-                    </div>
+                <div>
+                    <label class="mono" style="color:var(--primary)">COMPENSATION (e.g. $1,500)</label>
+                    <input type="text" class="form-input" id="f-reward">
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Logo (Emoji or URL)</label>
-                        <input type="text" class="form-input" id="f-logo" value="⚡">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Featured</label>
-                        <select class="form-input" id="f-featured">
-                            <option value="false">No</option>
-                            <option value="true">Yes</option>
-                        </select>
-                    </div>
+                <div style="grid-column: span 2;">
+                    <label class="mono" style="color:var(--primary)">DESCRIPTION</label>
+                    <textarea class="form-input" id="f-desc" rows="2"></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Opportunity</button>
+                <div>
+                    <label class="mono" style="color:var(--primary)">APPLY_LINK</label>
+                    <input type="url" class="form-input" id="f-url">
+                </div>
+                <div>
+                    <label class="mono" style="color:var(--primary)">IMAGE_LOG_URL</label>
+                    <input type="url" class="form-input" id="f-logo" placeholder="https://logo.com/icon.png">
+                </div>
+                <div>
+                    <label class="mono" style="color:var(--primary)">DEADLINE_DATE</label>
+                    <input type="date" class="form-input" id="f-deadline">
+                </div>
+                <div>
+                    <label class="mono" style="color:var(--primary)">FEATURED?</label>
+                    <select class="form-input" id="f-featured"><option value="false">NO</option><option value="true">YES</option></select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="grid-column: span 2; padding: 20px; font-size: 20px;">SAVE_OPPORTUNITY</button>
             </form>
 
-            <div style="margin-top: 40px; border-top: 1px solid var(--border); padding-top: 40px;">
-                <h3 style="margin-bottom: 20px;">Current Listings</h3>
-                <div id="admin-list"></div>
-            </div>
+            <div id="admin-list" style="margin-top: 60px;"></div>
         </div>
     </div>
 
-    <!-- Login Modal -->
+    <!-- Login -->
     <div id="login-modal">
         <div class="modal-box">
-            <h2 style="margin-bottom: 20px;">Admin Access</h2>
-            <input type="password" id="admin-pass" class="form-input" placeholder="Password" style="margin-bottom: 20px;">
-            <div style="display: flex; gap: 12px;">
-                <button class="btn btn-primary" style="flex: 1;" onclick="checkPass()">Login</button>
-                <button class="btn btn-ghost" style="flex: 1;" onclick="hideLogin()">Cancel</button>
-            </div>
+            <h2 class="bold" style="font-size: 32px; margin-bottom: 20px;">ACCESS_BOARD</h2>
+            <input type="password" id="admin-pass" class="form-input" style="background:#eee; color:#000;">
+            <button class="btn btn-primary" style="width:100%" onclick="checkPass()">ENTER</button>
         </div>
     </div>
 
@@ -573,117 +365,120 @@
         const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
         let db;
 
+        const parseReward = (str) => {
+            if (!str) return 0;
+            const match = str.replace(/,/g, '').match(/\d+/);
+            return match ? parseInt(match[0]) : 0;
+        };
+
         function initSupabase() {
-            try {
-                const { createClient } = window.supabase;
-                db = createClient(SUPABASE_URL, SUPABASE_KEY);
-                console.log('✅ Supabase connected');
-                return true;
-            } catch (e) {
-                console.error('Supabase failed:', e);
-                return false;
-            }
+            try { db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); return true; } 
+            catch (e) { console.error(e); return false; }
         }
 
         async function loadListings() {
-            if (!db) return;
             const { data, error } = await db.from('listings').select('*').order('created_at', { ascending: false });
-            if (error) {
-                console.error('Load error:', error);
-                return;
+            if (!error) {
+                updateTicker(data);
+                updateStats(data);
+                renderGrid(data);
+                renderAdminList(data);
             }
-
-            renderGrid(data);
-            updateStats(data);
-            renderAdminList(data);
         }
 
-        function renderGrid(listings) {
-            const sections = ['ambassador', 'discord', 'bounty', 'developer', 'campaign'];
-            sections.forEach(sec => {
-                const container = document.getElementById(`${sec}-cards`);
-                container.innerHTML = '';
-                const filtered = listings.filter(l => l.section === sec);
-
-                if (filtered.length === 0) {
-                    container.innerHTML = `<div class="empty-state">No opportunities in this category yet.</div>`;
-                    return;
-                }
-
-                // Sort and pin featured to top
-                const sorted = [...filtered].sort((a,b) => (b.featured === true ? 1 : 0) - (a.featured === true ? 1 : 0));
-
-                sorted.forEach(item => {
-                    const card = document.createElement('div');
-                    card.className = `card ${item.featured ? 'featured' : ''}`;
-                    
-                    card.innerHTML = `
-                        ${item.featured ? '<div class="featured-badge">FEATURED</div>' : ''}
-                        ${item.urgency ? `<div class="urgency-badge urgency-${item.urgency}">${item.urgency}</div>` : ''}
-                        <div class="card-header">
-                            <div class="card-logo">${item.logo || '⚡'}</div>
-                            <div>
-                                <div class="card-project">${item.project || 'Web3 Project'}</div>
-                                <h3 class="card-title">${item.title}</h3>
-                            </div>
-                        </div>
-                        <p class="card-desc">${item.description || ''}</p>
-                        <div class="card-footer">
-                            <div class="reward-box">
-                                <span class="reward-label">Compensation</span>
-                                <span class="reward-val">${item.reward || 'TBA'}</span>
-                            </div>
-                            <a href="${item.apply_url || '#'}" target="_blank" class="btn btn-primary">Apply Now</a>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-            });
+        function updateTicker(listings) {
+            const ticker = document.getElementById('ticker-target');
+            const items = listings.slice(0, 10).map(l => `◆ ${l.project}: ${l.title} ◆`);
+            ticker.innerHTML = `<span>${items.join(' ')}</span>`.repeat(3); // Repeat for infinite loop
         }
 
         function updateStats(listings) {
-            document.getElementById('hero-count').innerText = listings.length;
+            const activeOnly = listings.filter(l => !l.deadline || new Date(l.deadline) > new Date());
+            document.getElementById('hero-count').innerText = activeOnly.length.toString().padStart(2, '0');
+            
+            const total = activeOnly.reduce((acc, l) => acc + parseReward(l.reward), 0);
+            document.getElementById('hero-rewards').innerText = total >= 1000 ? `$${(total/1000).toFixed(0)}K+` : `$${total}`;
+        }
+
+        // Detects if a string is a URL or an emoji/text
+        const isUrl = (s) => s && (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'));
+
+        // Parses deadline strings — handles 'April 4, 2026', '2026-04-04', 'TBA', etc.
+        const parseDeadline = (s) => {
+            if (!s || s.toUpperCase() === 'TBA' || s.trim() === '') return null;
+            const d = new Date(s);
+            return isNaN(d.getTime()) ? null : d;
+        };
+
+        function renderGrid(listings) {
+            const cats = ['ambassador', 'discord', 'bounty', 'developer', 'campaign', 'ended'];
+            cats.forEach(c => { const el = document.getElementById(`${c}-cards`); if(el) el.innerHTML = ''; });
+
+            const now = new Date();
+            const threeDaysAgo = new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000));
+
+            listings.forEach(item => {
+                const deadline = parseDeadline(item.deadline);
+                let target = item.section;
+                let status = '';
+
+                if (deadline) {
+                    if (deadline < threeDaysAgo) { target = 'ended'; }
+                    else if (deadline < now) { status = 'EXPIRED'; }
+                }
+
+                // Smart logo: URL → <img>, emoji/text → render as text
+                const logoHtml = isUrl(item.logo)
+                    ? `<img src="${item.logo}" onerror="this.parentElement.innerHTML='⚡'">` 
+                    : (item.logo || '⚡');
+
+                const deadlineLabel = deadline
+                    ? (status === 'EXPIRED' ? `EXPIRED ${deadline.toLocaleDateString()}` : deadline.toLocaleDateString())
+                    : (item.deadline || 'OPEN');
+
+                const card = document.createElement('div');
+                card.className = `card ${item.featured ? 'featured' : ''} ${status ? 'expired' : ''}`;
+                card.innerHTML = `
+                    <div class="card-urgency urgency-${item.urgency || 'MEDIUM'}"></div>
+                    <div class="card-stamp mono ${status ? 'expired-stamp' : ''}">${status || item.section}</div>
+                    <div class="card-inner">
+                        <div style="display:flex; gap:15px; align-items:center;">
+                            <div class="card-logo">${logoHtml}</div>
+                            <div>
+                                <span class="mono" style="font-size:10px; color:var(--muted)">${item.project}</span>
+                                <h3 style="font-size:18px;">${item.title}</h3>
+                            </div>
+                        </div>
+                        <p style="font-size:14px; color:var(--muted);">${item.description || 'Global opportunity for Web3 creators and community leaders.'}</p>
+                        <div class="reward-tag">${item.reward || 'TBA'}</div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="mono" style="font-size:10px; color:${status ? 'var(--accent)' : 'var(--muted)'}">${deadlineLabel}</div>
+                        <a href="${item.apply_url || '#'}" target="_blank" class="btn btn-primary" style="padding:10px 15px; font-size:12px">APPLY</a>
+                    </div>
+                `;
+                const container = document.getElementById(`${target}-cards`);
+                if (container) container.appendChild(card);
+            });
         }
 
         function renderAdminList(listings) {
             const container = document.getElementById('admin-list');
-            container.innerHTML = '';
-            
-            listings.forEach(item => {
-                const row = document.createElement('div');
-                row.style.cssText = 'background: var(--glass); padding: 16px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border);';
-                row.innerHTML = `
-                    <div>
-                        <strong>${item.title}</strong> @ ${item.project}
-                        <div style="font-size: 12px; color: var(--text-muted);">${item.section} • ${item.status}</div>
+            container.innerHTML = listings.map(l => `
+                <div style="border:2px solid #333; padding:15px; background:#111; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <div class="mono" style="font-size:12px;">${l.title} @ ${l.project}</div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-white" style="padding:5px 10px; font-size:11px" onclick="editItem('${l.id}')">EDIT</button>
+                        <button class="btn btn-secondary" style="padding:5px 10px; font-size:11px; background:red; color:#fff;" onclick="deleteItem('${l.id}')">DEL</button>
                     </div>
-                    <div>
-                        <button class="btn btn-ghost" style="padding: 6px 12px; margin-right: 8px;" onclick="editItem('${item.id}')">Edit</button>
-                        <button class="btn btn-ghost" style="padding: 6px 12px; color: var(--red);" onclick="deleteItem('${item.id}')">Delete</button>
-                    </div>
-                `;
-                container.appendChild(row);
-            });
+                </div>
+            `).join('');
         }
 
-        // Admin Auth
         function showLogin() { document.getElementById('login-modal').style.display = 'flex'; }
-        function hideLogin() { document.getElementById('login-modal').style.display = 'none'; }
-        function checkPass() {
-            if (document.getElementById('admin-pass').value === 'admin123') {
-                hideLogin();
-                document.getElementById('admin-panel').style.display = 'block';
-                document.body.style.overflow = 'hidden';
-            } else {
-                alert('Wrong password');
-            }
-        }
-        function hideAdmin() {
-            document.getElementById('admin-panel').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
+        function checkPass() { if(document.getElementById('admin-pass').value === 'admin123') { document.getElementById('login-modal').style.display='none'; document.getElementById('admin-panel').style.display='block'; }}
+        function hideAdmin() { document.getElementById('admin-panel').style.display='none'; }
 
-        // Admin CRUD
         document.getElementById('listing-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('f-id').value;
@@ -694,58 +489,30 @@
                 reward: document.getElementById('f-reward').value,
                 description: document.getElementById('f-desc').value,
                 apply_url: document.getElementById('f-url').value,
-                urgency: document.getElementById('f-urgency').value,
                 logo: document.getElementById('f-logo').value,
+                deadline: document.getElementById('f-deadline').value,
                 featured: document.getElementById('f-featured').value === 'true'
             };
-
-            if (id) {
-                await db.from('listings').update(item).eq('id', id);
-            } else {
-                await db.from('listings').insert([item]);
-            }
-            
-            document.getElementById('listing-form').reset();
-            document.getElementById('f-id').value = '';
-            alert('Listing Saved!');
+            if (id) await db.from('listings').update(item).eq('id', id);
+            else await db.from('listings').insert([item]);
+            document.getElementById('listing-form').reset(); document.getElementById('f-id').value = '';
         });
-
-        async function deleteItem(id) {
-            if (confirm('Delete this listing?')) {
-                await db.from('listings').delete().eq('id', id);
-            }
-        }
 
         async function editItem(id) {
             const { data } = await db.from('listings').select('*').eq('id', id).single();
             if (data) {
-                document.getElementById('f-id').value = data.id;
-                document.getElementById('f-section').value = data.section;
-                document.getElementById('f-project').value = data.project;
-                document.getElementById('f-title').value = data.title;
-                document.getElementById('f-reward').value = data.reward;
-                document.getElementById('f-desc').value = data.description;
-                document.getElementById('f-url').value = data.apply_url;
-                document.getElementById('f-urgency').value = data.urgency;
-                document.getElementById('f-logo').value = data.logo;
+                ['id', 'section', 'project', 'title', 'reward', 'desc', 'url', 'logo', 'deadline'].forEach(f => {
+                    const el = document.getElementById('f-'+f); if(el) el.value = data[f === 'desc' ? 'description' : (f === 'url' ? 'apply_url' : f)] || '';
+                });
                 document.getElementById('f-featured').value = data.featured.toString();
-                window.scrollTo(0, 0);
             }
         }
+        async function deleteItem(id) { if(confirm('DELETE?')) await db.from('listings').delete().eq('id', id); }
 
-        // Init
         document.addEventListener('DOMContentLoaded', async () => {
             if (!initSupabase()) return;
             await loadListings();
-            
-            // Realtime
-            db.channel('live')
-                .on('postgres_changes', {
-                    event: '*',
-                    schema: 'public',
-                    table: 'listings'
-                }, () => loadListings())
-                .subscribe();
+            db.channel('live').on('postgres_changes', { event: '*', schema: 'public', table: 'listings' }, () => loadListings()).subscribe();
         });
     </script>
 </body>
