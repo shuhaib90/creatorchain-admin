@@ -504,10 +504,7 @@
                     </div>
                     <div class="field">
                         <label>X (Twitter) URL</label>
-                        <div style="display:flex; gap:10px;">
-                            <input type="url" id="s-twitter" placeholder="https://x.com/..." style="flex:1;">
-                            <button type="button" class="btn btn-secondary" onclick="verifyXHandle()" style="padding: 10px 14px; font-size:12px; margin:0; border-radius:0;">VERIFY</button>
-                        </div>
+                        <input type="url" id="s-twitter" placeholder="https://x.com/...">
                     </div>
                     <div class="field">
                         <label>Your Name / Handle <span class="req">*</span></label>
@@ -701,12 +698,15 @@
     async function signInWithX() {
         if (window.va) window.va('track', 'Auth_X_Login_Click');
         const { error } = await db.auth.signInWithOAuth({
-            provider: 'twitter',
+            provider: 'x',
             options: {
-                redirectTo: window.location.origin
+                redirectTo: 'http://localhost:3000/auth/callback'
             }
         });
-        if (error) showToast('Auth failed. Login with X is not configured in Supabase.', 'error');
+        if (error) {
+            console.error(error);
+            showToast('Auth failed. Login with X is not configured in Supabase.', 'error');
+        }
     }
 
     async function signOut() {
@@ -736,6 +736,7 @@
         }
     }
 
+
     function showToast(msg, type='success') {
         const el = document.createElement('div');
         el.className = `toast-item ${type==='error'?'error':''}`;
@@ -744,46 +745,8 @@
         setTimeout(() => el.remove(), 4000);
     }
 
-    function initSupabase() {
-        try { db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); return true; }
-        catch(e) { console.error(e); return false; }
-    }
 
 
-
-    async function verifyXHandle() {
-        const urlInput = document.getElementById('s-twitter');
-        const handle = urlInput.value.split('/').pop().replace('@', '');
-        
-        if (!handle) { showToast('Please enter an X URL', 'error'); return; }
-        
-        const btn = event.target;
-        const originalText = btn.textContent;
-        btn.disabled = true; btn.textContent = 'Verifying...';
-        
-        try {
-            const response = await fetch('http://localhost:5000/api/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ handle: handle })
-            });
-            const result = await response.json();
-            
-            if (result.success) {
-                showToast(`✓ Profile verified: ${result.data.name}`);
-                // Auto-fill project details
-                document.getElementById('s-project').value = result.data.name.split(' (')[0];
-                document.getElementById('s-logo').value = result.data.profile_img;
-            } else {
-                showToast(result.error || 'Verification failed. Run api/app.py localy.', 'error');
-            }
-        } catch (e) {
-            console.error(e);
-            showToast('Local API unreachable. Run api/app.py locally.', 'error');
-        } finally {
-            btn.disabled = false; btn.textContent = originalText;
-        }
-    }
 
     // ─── Public listings (APPROVED only) ──────────────────
     async function loadListings() {
