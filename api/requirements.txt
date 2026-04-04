@@ -1,0 +1,6 @@
+flask
+flask-cors
+httpx
+pydantic
+# Scweet is installed via GitHub repo as per user link
+git+https://github.com/shuhaib90/Scweet.git
