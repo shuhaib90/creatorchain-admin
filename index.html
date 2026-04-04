@@ -661,18 +661,7 @@
     </div>
 </div>
 
-<!-- LOGIN -->
-<div id="login-modal">
-    <div class="modal-box" style="position:relative;">
-        <button onclick="document.getElementById('login-modal').style.display='none'" style="position:absolute; top:20px; right:25px; background:none; border:none; font-size:24px; cursor:pointer; font-weight:900; color:var(--black); z-index:100;">✕</button>
-        <h2 class="bold" style="font-size:30px; margin-bottom:20px;">ACCESS BOARD</h2>
-        <div class="pass-group">
-            <input type="password" id="admin-pass" class="admin-form-input" style="background:#eee; color:#000; border-color:#000; margin-bottom:0;" placeholder="Enter password...">
-            <button type="button" class="pass-toggle" onclick="togglePass()" id="pass-eye">👁️</button>
-        </div>
-        <button class="btn btn-primary" style="width:100%;" onclick="checkPass()">ENTER</button>
-    </div>
-</div>
+<!-- LOGIN MODAL REMOVED - REPLACED BY X AUTH -->
 
 <script>
     const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
@@ -1196,32 +1185,37 @@
     }
 
 
-    // ─── Admin Auth ────────────────────────────────────────
-    function showLogin() { document.getElementById('login-modal').style.display='flex'; }
-    function togglePass() {
-        const input = document.getElementById('admin-pass');
-        const eye = document.getElementById('pass-eye');
-        if(input.type === 'password') {
-            input.type = 'text';
-            eye.textContent = '🙈';
-        } else {
-            input.type = 'password';
-            eye.textContent = '👁️';
+    // ─── Admin Auth & Dashboard Access ─────────────────────
+    async function showLogin() {
+        const { data: { user } } = await db.auth.getUser();
+        
+        if (!user) {
+            showToast('Please SIGN IN WITH X first to access the dashboard.', 'error');
+            signInWithX();
+            return;
         }
-    }
-    function checkPass() {
-        if(document.getElementById('admin-pass').value==='shuhaib6282') {
-            if (window.va) window.va('track', 'Admin_Login_Success');
-            document.getElementById('login-modal').style.display='none';
+
+        const handle = (user.user_metadata.user_name || '').toLowerCase();
+        
+        if (handle === 'zenvicalpha') {
+            if (window.va) window.va('track', 'Admin_Dashboard_Opened');
             document.getElementById('admin-panel').style.display='block';
             document.body.style.overflow='hidden';
             loadPendingListings();
             loadAllAdminListings();
             subscribeAdminRealtime();
-        } else { 
-            if (window.va) window.va('track', 'Admin_Login_Failed');
-            showToast('Wrong password', 'error'); 
+        } else {
+            showToast(`Access Denied: @${handle} is not authorized for the Admin Panel.`, 'error');
         }
+    }
+
+    function openStatusModal() {
+        showLogin(); // Mandatory X login check
+    }
+
+    function checkPass() {
+        // Obsolete function, but kept for compatibility.
+        showLogin();
     }
     function hideAdmin() { document.getElementById('admin-panel').style.display='none'; document.body.style.overflow='auto'; }
 
