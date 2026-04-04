@@ -451,8 +451,8 @@
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                 <div>
                     <h2>Submit an Opportunity</h2>
-                    <p>Your submission will be reviewed by our team before going live.<br>Usually approved within 24 hours.</p>
-                    <div class="info-pill" style="margin-top:12px;">🔍 All submissions manually reviewed</div>
+                    <p style="font-size:13px; color:var(--muted); margin-bottom:10px;">Submitting as <span id="submitter-handle-badge" style="color:var(--primary); font-weight:700;">@LOADING...</span></p>
+                    <div class="info-pill">🔍 All submissions manually reviewed</div>
                 </div>
                 <button onclick="closeSubmitModal()" style="background:none; border:none; color:#888; font-size:24px; cursor:pointer; margin-left:20px;">✕</button>
             </div>
@@ -508,7 +508,7 @@
                     </div>
                     <div class="field">
                         <label>Your Name / Handle <span class="req">*</span></label>
-                        <input type="text" id="s-submitter" placeholder="Who is submitting?" required>
+                        <input type="text" id="s-submitter" placeholder="@handle" readonly style="background:#eee; cursor:not-allowed;">
                     </div>
                     <div class="field">
                         <label>Contact Email</label>
@@ -845,13 +845,24 @@
     }
 
     // ─── Submit Modal ──────────────────────────────────────
-    function openSubmitModal() {
+    async function openSubmitModal() {
+        const { data: { user } } = await db.auth.getUser();
+        if (!user) {
+            showToast('Please SIGN IN WITH X first to submit a project.', 'error');
+            signInWithX();
+            return;
+        }
+
+        const handle = user.user_metadata.user_name || 'Anonymous';
+        document.getElementById('s-submitter').value = `@${handle}`;
+        document.getElementById('submitter-handle-badge').textContent = `@${handle.toUpperCase()}`;
+
         if (window.va) window.va('track', 'Submit_Modal_Open');
         const modal = document.getElementById('submit-modal');
         modal.style.display = 'flex';
         // Reset form body to original form if it was showing success
         if (document.querySelector('.submit-success')) {
-            location.reload(); // Simplest way to reset the complex modal state
+            location.reload(); 
         }
     }
     function closeSubmitModal() { document.getElementById('submit-modal').style.display = 'none'; }
@@ -998,7 +1009,7 @@
                 logo: logoVal,
                 deadline: 'OPEN',
                 twitter_url: document.getElementById('s-twitter').value,
-                submitted_by: document.getElementById('s-submitter').value,
+                submitted_by: document.getElementById('s-submitter').value.replace('@', ''),
                 submitter_email: document.getElementById('s-email').value,
                 submission_token: token,
                 approval_status: 'pending',
