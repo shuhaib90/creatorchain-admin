@@ -436,8 +436,8 @@
                     @ZenvicAlpha
                 </a>
             </div>
-            <div style="margin-top:15px; color:#444; font-size:11px;">
-                &copy; 2026 CreatorChain. Decentralized Creator Economy Platform. • <a href="#" onclick="showLogin(); return false;" style="color:#222; text-decoration:none;">Admin Access</a>
+            <div id="admin-link-wrapper" style="margin-top:15px; display:none;">
+                <span style="color:#444; font-size:11px;">&copy; 2026 CreatorChain. Decentralized Creator Economy Platform. • <a href="#" onclick="showLogin(); return false;" style="color:#222; text-decoration:none;">Admin Access</a></span>
             </div>
         </div>
 
@@ -723,6 +723,10 @@
         if (document.getElementById('auth-hero-box')) {
             document.getElementById('auth-hero-box').innerHTML = `<p class="mono" style="font-size:12px; color:var(--muted);">✓ LOGGED IN AS ${profile.user_name.toUpperCase()}</p>`;
         }
+        // Show Admin Access ONLY for @ZenvicAlpha
+        if (profile.user_name.toLowerCase() === 'zenvicalpha') {
+            document.getElementById('admin-link-wrapper').style.display = 'block';
+        }
     }
 
 
@@ -853,8 +857,11 @@
     function closeSubmitModal() { document.getElementById('submit-modal').style.display = 'none'; }
 
     // ─── Status Tracking ───────────────────────────────────
-    function openStatusModal() { document.getElementById('status-modal').style.display = 'flex'; }
-    function closeStatusModal() { document.getElementById('status-modal').style.display = 'none'; document.getElementById('status-result').innerHTML = ''; }
+    function closeStatusModal() { 
+        document.getElementById('status-modal').style.display = 'none'; 
+        document.getElementById('status-result').innerHTML = ''; 
+        document.body.style.overflow = 'auto';
+    }
 
     function generateToken() {
         return 'CC-' + Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -1209,8 +1216,15 @@
         }
     }
 
-    function openStatusModal() {
-        showLogin(); // Mandatory X login check
+    async function openStatusModal() {
+        const { data: { user } } = await db.auth.getUser();
+        if (!user) {
+            showToast('Please SIGN IN WITH X first to track your submission.', 'error');
+            signInWithX();
+            return;
+        }
+        document.getElementById('status-modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
     }
 
     function checkPass() {
