@@ -1458,9 +1458,12 @@
 
     // ─── Thumbnail Auto-Detection ────────────────────────
     const setupThumbDetection = (inputId, formId, statusParentId, hiddenId) => {
-        document.getElementById(inputId)?.addEventListener('blur', async (e) => {
-            const url = e.target.value.trim();
-            if (!url || !url.includes('x.com/') && !url.includes('twitter.com/')) return;
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        const runDetection = async () => {
+            const url = input.value.trim();
+            if (!url || (!url.includes('x.com/') && !url.includes('twitter.com/'))) return;
             
             const parent = document.getElementById(statusParentId);
             if (!parent) return;
@@ -1471,11 +1474,7 @@
             statusEl.textContent = '🔍 Detecting post thumbnail...';
             
             const existing = document.getElementById(statusEl.id);
-            if (existing) existing.remove();
-            parent.appendChild(statusEl);
-
             try {
-                // Moving logic to client-side for local compatibility
                 const tweetIdMatch = url.match(/status\/(\d+)/);
                 if (!tweetIdMatch) {
                     statusEl.textContent = '⚠️ Invalid Tweet URL';
@@ -1484,11 +1483,16 @@
                 const tweetId = tweetIdMatch[1];
                 const apiKey = 'sb_live_MDDox9VP_6MW7JCnZ750TSB_CrpSywsNlZJa8jqRkC0';
 
-                const resp = await fetch(`https://scrapebadger.com/v1/twitter/tweets/${tweetId}`, {
+                // Use a CORS proxy for local development compatibility
+                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const apiUrl = `https://scrapebadger.com/v1/twitter/tweets/${tweetId}`;
+                const finalUrl = isLocal ? `https://corsproxy.io/?${encodeURIComponent(apiUrl)}` : apiUrl;
+
+                const resp = await fetch(finalUrl, {
                     headers: { 'x-api-key': apiKey }
                 });
                 
-                if (!resp.ok) throw new Error('API Error');
+                if (!resp.ok) throw new Error(`API Error: ${resp.status}`);
                 const tweet = await resp.json();
                 
                 let thumbnailUrl = null;
@@ -1513,14 +1517,16 @@
                 }
             } catch (err) {
                 console.error('Detection Error:', err);
-                statusEl.textContent = '⚠️ Could not detect thumbnail.';
+                statusEl.textContent = '⚠️ Detection failed (Check Console).';
             }
-        });
+        };
+
+        input.addEventListener('blur', runDetection);
+        input.addEventListener('change', runDetection);
     };
 
-    // Public Form
+    // Initialize detection triggers
     setupThumbDetection('s-twitter', 'submit-form', 'submitter-handle-badge', 's-detected-thumb');
-    // Admin Form
     setupThumbDetection('f-twitter', 'listing-form', 'f-logo-filename', 'f-detected-thumb');
 
     // ─── Boot ──────────────────────────────────────────────
