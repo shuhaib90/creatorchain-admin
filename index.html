@@ -1011,6 +1011,7 @@
                 twitter_url: document.getElementById('s-twitter').value,
                 submitted_by: document.getElementById('s-submitter').value.replace('@', ''),
                 submitter_email: document.getElementById('s-email').value,
+                share_image: document.getElementById('s-detected-thumb')?.value || '',
                 submission_token: token,
                 approval_status: 'pending',
                 submitted_at: new Date().toISOString(),
@@ -1090,7 +1091,8 @@
 
     function shareToX(e, id, project, title) {
         if(e) e.stopPropagation();
-        const url = window.location.origin + window.location.pathname + '?id=' + id;
+        // Use the SEO Proxy URL for social media cards
+        const url = window.location.origin + '/api/share?id=' + id;
         const text = `Check out this opportunity: ${project} - ${title} on CreatorChain! 🚀`;
         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
         if (window.va) window.va('track', 'Project_Share_X', { id: id });
@@ -1396,7 +1398,8 @@
             deadline: document.getElementById('f-deadline').value,
             twitter_url: document.getElementById('f-twitter')?.value || '',
             urgency: document.getElementById('f-urgency').value || 'MEDIUM',
-            featured: document.getElementById('f-featured').value === 'true',
+            featured: document.getElementById('s-featured')?.value === 'true' || document.getElementById('f-featured').value === 'true',
+            share_image: document.getElementById('f-detected-thumb')?.value || '',
             approval_status: 'approved',
             created_at: new Date().toISOString()
         };
@@ -1452,6 +1455,52 @@
                 }
             }).subscribe();
     }
+
+    // ─── Thumbnail Auto-Detection ────────────────────────
+    const setupThumbDetection = (inputId, formId, statusParentId, hiddenId) => {
+        document.getElementById(inputId)?.addEventListener('blur', async (e) => {
+            const url = e.target.value.trim();
+            if (!url || !url.includes('x.com/') && !url.includes('twitter.com/')) return;
+            
+            const parent = document.getElementById(statusParentId);
+            if (!parent) return;
+
+            const statusEl = document.createElement('div');
+            statusEl.id = `${hiddenId}-status`;
+            statusEl.style = 'font-size:10px; color:var(--primary); margin-top:5px;';
+            statusEl.textContent = '🔍 Detecting post thumbnail...';
+            
+            const existing = document.getElementById(statusEl.id);
+            if (existing) existing.remove();
+            parent.appendChild(statusEl);
+
+            try {
+                const resp = await fetch(`/api/get-twitter-media?url=${encodeURIComponent(url)}`);
+                const data = await resp.json();
+                if (data.thumbnailUrl) {
+                    statusEl.innerHTML = `✅ Post thumbnail detected! <img src="${data.thumbnailUrl}" style="height:20px; vertical-align:middle; margin-left:5px; border:1px solid var(--primary);">`;
+                    
+                    let hidden = document.getElementById(hiddenId);
+                    if (!hidden) {
+                        hidden = document.createElement('input');
+                        hidden.type = 'hidden';
+                        hidden.id = hiddenId;
+                        document.getElementById(formId).appendChild(hidden);
+                    }
+                    hidden.value = data.thumbnailUrl;
+                } else {
+                    statusEl.textContent = 'ℹ️ No image found in this post.';
+                }
+            } catch (err) {
+                statusEl.textContent = '⚠️ Could not detect thumbnail.';
+            }
+        });
+    };
+
+    // Public Form
+    setupThumbDetection('s-twitter', 'submit-form', 'submitter-handle-badge', 's-detected-thumb');
+    // Admin Form
+    setupThumbDetection('f-twitter', 'listing-form', 'f-logo-filename', 'f-detected-thumb');
 
     // ─── Boot ──────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', async () => {
