@@ -1475,10 +1475,30 @@
             parent.appendChild(statusEl);
 
             try {
-                const resp = await fetch(`/api/get-twitter-media?url=${encodeURIComponent(url)}`);
-                const data = await resp.json();
-                if (data.thumbnailUrl) {
-                    statusEl.innerHTML = `✅ Post thumbnail detected! <img src="${data.thumbnailUrl}" style="height:20px; vertical-align:middle; margin-left:5px; border:1px solid var(--primary);">`;
+                // Moving logic to client-side for local compatibility
+                const tweetIdMatch = url.match(/status\/(\d+)/);
+                if (!tweetIdMatch) {
+                    statusEl.textContent = '⚠️ Invalid Tweet URL';
+                    return;
+                }
+                const tweetId = tweetIdMatch[1];
+                const apiKey = 'sb_live_MDDox9VP_6MW7JCnZ750TSB_CrpSywsNlZJa8jqRkC0';
+
+                const resp = await fetch(`https://scrapebadger.com/v1/twitter/tweets/${tweetId}`, {
+                    headers: { 'x-api-key': apiKey }
+                });
+                
+                if (!resp.ok) throw new Error('API Error');
+                const tweet = await resp.json();
+                
+                let thumbnailUrl = null;
+                if (tweet.attachments && tweet.attachments.length > 0) {
+                    const media = tweet.attachments[0];
+                    thumbnailUrl = media.url || media.preview_image_url;
+                }
+
+                if (thumbnailUrl) {
+                    statusEl.innerHTML = `✅ Post thumbnail detected! <img src="${thumbnailUrl}" style="height:20px; vertical-align:middle; margin-left:5px; border:1px solid var(--primary);">`;
                     
                     let hidden = document.getElementById(hiddenId);
                     if (!hidden) {
@@ -1487,11 +1507,12 @@
                         hidden.id = hiddenId;
                         document.getElementById(formId).appendChild(hidden);
                     }
-                    hidden.value = data.thumbnailUrl;
+                    hidden.value = thumbnailUrl;
                 } else {
                     statusEl.textContent = 'ℹ️ No image found in this post.';
                 }
             } catch (err) {
+                console.error('Detection Error:', err);
                 statusEl.textContent = '⚠️ Could not detect thumbnail.';
             }
         });
