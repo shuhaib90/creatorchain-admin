@@ -183,6 +183,22 @@
         .footer-submit-cta { background: #111; border: 2px solid var(--primary); padding: 24px; margin-top: 30px; }
         .submit-count { font-family: 'Space Mono', monospace; font-size: 11px; color: #888; margin-top: 8px; }
         .footer-divider { border-top: 1px solid #222; margin-top: 40px; padding-top: 20px; color: #555; font-size: 12px; text-align: center; }
+        
+        /* AI MATCHING */
+        .ai-banner { background: var(--black); color: var(--primary); padding: 10px; text-align: center; font-family: 'Space Mono', monospace; font-size: 11px; border-bottom: 2px solid var(--primary); }
+        .ai-search-card { background: var(--surface); border: 4px solid var(--black); box-shadow: 12px 12px 0 var(--black); padding: 40px; margin-bottom: 40px; position: relative; overflow: hidden; }
+        .ai-search-card::after { content: 'GEMINI_AI'; position: absolute; top: -5px; right: -5px; background: var(--primary); color: #000; padding: 4px 12px; font-family: 'Space Mono', monospace; font-weight: 700; font-size: 10px; border: 2px solid var(--black); }
+        .ai-input-group { display: flex; gap: 15px; margin-top: 20px; }
+        .ai-input { flex: 1; border: 3px solid var(--black); padding: 15px; font-family: 'Space Mono', monospace; font-size: 16px; outline: none; }
+        .ai-input:focus { border-color: var(--primary); }
+        .match-badge { background: var(--primary); color: #000; padding: 3px 8px; font-family: 'Space Mono', monospace; font-weight: 700; font-size: 11px; border: 2px solid var(--black); display: inline-block; margin-bottom: 10px; }
+        .ai-results-zone { display: none; margin-top: 40px; border-top: 3px dashed var(--black); padding-top: 30px; }
+        .profile-chip { display: inline-flex; align-items: center; gap: 8px; background: #f0f0f0; border: 2px solid var(--black); padding: 6px 14px; font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; border-radius: 999px; margin-right: 10px; margin-bottom: 10px; }
+        .profile-chip span { color: var(--muted); }
+        .match-card { border-left: 8px solid var(--primary) !important; }
+        .loader-dots { display: inline-block; }
+        .loader-dots::after { content: '...'; animation: dots 1.5s steps(4, end) infinite; }
+        @keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80% { content: '...'; } }
 
         @media (max-width: 768px) {
             .hero { grid-template-columns: 1fr; }
@@ -383,6 +399,37 @@
         </div>
     </div>
 </section>
+
+<!-- AI MATCHING SECTION -->
+<div class="container" style="margin-top:-40px; position:relative; z-index:100;">
+    <div class="ai-search-card">
+        <h2 style="font-size:32px; margin-bottom:10px;">Personalized <span class="outline">Match</span></h2>
+        <p style="color:var(--muted); font-size:14px; font-weight:500;">Analyze any X handle with Gemini AI to find your best matches instantly.</p>
+        
+        <div class="ai-input-group">
+            <input type="text" id="ai-handle-search" class="ai-input" placeholder="Enter X Username (e.g. @ZenvicAlpha)">
+            <button class="btn btn-black" id="ai-analyze-btn" onclick="runAIAnalysis()">
+                <span id="ai-btn-text">ANALYZE PROFILE</span>
+            </button>
+        </div>
+
+        <div id="ai-results" class="ai-results-zone">
+            <div id="ai-profile-summary" style="margin-bottom:25px;">
+                <!-- Profile chips go here -->
+            </div>
+            <h3 style="font-size:20px; margin-bottom:25px; display:flex; align-items:center; gap:10px;">
+                <span style="background:var(--primary); width:12px; height:12px; border:2px solid #000;"></span> 
+                Best matches for <span id="target-username-display" style="color:var(--primary)">...</span>
+            </h3>
+            <div class="grid" id="ai-match-grid">
+                <!-- Matched cards go here -->
+            </div>
+            <div style="text-align:center; margin-top:30px;">
+                <button class="btn btn-white btn-sm" onclick="clearAI()">Clear Results</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- CATEGORIES -->
 <div class="container">
@@ -1528,6 +1575,91 @@
     // Initialize detection triggers
     setupThumbDetection('s-twitter', 'submit-form', 'submitter-handle-badge', 's-detected-thumb');
     setupThumbDetection('f-twitter', 'listing-form', 'f-logo-filename', 'f-detected-thumb');
+
+    // ─── AI Analysis & Matching ───────────────────────────
+    async function runAIAnalysis() {
+        const input = document.getElementById('ai-handle-search');
+        const btn = document.getElementById('ai-analyze-btn');
+        const btnText = document.getElementById('ai-btn-text');
+        const username = input.value.trim().replace('@', '');
+        
+        if (!username) {
+            showToast('Enter a valid X handle', true);
+            return;
+        }
+
+        btn.classList.add('btn-loading');
+        btnText.innerHTML = 'ANALYZING<span class="loader-dots"></span>';
+        document.getElementById('ai-results').style.display = 'none';
+
+        try {
+            // 1. Analyze with Gemini
+            const analyzeResp = await fetch(`/api/analyze-user?username=${username}`);
+            if (!analyzeResp.ok) throw new Error('Analysis failed');
+            const analysis = await analyzeResp.json();
+
+            // 2. Fetch Matches
+            const matchResp = await fetch(`/api/recommendations?username=${username}`);
+            if (!matchResp.ok) throw new Error('Matching failed');
+            const data = await matchResp.json();
+
+            displayAIResults(data);
+            showToast(`Analysis complete for @${username}!`);
+        } catch (err) {
+            console.error(err);
+            showToast('AI Analysis failed. Try again.', true);
+        } finally {
+            btn.classList.remove('btn-loading');
+            btnText.textContent = 'ANALYZE PROFILE';
+        }
+    }
+
+    function displayAIResults(data) {
+        const resultsZone = document.getElementById('ai-results');
+        const profileSummary = document.getElementById('ai-profile-summary');
+        const matchGrid = document.getElementById('ai-match-grid');
+        const usernameDisplay = document.getElementById('target-username-display');
+
+        resultsZone.style.display = 'block';
+        usernameDisplay.textContent = `@${data.username}`;
+        
+        // Render Profile Chips
+        const p = data.profile;
+        profileSummary.innerHTML = `
+            <div class="profile-chip"><span>TYPE:</span> ${p.user_type}</div>
+            <div class="profile-chip"><span>SKILL:</span> ${p.skill_level}</div>
+            <div class="profile-chip"><span>FOCUS:</span> ${p.interests.join(', ')}</div>
+            <div class="profile-chip"><span>INTENT:</span> ${p.intent}</div>
+        `;
+
+        // Render Matched Cards
+        matchGrid.innerHTML = '';
+        if (data.recommendations.length === 0) {
+            matchGrid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><h3>No high-confidence matches found yet.</h3><p>Try again later as new opportunities are posted!</p></div>';
+        } else {
+            data.recommendations.forEach(job => {
+                const card = createJobCard(job);
+                card.classList.add('match-card');
+                
+                // Prepend Match Badge
+                const inner = card.querySelector('.card-inner');
+                const badge = document.createElement('div');
+                badge.className = 'match-badge';
+                badge.textContent = `${job.matchScore}% MATCH ✨`;
+                inner.prepend(badge);
+
+                matchGrid.appendChild(card);
+            });
+        }
+
+        // Scroll to results
+        resultsZone.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function clearAI() {
+        document.getElementById('ai-results').style.display = 'none';
+        document.getElementById('ai-handle-search').value = '';
+    }
 
     // ─── Boot ──────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', async () => {
