@@ -212,60 +212,6 @@
         }
 
 
-        .owner-credit {
-          display: inline-flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .owner-link {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          color: var(--primary);
-          text-decoration: none;
-          font-weight: 700;
-          font-family: 'Space Mono', monospace;
-          padding: 6px 16px;
-          border: 2px solid var(--primary);
-          box-shadow: 4px 4px 0px var(--black);
-          transition: 0.1s;
-          background: #000;
-        }
-
-        .owner-link::before {
-          content: '𝕏';
-          font-size: 14px;
-        }
-
-        .owner-link:hover {
-          translate: -2px -2px;
-          box-shadow: 6px 6px 0px var(--black);
-        }
-
-        .nav-by {
-          font-size: 11px;
-          color: var(--muted);
-          font-family: 'Space Mono', monospace;
-          margin-left: 12px;
-          font-weight: 500;
-        }
-
-        .nav-by a {
-          color: var(--primary);
-          text-decoration: none;
-          font-weight: 700;
-        }
-
-        .nav-by a:hover {
-          text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-          .nav-by { display: none; }
-        }
-
         /* TRACKING SYSTEM CSS */
         .status-card { border-radius: 14px; padding: 24px; margin-top: 20px; text-align: center; }
         .status-pending { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.25); }
@@ -340,7 +286,6 @@
     <div class="container nav-inner">
         <div style="display:flex; align-items:center;">
             <div class="logo" onclick="window.location.reload()">CREATOR<span>CHAIN</span></div>
-            <div class="nav-by">by <a href="https://x.com/ZenvicAlpha" target="_blank">@ZenvicAlpha</a></div>
         </div>
         <div class="nav-links">
             <a href="#ambassador-section" class="nav-link">AMBASSADORS</a>
@@ -477,12 +422,6 @@
             </div>
         </div>
         <div class="footer-divider">
-            <div class="owner-credit">
-                <span>Built by</span>
-                <a href="https://x.com/ZenvicAlpha" target="_blank" class="owner-link">
-                    @ZenvicAlpha
-                </a>
-            </div>
             <div id="admin-link-wrapper" style="margin-top:15px; display:none;">
                 <span style="color:#444; font-size:11px;">&copy; 2026 CreatorChain. Decentralized Creator Economy Platform. • <a href="#" onclick="showLogin(); return false;" style="color:#222; text-decoration:none;">Admin Access</a></span>
             </div>
