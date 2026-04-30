@@ -574,27 +574,32 @@
 
                 if (error) throw error;
 
-                const matches = users.map(user => {
-                    let score = 0;
+                const matches = users.filter(user => {
+                    // 1. Skill Filter: Must have at least one of the selected skills (if any selected)
+                    let matchedSkills = [];
                     if (selectedTMSkills.length > 0) {
                         const userSkills = user.skills || [];
-                        const matched = selectedTMSkills.filter(s => userSkills.includes(s));
-                        score += (matched.length / selectedTMSkills.length) * 60;
-                    } else score += 60;
+                        matchedSkills = selectedTMSkills.filter(s => userSkills.includes(s));
+                        if (matchedSkills.length === 0) return false;
+                    }
 
-                    if (reqExp !== 'any') {
-                        if (user.experience_level === reqExp) score += 20;
-                        else score += 10;
-                    } else score += 20;
+                    // 2. Experience Filter: Must match exactly if not 'any'
+                    if (reqExp !== 'any' && user.experience_level !== reqExp) return false;
 
-                    if (reqWork !== 'any') {
-                        if (user.work_preference === reqWork) score += 20;
-                    } else score += 20;
+                    // 3. Work Type Filter: Must match exactly if not 'any'
+                    if (reqWork !== 'any' && user.work_preference !== reqWork) return false;
 
-                    return { ...user, matchScore: Math.round(score) };
-                })
-                .filter(m => m.matchScore > 25)
-                .sort((a, b) => b.matchScore - a.matchScore);
+                    // Add matched skills for rendering
+                    user._matchedSkills = matchedSkills;
+                    return true;
+                });
+
+                // Simple score for sorting
+                matches.sort((a, b) => {
+                    const aCount = (a.skills || []).length;
+                    const bCount = (b.skills || []).length;
+                    return bCount - aCount;
+                });
 
                 grid.innerHTML = '';
                 countEl.textContent = matches.length;
@@ -630,7 +635,6 @@
             const handle = p.username || 'builder';
 
             card.innerHTML = `
-                <div class="match-badge">${p.matchScore}% MATCH</div>
                 <div class="card-header">
                     <img src="${avatar}" class="avatar">
                     <div>
