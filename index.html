@@ -196,7 +196,9 @@
         .explore-item:last-child { border-bottom: none; }
         .explore-item:hover { background: var(--primary); color: #000; }
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10005; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px; overflow-y: auto; }
-        .outline { -webkit-text-stroke: 1.5px #fff; color: transparent; }
+        .outline { -webkit-text-stroke: 1.5px var(--black); color: transparent; }
+        .hero .outline { -webkit-text-stroke: 2px var(--black); }
+        nav .outline { -webkit-text-stroke: 1.5px var(--black); }
 
         /* LOGIN */
         #login-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10002; display: none; align-items: center; justify-content: center; }
@@ -370,13 +372,12 @@
 <nav>
     <div class="container nav-inner">
         <div style="display:flex; align-items:center;">
-            <div class="logo" onclick="window.location.reload()">CREATOR<span class="outline">CHAIN</span></div>
+            <a href="/" class="logo" style="text-decoration:none; color:inherit;">CREATOR<span class="outline">CHAIN</span></a>
         </div>
         <div class="nav-links">
             <div class="explore-dropdown">
                 <button class="explore-btn" onclick="toggleExplore()">EXPLORE ▼</button>
                 <div class="explore-menu" id="exploreMenu">
-                    <a href="/" class="explore-item"><span>🏠</span> HOME</a>
                     <a href="/talent.html" class="explore-item"><span>✨</span> FIND TALENT</a>
                     <a href="#" onclick="openSubmitModal(); toggleExplore(); return false;" class="explore-item"><span>🚀</span> SUBMIT PROJECT</a>
                     <a href="#" onclick="openStatusModal(); toggleExplore(); return false;" class="explore-item"><span>📋</span> TRACK SUBMISSION</a>
