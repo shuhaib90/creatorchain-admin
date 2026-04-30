@@ -458,6 +458,50 @@
         </div>
     </div>
 
+    <!-- Hire Request Modal -->
+    <div id="hire-modal" class="modal" onclick="if(event.target === this) closeHireModal()" style="cursor:pointer; z-index: 10010;">
+        <div class="submit-card" onclick="event.stopPropagation()" style="cursor:default; max-width: 450px;">
+            <div class="submit-header">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <h2>Send <span class="outline" style="-webkit-text-stroke: 1.5px #fff; color: transparent;">Hire Request</span></h2>
+                        <p>Interested in working with <span id="hire-target-name" style="color:var(--primary); font-weight:700;">...</span>?</p>
+                    </div>
+                    <button onclick="closeHireModal()" style="background:none; border:none; color:#888; font-size:24px; cursor:pointer;">✕</button>
+                </div>
+            </div>
+            <div class="submit-body">
+                <form id="hire-form" onsubmit="submitHireRequest(event)">
+                    <input type="hidden" id="hire-target-id">
+                    <div class="field">
+                        <label>YOUR TEAM / COMPANY NAME</label>
+                        <input type="text" id="hire-sender-name" placeholder="E.g., CreatorChain Labs" required>
+                    </div>
+                    <div class="field">
+                        <label>CONTACT EMAIL</label>
+                        <input type="email" id="hire-email" placeholder="team@example.com" required>
+                    </div>
+                    <div class="field">
+                        <label>TELEGRAM DM LINK (Optional)</label>
+                        <input type="text" id="hire-telegram" placeholder="https://t.me/username">
+                    </div>
+                    <div class="field">
+                        <label>APPLICATION / FORM URL (Optional)</label>
+                        <input type="url" id="hire-form-url" placeholder="https://forms.gle/...">
+                    </div>
+                    <div class="field">
+                        <label>MESSAGE TO BUILDER</label>
+                        <textarea id="hire-message" rows="3" placeholder="Describe the opportunity..." required></textarea>
+                    </div>
+                    <div style="display:flex; gap:12px; margin-top:20px;">
+                        <button type="button" class="btn btn-white" style="flex:1;" onclick="closeHireModal()">CANCEL</button>
+                        <button type="submit" class="btn btn-primary" style="flex:2;" id="hire-submit-btn">SEND REQUEST &rarr;</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div id="toast" class="toast"></div>
 
     <script>
@@ -648,6 +692,11 @@
                         ${matched.map(s => `<span style="font-size:10px; padding:2px 8px; border:1px solid var(--black); background:rgba(0,245,160,0.1); font-weight:700;">${s}</span>`).join('')}
                     </div>
                     <p style="font-size:13px; color:#444; line-height:1.4; height:3em; overflow:hidden;">${p.bio || 'Building in Web3...'}</p>
+                    
+                    <div style="display:flex; gap:10px; margin-top:15px;">
+                        <button class="btn btn-white btn-sm" style="flex:1; font-size:10px; padding:10px;" onclick="event.stopPropagation(); openPublicProfile('${p.username}')">VIEW PROFILE</button>
+                        <button class="btn btn-accent btn-sm" style="flex:1; font-size:10px; padding:10px;" onclick="event.stopPropagation(); openHireModal('${p.user_id}', '${p.name.replace(/'/g, "\\'")}')">HIRE BUILDER</button>
+                    </div>
                 </div>
                 <div class="card-footer">
                     <span class="mono" style="font-size:10px; font-weight:700;">${p.experience_level?.toUpperCase() || 'BUILDER'}</span>
@@ -655,6 +704,55 @@
                 </div>
             `;
             return card;
+        }
+
+        function openHireModal(userId, name) {
+            document.getElementById('hire-target-id').value = userId;
+            document.getElementById('hire-target-name').textContent = name;
+            document.getElementById('hire-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeHireModal() {
+            document.getElementById('hire-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        async function submitHireRequest(e) {
+            e.preventDefault();
+            const btn = document.getElementById('hire-submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'SENDING...';
+
+            const payload = {
+                receiver_id: document.getElementById('hire-target-id').value,
+                sender_name: document.getElementById('hire-sender-name').value,
+                sender_email: document.getElementById('hire-email').value,
+                telegram: document.getElementById('hire-telegram').value,
+                form_url: document.getElementById('hire-form-url').value,
+                message: document.getElementById('hire-message').value,
+                status: 'pending',
+                created_at: new Date().toISOString()
+            };
+
+            try {
+                const { error } = await db.from('hire_requests').insert([payload]);
+                if (error) throw error;
+                
+                showToast('🚀 Hire request sent! Builder will be notified.');
+                closeHireModal();
+                document.getElementById('hire-form').reset();
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to send request. Database sync pending.', true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'SEND REQUEST →';
+            }
+        }
+
+        function openChat(handle) {
+            showToast(`💬 Chat feature coming soon! You can reach @${handle} via Hire Request for now.`);
         }
 
         async function openPublicProfile(handle) {
@@ -753,9 +851,17 @@
                             </div>
                         </div>
 
-                        <div class="p-card-footer">
-                            <button class="p-card-share-btn" onclick="shareProfile('${handle}')">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:16px; height:16px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg> SHARE BUILDER PROFILE
+                        <div class="p-card-footer" style="display:flex; gap:15px;">
+                            <button class="btn btn-accent" style="flex:2; padding:15px; font-size:14px;" onclick="closeProfileCard(); openHireModal('${profile.user_id}', '${(profile.name || 'Anonymous').replace(/'/g, "\\'")}')">
+                                🚀 HIRE BUILDER
+                            </button>
+                            <button class="btn btn-white" style="flex:1; padding:15px; font-size:14px;" onclick="openChat('${handle}')">
+                                💬 CHAT
+                            </button>
+                        </div>
+                        <div style="margin-top:15px; text-align:center;">
+                            <button class="p-card-share-btn" onclick="shareProfile('${handle}')" style="width:100%; justify-content:center;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:16px; height:16px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg> SHARE PROFILE
                             </button>
                         </div>
                     </div>
