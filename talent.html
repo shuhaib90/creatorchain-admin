@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find Talent | CreatorChain Builders</title>
     <link rel="icon" href="https://creatorchain.network/favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -391,6 +392,9 @@
 
     <nav>
         <a href="/" class="logo" style="text-decoration:none; color:inherit;">CREATOR<span class="outline">CHAIN</span></a>
+        <div id="auth-nav-box">
+             <button class="btn btn-black" onclick="signInWithX()">LOGIN WITH X</button>
+        </div>
     </nav>
 
     <header class="hero">
@@ -535,11 +539,13 @@
                 db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 checkUser();
                 initUnifiedSkills();
+                lucide.createIcons();
             } catch (e) {
                 console.error("Initialization error:", e);
                 showToast("Failed to connect to network.", true);
             }
         }
+        init();
 
         async function signInWithX() {
             const { error } = await db.auth.signInWithOAuth({
@@ -566,18 +572,19 @@
                     <div class="user-dropdown-trigger" onclick="document.getElementById('userDropdownMenu').classList.toggle('show')">
                         <img src="${profile.avatar_url || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'}" alt="">
                         <span>${profile.user_name || profile.full_name || 'User'}</span>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" stroke-linejoin="round" style="margin-left: 4px;"><path d="m6 9 6 6 6-6"/></svg>
+                        <i data-lucide="chevron-down" style="width:12px; height:12px;"></i>
                     </div>
                     <div class="user-dropdown-menu" id="userDropdownMenu">
-                        <a href="#" onclick="openPublicProfile('${profile.user_name}'); document.getElementById('userDropdownMenu').classList.remove('show'); return false;">👤 VIEW PROFILE</a>
-                        <a href="/?profile=true" style="text-decoration:none;">✏️ EDIT PROFILE</a>
-                        <a href="#" onclick="openInbox(); document.getElementById('userDropdownMenu').classList.remove('show'); return false;">📬 INBOX</a>
+                        <a href="#" onclick="openPublicProfile('${profile.user_name}'); document.getElementById('userDropdownMenu').classList.remove('show'); return false;"><i data-lucide="user" style="width:14px; height:14px; vertical-align:middle; margin-right:8px;"></i> VIEW PROFILE</a>
+                        <a href="/?profile=true" style="text-decoration:none;"><i data-lucide="edit-3" style="width:14px; height:14px; vertical-align:middle; margin-right:8px;"></i> EDIT PROFILE</a>
+                        <a href="#" onclick="openInbox(); document.getElementById('userDropdownMenu').classList.remove('show'); return false;"><i data-lucide="inbox" style="width:14px; height:14px; vertical-align:middle; margin-right:8px;"></i> INBOX</a>
                         <div style="height: 2px; background: var(--black); margin: 2px 0;"></div>
-                        <a href="#" onclick="signOut(); return false;" style="color: #ef4444;">🚪 LOGOUT</a>
+                        <a href="#" onclick="signOut(); return false;" style="color: #ef4444;"><i data-lucide="log-out" style="width:14px; height:14px; vertical-align:middle; margin-right:8px;"></i> LOGOUT</a>
                     </div>
                 </div>
             `;
             document.getElementById('auth-nav-box').innerHTML = html;
+            lucide.createIcons();
         }
         
         async function openInbox() {
@@ -586,6 +593,7 @@
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             content.innerHTML = '<div style="padding:60px; text-align:center;"><p class="mono">🔍 SCANNING INBOX...</p></div>';
+            lucide.createIcons();
 
             const { data: { user } } = await db.auth.getUser();
             if (!user) return;
@@ -621,13 +629,14 @@
                                 "${req.message}"
                             </div>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                                <a href="mailto:${req.sender_email}" class="btn btn-white btn-sm" style="text-align:center; padding:12px;">📧 EMAIL SENDER</a>
-                                ${req.telegram ? `<a href="${req.telegram}" target="_blank" class="btn btn-white btn-sm" style="text-align:center; padding:12px;">🐦 TELEGRAM DM</a>` : ''}
-                                ${req.form_url ? `<a href="${req.form_url}" target="_blank" class="btn btn-black btn-sm" style="grid-column: span 2; text-align:center; padding:15px; margin-top:5px;">📋 VIEW FULL APPLICATION / FORM &rarr;</a>` : ''}
+                                <a href="mailto:${req.sender_email}" class="btn btn-white btn-sm" style="text-align:center; padding:12px;"><i data-lucide="mail" style="width:14px; height:14px; vertical-align:middle; margin-right:5px;"></i> EMAIL SENDER</a>
+                                ${req.telegram ? `<a href="${req.telegram}" target="_blank" class="btn btn-white btn-sm" style="text-align:center; padding:12px;"><i data-lucide="send" style="width:14px; height:14px; vertical-align:middle; margin-right:5px;"></i> TELEGRAM DM</a>` : ''}
+                                ${req.form_url ? `<a href="${req.form_url}" target="_blank" class="btn btn-black btn-sm" style="grid-column: span 2; text-align:center; padding:15px; margin-top:5px;"><i data-lucide="external-link" style="width:14px; height:14px; vertical-align:middle; margin-right:5px;"></i> VIEW FULL APPLICATION / FORM &rarr;</a>` : ''}
                             </div>
                         </div>
                     `).join('');
                 }
+                lucide.createIcons();
             } catch (err) {
                 console.error(err);
                 content.innerHTML = '<div style="padding:60px; text-align:center; color:red;"><p class="mono">ERROR LOADING INBOX. PLEASE RETRY.</p></div>';

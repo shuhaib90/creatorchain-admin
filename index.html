@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
             --bg: #f5f0e8; --surface: #ffffff; --black: #0a0a0a;
@@ -378,9 +379,9 @@
             <div class="explore-dropdown">
                 <button class="explore-btn" onclick="toggleExplore()">EXPLORE ▼</button>
                 <div class="explore-menu" id="exploreMenu">
-                    <a href="/talent.html" class="explore-item"><span>✨</span> FIND TALENT</a>
-                    <a href="#" onclick="openSubmitModal(); toggleExplore(); return false;" class="explore-item"><span>🚀</span> SUBMIT PROJECT</a>
-                    <a href="#" onclick="openStatusModal(); toggleExplore(); return false;" class="explore-item"><span>📋</span> TRACK SUBMISSION</a>
+                    <a href="/talent.html" class="explore-item"><i data-lucide="sparkles" style="width:16px; height:16px;"></i> FIND TALENT</a>
+                    <a href="#" onclick="openSubmitModal(); toggleExplore(); return false;" class="explore-item"><i data-lucide="rocket" style="width:16px; height:16px;"></i> SUBMIT PROJECT</a>
+                    <a href="#" onclick="openStatusModal(); toggleExplore(); return false;" class="explore-item"><i data-lucide="clipboard-list" style="width:16px; height:16px;"></i> TRACK SUBMISSION</a>
                 </div>
             </div>
             <a href="#ambassador-section" class="nav-link">AMBASSADORS</a>
@@ -534,10 +535,10 @@
                     <div style="display:flex; gap:15px; align-items:center; margin-top:8px;">
                         <div id="p-avatar-preview-box" style="width:80px; height:80px; border:3px solid var(--black); background:#eee; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; box-shadow:4px 4px 0 var(--black);">
                             <img id="p-avatar-preview" src="" style="width:100%; height:100%; object-fit:cover; display:none;">
-                            <span id="p-avatar-placeholder" style="font-size:24px;">👤</span>
+                            <span id="p-avatar-placeholder" style="font-size:24px;"><i data-lucide="user"></i></span>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:8px; flex:1;">
-                            <button type="button" class="btn btn-white btn-sm" style="width:100%;" onclick="document.getElementById('p-avatar-file').click()">📸 CHANGE PROFILE PIC</button>
+                            <button type="button" class="btn btn-white btn-sm" style="width:100%;" onclick="document.getElementById('p-avatar-file').click()"><i data-lucide="camera" style="width:12px; height:12px;"></i> CHANGE PROFILE PIC</button>
                             <p style="font-size:10px; color:var(--muted); margin:0;">Auto-syncs with X profile if no custom pic is uploaded.</p>
                         </div>
                     </div>
@@ -608,7 +609,7 @@
                 </div>
                 <div class="field" style="margin-bottom: 25px;">
                     <label style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; text-transform: none; color: #1e293b;">
-                        Skills Needed <span style="color: #ef4444;">*</span> <span style="color: #94a3b8; font-size: 12px; font-weight: normal; cursor: help;" title="Select the skills you possess">ⓘ</span>
+                        Skills Needed <span style="color: #ef4444;">*</span> <span style="color: #94a3b8; font-size: 12px; font-weight: normal; cursor: help;" title="Select the skills you possess"><i data-lucide="info" style="width:12px; height:12px;"></i></span>
                     </label>
                     <p style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; color: #64748b; margin: 4px 0 10px 0; text-transform: none;">We will send email notifications of new listings for your selected skills</p>
                     
@@ -661,7 +662,7 @@
                 <div>
                     <h2>Submit an Opportunity</h2>
                     <p style="font-size:13px; color:var(--muted); margin-bottom:10px;">Submitting as <span id="submitter-handle-badge" style="color:var(--primary); font-weight:700;">@LOADING...</span></p>
-                    <div class="info-pill">🔍 All submissions manually reviewed</div>
+                    <div class="info-pill"><i data-lucide="search" style="width:12px; height:12px;"></i> All submissions manually reviewed</div>
                 </div>
                 <button onclick="closeSubmitModal()" style="background:none; border:none; color:#888; font-size:24px; cursor:pointer; margin-left:20px;">✕</button>
             </div>
@@ -707,7 +708,7 @@
                         <div style="display:flex; gap:10px;">
                             <input type="text" id="s-logo" placeholder="🔷 or https://..." style="flex:1;">
                             <input type="file" id="s-logo-file" accept="image/png, image/jpeg, image/gif, image/webp" style="display:none;" onchange="document.getElementById('s-logo').value = this.files[0] ? 'Image selected...' : ''; document.getElementById('s-logo-filename').textContent = this.files[0] ? this.files[0].name : ''; document.getElementById('s-logo-filename').style.display = this.files[0] ? 'block' : 'none';">
-                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('s-logo-file').click()" style="padding: 10px 14px; font-size:12px; margin:0; border-radius:0;"><span style="font-size:16px;">📁</span> UPLOAD</button>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('s-logo-file').click()" style="padding: 10px 14px; font-size:12px; margin:0; border-radius:0;"><i data-lucide="upload" style="width:16px; height:16px;"></i> UPLOAD</button>
                         </div>
                         <div id="s-logo-filename" style="font-size:11px; color:var(--primary); font-family:'Space Mono',monospace; font-weight:700; background:#000; padding:2px 8px; position:absolute; right:0; top:0; display:none;"></div>
                     </div>
@@ -748,12 +749,12 @@
 
         <!-- Admin Tabs -->
         <div class="admin-tabs">
-            <button class="admin-tab active" onclick="switchTab('tab-add')">➕ Add Listing</button>
+            <button class="admin-tab active" onclick="switchTab('tab-add')"><i data-lucide="plus" style="width:14px; height:14px;"></i> Add Listing</button>
             <button class="admin-tab" onclick="switchTab('tab-pending')" id="pending-tab-btn">
-                📬 Pending Review
+                <i data-lucide="mail" style="width:14px; height:14px;"></i> Pending Review
                 <span class="pending-badge" id="pending-badge" style="display:none">0</span>
             </button>
-            <button class="admin-tab" onclick="switchTab('tab-all')">📋 All Listings</button>
+            <button class="admin-tab" onclick="switchTab('tab-all')"><i data-lucide="list" style="width:14px; height:14px;"></i> All Listings</button>
         </div>
 
         <!-- TAB: Add Listing -->
@@ -926,18 +927,19 @@
                 <div class="user-dropdown-trigger" onclick="document.getElementById('userDropdownMenu').classList.toggle('show')">
                     <img src="${profile.avatar_url || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'}" alt="">
                     <span>${profile.user_name || profile.full_name || 'User'}</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" stroke-linejoin="round" style="margin-left: 4px;"><path d="m6 9 6 6 6-6"/></svg>
+                    <i data-lucide="chevron-down" style="width:12px; height:12px; margin-left: 4px;"></i>
                 </div>
                 <div class="user-dropdown-menu" id="userDropdownMenu">
-                    <a href="#" onclick="showProfileCard(); document.getElementById('userDropdownMenu').classList.remove('show'); return false;">👤 VIEW PROFILE</a>
-                    <a href="#" onclick="openProfileModal(); document.getElementById('userDropdownMenu').classList.remove('show'); return false;">✏️ EDIT PROFILE</a>
-                    <a href="#" onclick="openInbox(); document.getElementById('userDropdownMenu').classList.remove('show'); return false;">📬 INBOX</a>
+                    <a href="#" onclick="showProfileCard(); document.getElementById('userDropdownMenu').classList.remove('show'); return false;"><i data-lucide="user" style="width:14px; height:14px; vertical-align:middle; margin-right:8px;"></i> VIEW PROFILE</a>
+                    <a href="#" onclick="openProfileModal(); document.getElementById('userDropdownMenu').classList.remove('show'); return false;"><i data-lucide="edit-3" style="width:14px; height:14px; vertical-align:middle; margin-right:8px;"></i> EDIT PROFILE</a>
+                    <a href="#" onclick="openInbox(); document.getElementById('userDropdownMenu').classList.remove('show'); return false;"><i data-lucide="inbox" style="width:14px; height:14px; vertical-align:middle; margin-right:8px;"></i> INBOX</a>
                     <div style="height: 2px; background: var(--black); margin: 2px 0;"></div>
-                    <a href="#" onclick="signOut(); return false;" style="color: #ef4444;">🚪 LOGOUT</a>
+                    <a href="#" onclick="signOut(); return false;" style="color: #ef4444;"><i data-lucide="log-out" style="width:14px; height:14px; vertical-align:middle; margin-right:8px;"></i> LOGOUT</a>
                 </div>
             </div>
         `;
         document.getElementById('auth-nav-box').innerHTML = html;
+        lucide.createIcons();
         if (document.getElementById('auth-hero-box')) {
             document.getElementById('auth-hero-box').innerHTML = `<p class="mono" style="font-size:12px; color:var(--muted);">✓ LOGGED IN AS ${profile.user_name.toUpperCase()}</p>`;
         }
@@ -1011,7 +1013,7 @@
             const deadline = parseDeadline(item.deadline);
             let target = item.section, status = '';
             if(deadline) { if(deadline < threeDaysAgo) { target='ended'; } else if(deadline < now) { status='EXPIRED'; } }
-            const logoHtml = isUrl(item.logo) ? `<img src="${item.logo}" onerror="this.parentElement.innerHTML='⚡'">` : (item.logo||'⚡');
+            const logoHtml = isUrl(item.logo) ? `<img src="${item.logo}" onerror="this.parentElement.innerHTML='⚡'">` : (item.logo||'<i data-lucide="zap"></i>');
             const deadlineLabel = deadline ? (status ? `EXPIRED ${deadline.toLocaleDateString()}` : deadline.toLocaleDateString()) : (item.deadline||'OPEN');
 
             const card = document.createElement('div');
@@ -1041,10 +1043,10 @@
                         ` : `
                             <div class="share-container">
                                 <div class="share-menu" id="share-menu-${item.id}">
-                                    <button class="share-menu-item" onclick="shareToX(event, '${item.id}', '${item.project.replace(/'/g, "\\'")}', '${item.title.replace(/'/g, "\\'")}')">🐦 Share to X</button>
-                                    <button class="share-menu-item" onclick="copyLink(event, '${item.id}')">📋 Copy Link</button>
+                                    <button class="share-menu-item" onclick="shareToX(event, '${item.id}', '${item.project.replace(/'/g, "\\'")}', '${item.title.replace(/'/g, "\\'")}')"><i data-lucide="twitter" style="width:12px; height:12px;"></i> Share to X</button>
+                                    <button class="share-menu-item" onclick="copyLink(event, '${item.id}')"><i data-lucide="clipboard" style="width:12px; height:12px;"></i> Copy Link</button>
                                 </div>
-                                <div class="share-btn" onclick="toggleShareMenu(event, '${item.id}')" title="Share Project">🔗</div>
+                                <div class="share-btn" onclick="toggleShareMenu(event, '${item.id}')" title="Share Project"><i data-lucide="share-2" style="width:14px; height:14px;"></i></div>
                             </div>
                             ${item.twitter_url ? `<a href="${item.twitter_url}" target="_blank" class="x-link-small" title="Follow on X" onclick="event.stopPropagation()">𝗫</a>` : ''}
                             <a href="${item.apply_url||'#'}" target="_blank" class="btn btn-primary btn-sm" onclick="event.stopPropagation(); window.va && window.va('track', 'Apply_Click', { project: '${item.project.replace(/'/g, "\\'")}', title: '${item.title.replace(/'/g, "\\'")}' })">APPLY</a>
@@ -1055,6 +1057,7 @@
             const c = document.getElementById(`${target}-cards`);
             if(c) c.appendChild(card);
         });
+        lucide.createIcons();
     }
 
     async function loadSubmissionCount() {
@@ -1123,7 +1126,7 @@
         const templates = {
             pending: `
                 <div class="status-card status-pending">
-                    <div class="status-icon">🔍</div>
+                    <div class="status-icon"><i data-lucide="search"></i></div>
                     <div class="status-badge badge-pending">UNDER REVIEW</div>
                     <div class="status-project">${data?.project || 'Your Project'}</div>
                     <div class="status-title">${data?.title || ''}</div>
@@ -1133,7 +1136,7 @@
                 </div>`,
             approved: `
                 <div class="status-card status-approved">
-                    <div class="status-icon">✅</div>
+                    <div class="status-icon"><i data-lucide="check-circle"></i></div>
                     <div class="status-badge badge-approved">APPROVED & LIVE</div>
                     <div class="status-project">${data?.project || 'Your Project'}</div>
                     <div class="status-title">${data?.title || ''}</div>
@@ -1146,7 +1149,7 @@
                 </div>`,
             rejected: `
                 <div class="status-card status-rejected">
-                    <div class="status-icon">❌</div>
+                    <div class="status-icon"><i data-lucide="x-circle"></i></div>
                     <div class="status-badge badge-rejected">NOT APPROVED</div>
                     <div class="status-project">${data?.project || 'Your Project'}</div>
                     <div class="status-title">${data?.title || ''}</div>
@@ -1163,13 +1166,14 @@
                 </div>`,
             not_found: `
                 <div class="status-card status-unknown">
-                    <div class="status-icon">⚠️</div>
+                    <div class="status-icon"><i data-lucide="alert-triangle"></i></div>
                     <div class="status-badge badge-unknown">CODE NOT FOUND</div>
                     <p class="status-msg">No submission found with this tracking code. Double check your code (e.g., CC-X7K2PQ) and try again.</p>
                     <button class="btn btn-white btn-sm" onclick="closeStatusModal()">Close</button>
                 </div>`
         };
         container.innerHTML = templates[status] || templates['not_found'];
+        lucide.createIcons();
     }
 
     function openResubmit(data) {
@@ -1244,7 +1248,7 @@
 
             document.getElementById('submit-form-body').innerHTML = `
                 <div class="submit-success">
-                    <div class="check">✅</div>
+                    <div class="check"><i data-lucide="check-circle" style="width:80px; height:80px; color:var(--primary);"></i></div>
                     <h2 style="margin-bottom:8px;">Submitted Successfully!</h2>
                     <p style="color:var(--muted); font-size:14px; margin-bottom:24px;">Your opportunity has been sent for review.<br>We'll check it within 24–48 hours.</p>
                     
@@ -1334,7 +1338,7 @@
     function openProjectDetail(item) {
         const deadline = parseDeadline(item.deadline);
         const isEnded = deadline && deadline < new Date(new Date() - 3*24*60*60*1000);
-        const logoHtml = isUrl(item.logo) ? `<img src="${item.logo}" onerror="this.parentElement.innerHTML='⚡'">` : (item.logo||'⚡');
+        const logoHtml = isUrl(item.logo) ? `<img src="${item.logo}" onerror="this.parentElement.innerHTML='⚡'">` : (item.logo||'<i data-lucide="zap"></i>');
         const content = `
             <div class="project-detail-header" style="${isEnded ? 'filter:grayscale(1); opacity:0.8;' : ''}">
                 <div class="project-detail-logo">${logoHtml}</div>
@@ -1381,6 +1385,7 @@
         const newUrl = window.location.origin + window.location.pathname + '?id=' + item.id;
         history.pushState({id: item.id}, '', newUrl);
         if (window.va) window.va('track', 'Project_Detail_Open', { id: item.id, project: item.project });
+        lucide.createIcons();
     }
 
     function closeProjectDetail() {
@@ -1973,16 +1978,6 @@
         const skills = profile.skills || [];
         const handle = profile.username || profile.twitter?.replace('@', '') || 'anonymous';
         
-        // Icon Helpers
-        const icon = (path) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
-        const icons = {
-            level: icon('<path d="M6 18h12M6 14h12M6 10h12M6 6h12"/>'),
-            work: icon('<rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>'),
-            loc: icon('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'),
-            company: icon('<path d="M3 21h18M3 7v14M21 7v14M9 21V10l3-3 3 3v11M12 7V3"/>'),
-            share: icon('<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/>')
-        };
-
         const avatarToUse = profile.avatar_url || avatar || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png';
 
         content.innerHTML = `
@@ -2004,10 +1999,10 @@
                         <div class="p-card-section-title">Connections</div>
                         <div class="p-card-socials">
                             ${profile.twitter ? `<a href="https://x.com/${profile.twitter.replace('@','')}" target="_blank" class="p-card-social-btn">
-                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                <i data-lucide="twitter"></i>
                             </a>` : ''}
                             ${profile.github ? `<a href="${profile.github.startsWith('http')?profile.github:'https://github.com/'+profile.github}" target="_blank" class="p-card-social-btn">
-                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                                <i data-lucide="github"></i>
                             </a>` : ''}
                         </div>
                     </div>
@@ -2023,28 +2018,28 @@
                         <div class="p-card-section-title">Work Context</div>
                         <div class="p-card-meta-grid">
                             <div class="p-card-meta-card">
-                                <div class="p-card-meta-icon">${icons.level}</div>
+                                <div class="p-card-meta-icon"><i data-lucide="list"></i></div>
                                 <div class="p-card-meta-info">
                                     <span class="p-card-meta-label">Level</span>
                                     <span class="p-card-meta-value">${profile.experience_level || 'Beginner'}</span>
                                 </div>
                             </div>
                             <div class="p-card-meta-card">
-                                <div class="p-card-meta-icon">${icons.work}</div>
+                                <div class="p-card-meta-icon"><i data-lucide="briefcase"></i></div>
                                 <div class="p-card-meta-info">
                                     <span class="p-card-meta-label">Preference</span>
                                     <span class="p-card-meta-value">${profile.work_preference || 'Part-time'}</span>
                                 </div>
                             </div>
                             <div class="p-card-meta-card">
-                                <div class="p-card-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+                                <div class="p-card-meta-icon"><i data-lucide="map-pin"></i></div>
                                 <div class="p-card-meta-info">
                                     <span class="p-card-meta-label">Location</span>
                                     <span class="p-card-meta-value">${profile.location || 'GLOBAL'}</span>
                                 </div>
                             </div>
                             <div class="p-card-meta-card">
-                                <div class="p-card-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 21h18M3 7v14M21 7v14M9 21V10l3-3 3 3v11M12 7V3"/></svg></div>
+                                <div class="p-card-meta-icon"><i data-lucide="building"></i></div>
                                 <div class="p-card-meta-info">
                                     <span class="p-card-meta-label">Company</span>
                                     <span class="p-card-meta-value">${profile.company || 'Freelance'}</span>
@@ -2055,12 +2050,13 @@
 
                     <div class="p-card-footer">
                         <button class="p-card-share-btn" onclick="shareProfile('${handle}')">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:16px; height:16px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg> SHARE BUILDER PROFILE
+                            <i data-lucide="share-2"></i> SHARE BUILDER PROFILE
                         </button>
                     </div>
                 </div>
             </div>
         `;
+        lucide.createIcons();
     }
 
     function closeProfileCard() {
@@ -2160,16 +2156,10 @@
 
     function initUnifiedSkills() {
         const profileBox = document.getElementById('suggested-skills-box');
-        const talentBox = document.getElementById('tm-suggested-skills');
         
         if (profileBox) {
             profileBox.innerHTML = GLOBAL_SKILLS.map(s => 
                 `<span class="skill-suggest-chip" onclick="addSkill('${s}')">${s} +</span>`
-            ).join('');
-        }
-        if (talentBox) {
-            talentBox.innerHTML = GLOBAL_SKILLS.map(s => 
-                `<span class="skill-suggest-chip" onclick="addTMSkill('${s}')">${s} +</span>`
             ).join('');
         }
     }
@@ -2180,12 +2170,6 @@
     // Initialize detection triggers
     setupThumbDetection('s-twitter', 'submit-form', 'submitter-handle-badge', 's-detected-thumb');
     setupThumbDetection('f-twitter', 'listing-form', 'f-logo-filename', 'f-detected-thumb');
-
-    function clearAI() {
-        document.getElementById('tm-results').style.display = 'none';
-        selectedTMSkills = [];
-        renderTMSkills();
-    }
 
     async function openPublicProfile(handle) {
         try {
@@ -2201,6 +2185,7 @@
     document.addEventListener('DOMContentLoaded', async () => {
         if(!initSupabase()) return;
         await loadListings();
+        lucide.createIcons();
 
         // Deep Link: Profiles (?u=@handle)
         const urlParams = new URLSearchParams(window.location.search);
