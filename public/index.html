@@ -4,7 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CREATORCHAIN | WEB3 OPPORTUNITY BOARD</title>
+    <title>CreatorChain | Web3 Aggregator</title>
+    <link rel="icon" href="/favicon.ico">
+    <meta name="description" content="The unfiltered aggregator for the best roles in the decentralized economy. Built for creators, community leads, and devs.">
+    <meta property="og:title" content="CreatorChain | Web3 Job Aggregator">
+    <meta property="og:description" content="Find bounties, jobs, and paid campaigns in Web3.">
+    <meta property="og:image" content="/logo.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="/logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -373,7 +380,10 @@
 <nav>
     <div class="container nav-inner">
         <div style="display:flex; align-items:center;">
-            <a href="/" class="logo" style="text-decoration:none; color:inherit;">CREATOR<span class="outline">CHAIN</span></a>
+            <a href="/" class="logo" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:10px;">
+                <img src="/logo.png" alt="CreatorChain Logo" style="height:32px; width:auto;">
+                <span>CREATOR<span class="outline">CHAIN</span></span>
+            </a>
         </div>
         <div class="nav-links">
             <div class="explore-dropdown">
@@ -1013,7 +1023,7 @@
             const deadline = parseDeadline(item.deadline);
             let target = item.section, status = '';
             if(deadline) { if(deadline < threeDaysAgo) { target='ended'; } else if(deadline < now) { status='EXPIRED'; } }
-            const logoHtml = isUrl(item.logo) ? `<img src="${item.logo}" onerror="this.parentElement.innerHTML='⚡'">` : (item.logo||'<i data-lucide="zap"></i>');
+            const logoHtml = isUrl(item.logo) ? `<img src="${item.logo}" onerror="this.src='/logo.png'">` : `<img src="/logo.png" style="opacity:0.5;">`;
             const deadlineLabel = deadline ? (status ? `EXPIRED ${deadline.toLocaleDateString()}` : deadline.toLocaleDateString()) : (item.deadline||'OPEN');
 
             const card = document.createElement('div');
@@ -1175,6 +1185,25 @@
         container.innerHTML = templates[status] || templates['not_found'];
         lucide.createIcons();
     }
+
+    function renderFooter() {
+        const footer = document.createElement('footer');
+        footer.style.cssText = "padding: 40px 0; border-top: 4px solid var(--black); background: var(--white); margin-top: 60px;";
+        footer.innerHTML = `
+            <div class="container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
+                <a href="/" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit; font-weight:900;">
+                    <img src="/logo.png" alt="Logo" style="height:24px;"> CREATORCHAIN
+                </a>
+                <div class="mono" style="font-size:12px; color:var(--muted);">© 2026 CREATORCHAIN.NETWORK — AGGREGATING THE FUTURE.</div>
+                <div style="display:flex; gap:20px;">
+                    <a href="#discord-section" class="nav-link">DISCORD</a>
+                    <a href="#bounty-section" class="nav-link">BOUNTIES</a>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(footer);
+    }
+    renderFooter();
 
     function openResubmit(data) {
         closeStatusModal();
