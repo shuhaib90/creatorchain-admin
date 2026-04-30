@@ -522,39 +522,6 @@
         </div>
     </div>
 
-    <!-- Chat Modal -->
-    <div id="chat-modal" class="modal" onclick="if(event.target === this) closeChatModal()" style="cursor:pointer; z-index: 10025;">
-        <div class="submit-card" style="max-width: 500px; cursor:default;" onclick="event.stopPropagation()">
-            <div class="submit-header" style="background:var(--primary); border-bottom-color:var(--black);">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div>
-                        <h2 style="color:var(--black);">Chat with <span class="outline" id="chat-target-name" style="-webkit-text-stroke: 1.5px var(--black);">Builder</span></h2>
-                        <p style="color:rgba(0,0,0,0.6);">Send a direct message to start a conversation.</p>
-                    </div>
-                    <button onclick="closeChatModal()" style="background:none; border:none; color:var(--black); font-size:24px; cursor:pointer;">✕</button>
-                </div>
-            </div>
-            <div class="submit-body">
-                <form id="chat-form" onsubmit="sendChatMessage(event)">
-                    <input type="hidden" id="chat-target-id">
-                    <div class="field">
-                        <label>YOUR NAME / TEAM</label>
-                        <input type="text" id="chat-sender-name" placeholder="Who are you?" required>
-                    </div>
-                    <div class="field">
-                        <label>YOUR EMAIL</label>
-                        <input type="email" id="chat-sender-email" placeholder="email@example.com" required>
-                    </div>
-                    <div class="field">
-                        <label>MESSAGE</label>
-                        <textarea id="chat-message" placeholder="Type your message here..." required style="min-height: 120px;"></textarea>
-                    </div>
-                    <button type="submit" id="chat-submit-btn" class="btn btn-black full" style="padding:15px; font-size:14px; margin-top:10px;">SEND MESSAGE →</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <div id="toast" class="toast"></div>
 
     <script>
@@ -823,10 +790,7 @@
                     
                     <div style="display:flex; gap:10px; margin-top:15px;">
                         <button class="btn btn-white btn-sm" style="flex:1; font-size:10px; padding:10px;" onclick="event.stopPropagation(); openPublicProfile('${p.username}')">VIEW PROFILE</button>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:20px;">
-                            <button class="btn btn-accent full" onclick="openHireModal('${p.user_id}', '${p.name.replace(/'/g, "\\'")}')" style="padding:15px; font-weight:900;">💼 HIRE BUILDER</button>
-                            <button class="btn btn-black full" onclick="openChat('${p.user_id}', '${p.name.replace(/'/g, "\\'")}')" style="padding:15px; font-weight:900;">💬 CHAT / DM</button>
-                        </div>
+                        <button class="btn btn-accent btn-sm" style="flex:1; font-size:10px; padding:10px;" onclick="event.stopPropagation(); openHireModal('${p.user_id}', '${p.name.replace(/'/g, "\\'")}')">HIRE BUILDER</button>
                     </div>
                 </div>
                 <div class="card-footer">
@@ -882,47 +846,8 @@
             }
         }
 
-        function openChat(userId, name) {
-            document.getElementById('chat-target-id').value = userId;
-            document.getElementById('chat-target-name').textContent = name;
-            document.getElementById('chat-modal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeChatModal() {
-            document.getElementById('chat-modal').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        async function sendChatMessage(e) {
-            e.preventDefault();
-            const btn = document.getElementById('chat-submit-btn');
-            btn.disabled = true;
-            btn.textContent = 'SENDING...';
-
-            const payload = {
-                receiver_id: document.getElementById('chat-target-id').value,
-                sender_name: document.getElementById('chat-sender-name').value,
-                sender_email: document.getElementById('chat-sender-email').value,
-                message: `[DM] ${document.getElementById('chat-message').value}`,
-                status: 'message',
-                created_at: new Date().toISOString()
-            };
-
-            try {
-                const { error } = await db.from('hire_requests').insert([payload]);
-                if (error) throw error;
-                
-                showToast('💬 Message sent! Check your inbox for replies.');
-                closeChatModal();
-                document.getElementById('chat-form').reset();
-            } catch (err) {
-                console.error(err);
-                showToast('Failed to send message.', true);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'SEND MESSAGE →';
-            }
+        function openChat(handle) {
+            showToast(`💬 Chat feature coming soon! You can reach @${handle} via Hire Request for now.`);
         }
 
         async function openPublicProfile(handle) {
