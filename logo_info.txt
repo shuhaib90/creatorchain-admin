@@ -1,0 +1,2 @@
+// This file is a placeholder for the logo image provided by the user.
+// I will assume the image is saved as logo.png in the root directory.
