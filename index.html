@@ -174,6 +174,17 @@
         .status-pending { color: var(--secondary); border-color: var(--secondary); }
         .status-rejected { color: var(--accent); border-color: var(--accent); }
 
+        /* NAV DROPDOWN */
+        .user-dropdown-container { position: relative; display: inline-block; }
+        .user-dropdown-trigger { display: flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 4px 12px 4px 4px; border-radius: 99px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
+        .user-dropdown-trigger:hover { background: #e2e8f0; border-color: #cbd5e1; }
+        .user-dropdown-trigger img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+        .user-dropdown-trigger span { font-weight: 500; font-size: 14px; color: #334155; }
+        .user-dropdown-menu { position: absolute; top: 100%; right: 0; margin-top: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); min-width: 160px; display: none; flex-direction: column; z-index: 10005; padding: 4px 0; }
+        .user-dropdown-menu.show { display: flex; }
+        .user-dropdown-menu a { padding: 8px 16px; text-decoration: none; color: #475569; font-size: 14px; font-weight: 500; transition: 0.1s; display: block; }
+        .user-dropdown-menu a:hover { background: #f8fafc; color: #0f172a; }
+
         /* LOGIN */
         #login-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10002; display: none; align-items: center; justify-content: center; }
         .modal-box { background: var(--surface); border: 4px solid var(--black); padding: 50px; box-shadow: 15px 15px 0 var(--black); max-width: 420px; width: 100%; }
@@ -834,11 +845,18 @@
     function updateUIForUser(user) {
         const profile = user.user_metadata;
         const html = `
-            <div class="user-profile">
-                <img src="${profile.avatar_url || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'}" alt="">
-                <span>${profile.full_name || profile.user_name}</span>
-                <span class="logout" onclick="openProfileModal()">PROFILE</span>
-                <span class="logout" onclick="signOut()">LOGOUT</span>
+            <div class="user-dropdown-container">
+                <div class="user-dropdown-trigger" onclick="document.getElementById('userDropdownMenu').classList.toggle('show')">
+                    <img src="${profile.avatar_url || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'}" alt="">
+                    <span>${profile.user_name || profile.full_name || 'User'}</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+                <div class="user-dropdown-menu" id="userDropdownMenu">
+                    <a href="#" onclick="openProfileModal(); document.getElementById('userDropdownMenu').classList.remove('show'); return false;">Profile</a>
+                    <a href="#" onclick="openProfileModal(); document.getElementById('userDropdownMenu').classList.remove('show'); return false;">Edit Profile</a>
+                    <div style="height: 1px; background: #e2e8f0; margin: 4px 0;"></div>
+                    <a href="#" onclick="signOut(); return false;">Logout</a>
+                </div>
             </div>
         `;
         document.getElementById('auth-nav-box').innerHTML = html;
@@ -1890,6 +1908,17 @@
         if(!initSupabase()) return;
         await loadListings();
     });
-</script>
+    </script>
+    <script>
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function(e) {
+            if (!e.target.closest('.user-dropdown-container')) {
+                const menu = document.getElementById('userDropdownMenu');
+                if (menu && menu.classList.contains('show')) {
+                    menu.classList.remove('show');
+                }
+            }
+        });
+    </script>
 </body>
 </html>
