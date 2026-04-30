@@ -4,13 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find Talent | CreatorChain Builders</title>
-    <link rel="icon" href="/favicon.ico">
-    <meta name="description" content="Connect with the best creators, devs, and community leads in the Web3 ecosystem.">
-    <meta property="og:title" content="CreatorChain Talent | Find Web3 Builders">
-    <meta property="og:description" content="Connect with the best creators, devs, and community leads.">
-    <meta property="og:image" content="/logo.png">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="/logo.png">
+    <link rel="icon" href="https://creatorchain.network/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -397,10 +391,7 @@
 <body>
 
     <nav>
-        <a href="/" class="logo" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:10px;">
-            <img src="/logo.png" alt="CreatorChain Logo" style="height:32px; width:auto;">
-            <span>CREATOR<span class="outline">CHAIN</span></span>
-        </a>
+        <a href="/" class="logo" style="text-decoration:none; color:inherit;">CREATOR<span class="outline">CHAIN</span></a>
         <div id="auth-nav-box">
              <button class="btn btn-black" onclick="signInWithX()">LOGIN WITH X</button>
         </div>
@@ -680,31 +671,15 @@
         ];
 
         let selectedTMSkills = [];
-        
+
         function initUnifiedSkills() {
-            const profileBox = document.getElementById('suggested-skills-box');
-            
-            if (profileBox) {
-                profileBox.innerHTML = GLOBAL_SKILLS.map(s => 
-                    `<span class="skill-suggest-chip" onclick="addProfileSkill('${s}')">${s} +</span>`
+            const talentBox = document.getElementById('tm-suggested-skills');
+            if (talentBox) {
+                talentBox.innerHTML = GLOBAL_SKILLS.map(s => 
+                    `<span class="skill-suggest-chip" onclick="addTMSkill('${s}')">${s} +</span>`
                 ).join('');
             }
         }
-
-        function renderFooter() {
-            const footer = document.createElement('footer');
-            footer.style.cssText = "padding: 40px 0; border-top: 4px solid var(--black); background: var(--white); margin-top: 60px;";
-            footer.innerHTML = `
-                <div class="container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
-                    <a href="/" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit; font-weight:900;">
-                        <img src="/logo.png" alt="Logo" style="height:24px;"> CREATORCHAIN
-                    </a>
-                    <div class="mono" style="font-size:12px; color:var(--muted);">© 2026 CREATORCHAIN.NETWORK — AGGREGATING THE FUTURE.</div>
-                </div>
-            `;
-            document.body.appendChild(footer);
-        }
-        renderFooter();
 
         window.addTMSkill = function(skill) {
             if (!selectedTMSkills.includes(skill)) {
