@@ -45,7 +45,7 @@ module.exports = async (req, res) => {
         updated_at: new Date().toISOString()
       };
 
-      const response = await axios.post(`${SUPABASE_URL}/rest/v1/user_profiles`, payload, {
+      const response = await axios.post(`${SUPABASE_URL}/rest/v1/user_profiles?on_conflict=user_id`, payload, {
         headers: {
           ...headers,
           'Prefer': 'resolution=merge-duplicates,return=representation'
@@ -57,7 +57,8 @@ module.exports = async (req, res) => {
 
     res.status(405).json({ error: 'Method Not Allowed' });
   } catch (error) {
-    console.error('Profile API Error:', error.response?.data || error.message);
-    res.status(500).json({ error: 'Internal Server Error' });
+    const errorMsg = error.response?.data?.message || error.response?.data?.error || error.message;
+    console.error('Profile API Error:', errorMsg);
+    res.status(500).json({ error: errorMsg || 'Internal Server Error' });
   }
 };
