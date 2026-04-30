@@ -134,6 +134,13 @@
 
         /* PROFILE MODAL */
         #profile-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9000; display: none; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; }
+        .skills-box { border: 1px solid #e2e8f0; border-radius: 4px; padding: 12px; min-height: 60px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #fff; margin-bottom: 10px; }
+        .skill-chip { background: #f4f6f8; color: #0f172a; padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .skill-chip .remove { cursor: pointer; color: #94a3b8; font-size: 14px; font-weight: 400; line-height: 1; }
+        .skill-chip .remove:hover { color: #475569; }
+        .skills-suggestions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .skill-suggest-chip { border: 1px solid #e2e8f0; color: #64748b; padding: 6px 12px; border-radius: 4px; font-size: 13px; cursor: pointer; background: #fff; display: inline-flex; align-items: center; gap: 4px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .skill-suggest-chip:hover { border-color: #cbd5e1; background: #f8fafc; }
         /* ADMIN */
         #admin-panel { position: fixed; inset: 0; background: #0a0a0a; color: #fff; z-index: 10001; padding: 0; overflow-y: auto; display: none; }
         .admin-inner { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
@@ -454,8 +461,8 @@
                 <div class="form-section-title">02 // SOCIALS</div>
                 <div class="field-row">
                     <div class="field">
-                        <label>GITHUB <span class="req">*</span></label>
-                        <input type="text" id="p-github" required placeholder="github.com/username">
+                        <label>GITHUB</label>
+                        <input type="text" id="p-github" placeholder="github.com/username">
                     </div>
                     <div class="field">
                         <label>TWITTER (X)</label>
@@ -508,9 +515,28 @@
                     <label>WEB3 INTERESTS (Comma separated)</label>
                     <input type="text" id="p-interests" placeholder="DeFi, NFTs, DAOs, Gaming, Infrastructure">
                 </div>
-                <div class="field">
-                    <label>SKILLS (Comma separated)</label>
-                    <input type="text" id="p-skills" placeholder="Frontend, Blockchain, Graphic Design, Community Manager...">
+                <div class="field" style="margin-bottom: 25px;">
+                    <label style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; text-transform: none; color: #1e293b;">
+                        Skills Needed <span style="color: #ef4444;">*</span> <span style="color: #94a3b8; font-size: 12px; font-weight: normal; cursor: help;" title="Select the skills you possess">ⓘ</span>
+                    </label>
+                    <p style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; color: #64748b; margin: 4px 0 10px 0; text-transform: none;">We will send email notifications of new listings for your selected skills</p>
+                    
+                    <div class="skills-box" id="selected-skills-box">
+                        <!-- Selected chips rendered via JS -->
+                    </div>
+                    
+                    <div class="skills-suggestions" id="suggested-skills-box">
+                        <span class="skill-suggest-chip" onclick="addSkill('Frontend')">Frontend <span style="color:#94a3b8;">+</span></span>
+                        <span class="skill-suggest-chip" onclick="addSkill('Blockchain')">Blockchain <span style="color:#94a3b8;">+</span></span>
+                        <span class="skill-suggest-chip" onclick="addSkill('Graphic Design')">Graphic Design <span style="color:#94a3b8;">+</span></span>
+                        <span class="skill-suggest-chip" onclick="addSkill('Community Manager')">Community Manager <span style="color:#94a3b8;">+</span></span>
+                        <span class="skill-suggest-chip" onclick="addSkill('Discord Moderator')">Discord Moderator <span style="color:#94a3b8;">+</span></span>
+                        <span class="skill-suggest-chip" onclick="addSkill('Writing')">Writing <span style="color:#94a3b8;">+</span></span>
+                        <span class="skill-suggest-chip" onclick="addSkill('Research')">Research <span style="color:#94a3b8;">+</span></span>
+                        <span class="skill-suggest-chip" onclick="addSkill('React')">React <span style="color:#94a3b8;">+</span></span>
+                        <span class="skill-suggest-chip" onclick="addSkill('Svelte')">Svelte <span style="color:#94a3b8;">+</span></span>
+                        <span class="skill-suggest-chip" onclick="addSkill('Angular')">Angular <span style="color:#94a3b8;">+</span></span>
+                    </div>
                 </div>
                 <div class="field">
                     <label>CURRENT EMPLOYER</label>
@@ -1554,6 +1580,30 @@
 
     // ─── Profile Logic ─────────────────────────────────────
     let currentUserProfileId = null;
+    let selectedProfileSkills = [];
+
+    function renderProfileSkills() {
+        const box = document.getElementById('selected-skills-box');
+        box.innerHTML = '';
+        selectedProfileSkills.forEach(skill => {
+            const chip = document.createElement('div');
+            chip.className = 'skill-chip';
+            chip.innerHTML = `${skill} <span class="remove" onclick="removeSkill('${skill}')">×</span>`;
+            box.appendChild(chip);
+        });
+    }
+
+    window.addSkill = function(skill) {
+        if (!selectedProfileSkills.includes(skill)) {
+            selectedProfileSkills.push(skill);
+            renderProfileSkills();
+        }
+    };
+
+    window.removeSkill = function(skill) {
+        selectedProfileSkills = selectedProfileSkills.filter(s => s !== skill);
+        renderProfileSkills();
+    };
 
     function openProfileModal() {
         document.getElementById('profile-modal').style.display = 'flex';
@@ -1586,7 +1636,8 @@
                     document.getElementById('p-exp-level').value = data.experience_level || '';
                     document.getElementById('p-work-pref').value = data.work_preference || '';
                     document.getElementById('p-interests').value = data.interests ? data.interests.join(', ') : '';
-                    document.getElementById('p-skills').value = data.skills ? data.skills.join(', ') : '';
+                    selectedProfileSkills = data.skills || [];
+                    renderProfileSkills();
                     document.getElementById('p-employer').value = data.current_employer || '';
                     document.getElementById('p-location').value = data.location || '';
                     document.getElementById('p-email-notif').checked = data.email_notifications || false;
@@ -1616,11 +1667,16 @@
             return;
         }
 
+        if (selectedProfileSkills.length === 0) {
+            errEl.textContent = 'You must select at least one skill.';
+            errEl.style.display = 'block';
+            return;
+        }
+
         btn.textContent = 'SAVING...';
         btn.disabled = true;
 
         const interestsVal = document.getElementById('p-interests').value.split(',').map(s=>s.trim()).filter(s=>s);
-        const skillsVal = document.getElementById('p-skills').value.split(',').map(s=>s.trim()).filter(s=>s);
 
         const payload = {
             user_id: currentUserProfileId,
@@ -1636,7 +1692,7 @@
             experience_level: document.getElementById('p-exp-level').value,
             work_preference: document.getElementById('p-work-pref').value,
             interests: interestsVal,
-            skills: skillsVal,
+            skills: selectedProfileSkills,
             current_employer: document.getElementById('p-employer').value,
             location: document.getElementById('p-location').value,
             email_notifications: document.getElementById('p-email-notif').checked,

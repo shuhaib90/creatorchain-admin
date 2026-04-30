@@ -33,8 +33,8 @@ module.exports = async (req, res) => {
       if (profileData.bio && profileData.bio.length > 180) {
         return res.status(400).json({ error: 'Bio must be under 180 characters' });
       }
-      if (!profileData.github) {
-        return res.status(400).json({ error: 'GitHub is required' });
+      if (!profileData.skills || profileData.skills.length === 0) {
+        return res.status(400).json({ error: 'You must select at least one skill' });
       }
       
       // Upsert logic based on user_id
