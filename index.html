@@ -520,9 +520,22 @@
                     <input type="text" id="p-name" placeholder="E.g., John Doe">
                 </div>
                 <div class="field">
-                    <label>PROFILE PICTURE URL</label>
-                    <input type="url" id="p-avatar" placeholder="https://example.com/photo.jpg">
-                    <p style="font-size:10px; color:var(--muted); margin-top:4px;">Paste a link to your photo (from X, GitHub, or any public URL)</p>
+                    <label>PROFILE IMAGE</label>
+                    <div style="display:flex; gap:15px; align-items:center; margin-top:8px;">
+                        <div id="p-avatar-preview-box" style="width:80px; height:80px; border:3px solid var(--black); background:#eee; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; box-shadow:4px 4px 0 var(--black);">
+                            <img id="p-avatar-preview" src="" style="width:100%; height:100%; object-fit:cover; display:none;">
+                            <span id="p-avatar-placeholder" style="font-size:24px;">👤</span>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px; flex:1;">
+                            <div style="display:flex; gap:10px;">
+                                <button type="button" class="btn btn-white btn-sm" style="flex:1;" onclick="document.getElementById('p-avatar-file').click()">📤 UPLOAD</button>
+                                <button type="button" class="btn btn-black btn-sm" style="flex:1;" onclick="syncAvatarFromX()">🔄 SYNC X</button>
+                            </div>
+                            <p style="font-size:10px; color:var(--muted); margin:0;">Recommended: Square JPG/PNG, max 2MB</p>
+                        </div>
+                    </div>
+                    <input type="file" id="p-avatar-file" accept="image/*" style="display:none;" onchange="handleProfileImageSelect(this)">
+                    <input type="hidden" id="p-avatar-url">
                 </div>
                 <div class="field">
                     <label>ONE-LINE BIO <span id="bio-count" style="color:var(--muted); float:right;">0/180</span></label>
@@ -1690,6 +1703,35 @@
     }
     function closeProfileModal() {
         document.getElementById('profile-modal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function handleProfileImageSelect(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.getElementById('p-avatar-preview');
+                const placeholder = document.getElementById('p-avatar-placeholder');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    async function syncAvatarFromX() {
+        const { data: { user } } = await db.auth.getUser();
+        if (user && user.user_metadata && user.user_metadata.avatar_url) {
+            const url = user.user_metadata.avatar_url;
+            document.getElementById('p-avatar-url').value = url;
+            const preview = document.getElementById('p-avatar-preview');
+            const placeholder = document.getElementById('p-avatar-placeholder');
+            preview.src = url;
+            preview.style.display = 'block';
+            placeholder.style.display = 'none';
+            showToast('✓ Synced from X profile!');
+        }
     }
 
     async function loadProfileData() {
@@ -1702,7 +1744,13 @@
             const { data, error } = await db.from('user_profiles').select('*').eq('user_id', user.id).single();
             if (data) {
                 document.getElementById('p-name').value = data.name || '';
-                document.getElementById('p-avatar').value = data.avatar_url || '';
+                const avatarUrl = data.avatar_url || user.user_metadata.avatar_url || '';
+                document.getElementById('p-avatar-url').value = avatarUrl;
+                if (avatarUrl) {
+                    document.getElementById('p-avatar-preview').src = avatarUrl;
+                    document.getElementById('p-avatar-preview').style.display = 'block';
+                    document.getElementById('p-avatar-placeholder').style.display = 'none';
+                }
                 document.getElementById('p-bio').value = data.bio || '';
                 document.getElementById('bio-count').innerText = (data.bio ? data.bio.length : 0) + '/180';
                 document.getElementById('p-github').value = data.github || '';
@@ -1753,13 +1801,39 @@
         btn.textContent = 'SAVING...';
         btn.disabled = true;
 
+        let finalAvatarUrl = document.getElementById('p-avatar-url').value;
+        const fileInput = document.getElementById('p-avatar-file');
+        
+        if (fileInput.files && fileInput.files[0]) {
+            try {
+                btn.textContent = 'UPLOADING...';
+                const file = fileInput.files[0];
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${currentUserProfileId}_${Date.now()}.${fileExt}`;
+                const filePath = `public/${fileName}`;
+
+                const { error: uploadError } = await db.storage.from('logos').upload(filePath, file, { upsert: true });
+                if (uploadError) throw uploadError;
+
+                const { data: urlData } = db.storage.from('logos').getPublicUrl(filePath);
+                finalAvatarUrl = urlData.publicUrl;
+            } catch (err) {
+                console.error('Upload Error:', err);
+                errEl.textContent = 'Failed to upload image. Please try again.';
+                errEl.style.display = 'block';
+                btn.textContent = 'SAVE PROFILE';
+                btn.disabled = false;
+                return;
+            }
+        }
+
         const interestsVal = document.getElementById('p-interests').value.split(',').map(s=>s.trim()).filter(s=>s);
 
         const payload = {
             user_id: currentUserProfileId,
             username: document.getElementById('p-twitter').value.replace('@', '') || `user_${Date.now()}`,
             name: document.getElementById('p-name').value,
-            avatar_url: document.getElementById('p-avatar').value,
+            avatar_url: finalAvatarUrl,
             bio: bio,
             github: document.getElementById('p-github').value,
             twitter: document.getElementById('p-twitter').value,
