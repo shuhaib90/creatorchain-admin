@@ -70,6 +70,18 @@
         .explore-item:hover { background: var(--accent); color: #000; }
         .explore-item span { font-size: 16px; }
 
+        /* USER DROPDOWN */
+        .user-dropdown-container { position: relative; display: inline-block; }
+        .user-dropdown-trigger { display: flex; align-items: center; gap: 10px; background: var(--white); padding: 5px 12px 5px 5px; border: 2px solid var(--black); cursor: pointer; transition: 0.1s; box-shadow: 3px 3px 0 var(--black); }
+        .user-dropdown-trigger:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--black); }
+        .user-dropdown-trigger img { width: 32px; height: 32px; border-radius: 0; border: 1px solid var(--black); object-fit: cover; }
+        .user-dropdown-trigger span { font-weight: 700; font-size: 13px; color: var(--black); font-family: var(--font-mono); }
+        .user-dropdown-menu { position: absolute; top: 100%; right: 0; margin-top: 10px; background: var(--white); border: 3px solid var(--black); box-shadow: 8px 8px 0 var(--black); min-width: 180px; display: none; flex-direction: column; z-index: 10005; padding: 5px; }
+        .user-dropdown-menu.show { display: flex; }
+        .user-dropdown-menu a { padding: 12px 16px; text-decoration: none; color: var(--black); font-size: 12px; font-weight: 700; font-family: var(--font-mono); transition: 0.1s; display: block; border-bottom: 1px solid #eee; text-align: left; }
+        .user-dropdown-menu a:last-child { border-bottom: none; }
+        .user-dropdown-menu a:hover { background: var(--accent); color: #000; }
+
         .logo { font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: -1px; }
 
         .hero {
@@ -263,7 +275,10 @@
 
     <nav>
         <a href="/" class="logo" style="text-decoration:none; color:inherit;">CREATOR<span class="outline">CHAIN</span></a>
-        <div style="display:flex; gap:15px;">
+        <div style="display:flex; gap:15px; align-items:center;">
+            <div id="auth-nav-box" style="display:inline-flex;">
+                <button class="btn btn-black btn-sm" style="padding: 8px 16px; font-size: 12px; box-shadow: 2px 2px 0 var(--black);" onclick="signInWithX()"><i>𝕏</i> SIGN IN</button>
+            </div>
             <div class="explore-dropdown">
                 <button class="explore-btn" onclick="toggleExplore()">EXPLORE ▼</button>
                 <div class="explore-menu" id="exploreMenu">
@@ -349,23 +364,57 @@
         const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
         
         let db;
-        const GLOBAL_SKILLS = [
-            'Frontend', 'Backend', 'Fullstack', 'Blockchain', 'Solidity', 'Rust', 'Cairo', 'Python', 'Javascript',
-            'Graphic Design', 'Video Editing', 'Content Creation', 'Writing', 'Research', 'Strategy',
-            'Community Manager', 'Discord Moderator', 'Marketing', 'Growth', 'Project Manager', 
-            'Data Analytics', 'DevOps', 'Mobile Dev', 'UI/UX Design', 'DeFi Expert', 'NFT Specialist'
-        ];
-
-        let selectedTMSkills = [];
 
         async function init() {
             try {
-                db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); 
+                db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                checkUser();
                 initUnifiedSkills();
             } catch (e) {
-                console.error('Supabase init failed:', e);
+                console.error("Initialization error:", e);
+                showToast("Failed to connect to network.", true);
             }
         }
+
+        async function signInWithX() {
+            const { error } = await db.auth.signInWithOAuth({
+                provider: 'x',
+                options: { redirectTo: window.location.origin + '/talent.html' }
+            });
+            if (error) showToast('Auth failed. Login with X is not configured.', true);
+        }
+
+        async function signOut() {
+            await db.auth.signOut();
+            window.location.reload();
+        }
+
+        async function checkUser() {
+            const { data: { user } } = await db.auth.getUser();
+            if (user) updateUIForUser(user);
+        }
+
+        function updateUIForUser(user) {
+            const profile = user.user_metadata;
+            const html = `
+                <div class="user-dropdown-container">
+                    <div class="user-dropdown-trigger" onclick="document.getElementById('userDropdownMenu').classList.toggle('show')">
+                        <img src="${profile.avatar_url || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'}" alt="">
+                        <span>${profile.user_name || profile.full_name || 'User'}</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" stroke-linejoin="round" style="margin-left: 4px;"><path d="m6 9 6 6 6-6"/></svg>
+                    </div>
+                    <div class="user-dropdown-menu" id="userDropdownMenu">
+                        <a href="#" onclick="openPublicProfile('${profile.user_name}'); document.getElementById('userDropdownMenu').classList.remove('show'); return false;">👤 VIEW PROFILE</a>
+                        <a href="/?profile=true" style="text-decoration:none;">✏️ EDIT PROFILE</a>
+                        <div style="height: 2px; background: var(--black); margin: 2px 0;"></div>
+                        <a href="#" onclick="signOut(); return false;" style="color: #ef4444;">🚪 LOGOUT</a>
+                    </div>
+                </div>
+            `;
+            document.getElementById('auth-nav-box').innerHTML = html;
+        }
+
+        let selectedTMSkills = [];
 
         function initUnifiedSkills() {
             const talentBox = document.getElementById('tm-suggested-skills');
