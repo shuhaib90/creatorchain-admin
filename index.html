@@ -413,34 +413,6 @@
     </div>
 </section>
 
-<!-- AI MATCHING SECTION -->
-<div class="container" style="margin-top:-40px; position:relative; z-index:100;">
-    <div class="ai-search-card">
-        <h2 style="font-size:32px; margin-bottom:10px;">Personalized <span class="outline">Match</span></h2>
-        <p style="color:var(--muted); font-size:14px; font-weight:500;">Analyze any X handle with Gemini AI to find your best matches instantly.</p>
-        
-        <div class="ai-input-group">
-            <input type="text" id="ai-handle-search" class="ai-input" placeholder="Enter X Username (e.g. @ZenvicAlpha)">
-            <button class="btn btn-black" id="ai-analyze-btn" onclick="runAIAnalysis()">
-                <span id="ai-btn-text">ANALYZE PROFILE</span>
-            </button>
-        </div>
-
-        <div id="ai-results" class="ai-results-zone">
-            <div id="ai-profile-summary" style="margin-bottom:25px;">
-                <!-- Profile chips go here -->
-            </div>
-            <h3 style="font-size:20px; margin-bottom:25px; display:flex; align-items:center; gap:10px;">
-                <span style="background:var(--primary); width:12px; height:12px; border:2px solid #000;"></span> 
-                Best matches for <span id="target-username-display" style="color:var(--primary)">...</span>
-            </h3>
-            <div class="grid" id="ai-match-grid">
-                <!-- Matched cards go here -->
-            </div>
-            <div style="text-align:center; margin-top:30px;">
-                <button class="btn btn-white btn-sm" onclick="clearAI()">Clear Results</button>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -448,7 +420,7 @@
 <div class="container" style="margin-top: 40px; margin-bottom: 40px;">
     <div class="ai-search-card" style="border-color: var(--accent); box-shadow: 12px 12px 0 var(--accent);">
         <h2 style="font-size:32px; margin-bottom:10px;">Find <span class="outline">Talent</span></h2>
-        <p style="color:var(--muted); font-size:14px; font-weight:500;">Define your project requirements to find the perfect builders for your team.</p>
+        <p style="color:var(--muted); font-size:14px; font-weight:500;">Match with builders based on structured skill data from their verified profiles.</p>
         
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px; margin-top:25px;">
             <div class="field">
@@ -456,12 +428,8 @@
                 <div id="tm-skills-box" class="skills-box" style="min-height:45px; border-color:var(--black); background:#fff;">
                     <!-- Selected matching skills -->
                 </div>
-                <div class="skills-suggestions" style="margin-top:10px;">
-                    <span class="skill-suggest-chip" onclick="addTMSkill('Frontend')">Frontend +</span>
-                    <span class="skill-suggest-chip" onclick="addTMSkill('Blockchain')">Blockchain +</span>
-                    <span class="skill-suggest-chip" onclick="addTMSkill('Graphic Design')">Design +</span>
-                    <span class="skill-suggest-chip" onclick="addTMSkill('Writing')">Writing +</span>
-                    <span class="skill-suggest-chip" onclick="addTMSkill('Solidity')">Solidity +</span>
+                <div class="skills-suggestions" id="tm-suggested-skills" style="margin-top:10px;">
+                    <!-- Populated via JS -->
                 </div>
             </div>
             
@@ -668,16 +636,7 @@
                     </div>
                     
                     <div class="skills-suggestions" id="suggested-skills-box">
-                        <span class="skill-suggest-chip" onclick="addSkill('Frontend')">Frontend <span style="color:#94a3b8;">+</span></span>
-                        <span class="skill-suggest-chip" onclick="addSkill('Blockchain')">Blockchain <span style="color:#94a3b8;">+</span></span>
-                        <span class="skill-suggest-chip" onclick="addSkill('Graphic Design')">Graphic Design <span style="color:#94a3b8;">+</span></span>
-                        <span class="skill-suggest-chip" onclick="addSkill('Community Manager')">Community Manager <span style="color:#94a3b8;">+</span></span>
-                        <span class="skill-suggest-chip" onclick="addSkill('Discord Moderator')">Discord Moderator <span style="color:#94a3b8;">+</span></span>
-                        <span class="skill-suggest-chip" onclick="addSkill('Writing')">Writing <span style="color:#94a3b8;">+</span></span>
-                        <span class="skill-suggest-chip" onclick="addSkill('Research')">Research <span style="color:#94a3b8;">+</span></span>
-                        <span class="skill-suggest-chip" onclick="addSkill('React')">React <span style="color:#94a3b8;">+</span></span>
-                        <span class="skill-suggest-chip" onclick="addSkill('Svelte')">Svelte <span style="color:#94a3b8;">+</span></span>
-                        <span class="skill-suggest-chip" onclick="addSkill('Angular')">Angular <span style="color:#94a3b8;">+</span></span>
+                        <!-- Populated via JS -->
                     </div>
                 </div>
                 <div class="field">
@@ -2156,78 +2115,37 @@
         input.addEventListener('change', runDetection);
     };
 
+    // ─── Unified Skill System ────────────────────────────
+    const GLOBAL_SKILLS = [
+        'Frontend', 'Backend', 'Fullstack', 'Blockchain', 'Solidity', 'Rust', 'Cairo', 'Python', 'Javascript',
+        'Graphic Design', 'Video Editing', 'Content Creation', 'Writing', 'Research', 'Strategy',
+        'Community Manager', 'Discord Moderator', 'Marketing', 'Growth', 'Project Manager', 
+        'Data Analytics', 'DevOps', 'Mobile Dev', 'UI/UX Design', 'DeFi Expert', 'NFT Specialist'
+    ];
+
+    function initUnifiedSkills() {
+        const profileBox = document.getElementById('suggested-skills-box');
+        const talentBox = document.getElementById('tm-suggested-skills');
+        
+        if (profileBox) {
+            profileBox.innerHTML = GLOBAL_SKILLS.map(s => 
+                `<span class="skill-suggest-chip" onclick="addSkill('${s}')">${s} +</span>`
+            ).join('');
+        }
+        if (talentBox) {
+            talentBox.innerHTML = GLOBAL_SKILLS.map(s => 
+                `<span class="skill-suggest-chip" onclick="addTMSkill('${s}')">${s} +</span>`
+            ).join('');
+        }
+    }
+
+    // Call on load
+    document.addEventListener('DOMContentLoaded', initUnifiedSkills);
+
     // Initialize detection triggers
     setupThumbDetection('s-twitter', 'submit-form', 'submitter-handle-badge', 's-detected-thumb');
     setupThumbDetection('f-twitter', 'listing-form', 'f-logo-filename', 'f-detected-thumb');
 
-    // ─── AI Analysis & Matching ───────────────────────────
-    async function runAIAnalysis() {
-        const input = document.getElementById('ai-handle-search');
-        const btn = document.getElementById('ai-analyze-btn');
-        const btnText = document.getElementById('ai-btn-text');
-        const username = input.value.trim().replace('@', '');
-        
-        if (!username) {
-            showToast('Enter a valid X handle', true);
-            return;
-        }
-
-        btn.classList.add('btn-loading');
-        btnText.innerHTML = 'ANALYZING<span class="loader-dots"></span>';
-        document.getElementById('ai-results').style.display = 'none';
-
-        try {
-            // 1. Analyze with Gemini
-            const analyzeResp = await fetch(`/api/analyze-user?username=${username}`);
-            if (!analyzeResp.ok) throw new Error('Analysis failed');
-            const analysis = await analyzeResp.json();
-
-            // 2. Fetch Matches
-            const matchResp = await fetch(`/api/recommendations?username=${username}`);
-            if (!matchResp.ok) throw new Error('Matching failed');
-            const data = await matchResp.json();
-
-            displayAIResults(data);
-            showToast(`Analysis complete for @${username}!`);
-        } catch (err) {
-            console.error(err);
-            showToast('AI Analysis failed. Try again.', true);
-        } finally {
-            btn.classList.remove('btn-loading');
-            btnText.textContent = 'ANALYZE PROFILE';
-        }
-    }
-
-    function displayAIResults(data) {
-        const resultsZone = document.getElementById('ai-results');
-        const profileSummary = document.getElementById('ai-profile-summary');
-        const matchGrid = document.getElementById('ai-match-grid');
-        const usernameDisplay = document.getElementById('target-username-display');
-
-        resultsZone.style.display = 'block';
-        usernameDisplay.textContent = `@${data.username}`;
-        
-        // Render Profile Chips
-        const p = data.profile;
-        const typeStr = p.user_type || 'Custom';
-        const skillStr = p.experience_level || p.skill_level || 'Unknown';
-        const focusArr = p.interests || [];
-        const intentStr = p.intent || 'Looking for Web3 opportunities';
-        
-        profileSummary.innerHTML = `
-            <div class="profile-chip"><span>TYPE:</span> ${typeStr}</div>
-            <div class="profile-chip"><span>EXPERIENCE:</span> ${skillStr}</div>
-            <div class="profile-chip"><span>FOCUS:</span> ${focusArr.join(', ')}</div>
-            <div class="profile-chip"><span>INTENT:</span> ${intentStr}</div>
-        `;
-
-        // Render Matched Cards
-        matchGrid.innerHTML = '';
-        if (data.recommendations.length === 0) {
-            matchGrid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><h3>No high-confidence matches found yet.</h3><p>Try again later as new opportunities are posted!</p></div>';
-        } else {
-            data.recommendations.forEach(job => {
-                const card = createJobCard(job);
                 card.classList.add('match-card');
                 
                 // Prepend Match Badge
