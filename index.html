@@ -520,6 +520,11 @@
                     <input type="text" id="p-name" placeholder="E.g., John Doe">
                 </div>
                 <div class="field">
+                    <label>PROFILE PICTURE URL</label>
+                    <input type="url" id="p-avatar" placeholder="https://example.com/photo.jpg">
+                    <p style="font-size:10px; color:var(--muted); margin-top:4px;">Paste a link to your photo (from X, GitHub, or any public URL)</p>
+                </div>
+                <div class="field">
                     <label>ONE-LINE BIO <span id="bio-count" style="color:var(--muted); float:right;">0/180</span></label>
                     <input type="text" id="p-bio" maxlength="180" placeholder="E.g., Full-stack Web3 Developer building the future." oninput="document.getElementById('bio-count').innerText = this.value.length + '/180'">
                 </div>
@@ -1697,6 +1702,7 @@
             const { data, error } = await db.from('user_profiles').select('*').eq('user_id', user.id).single();
             if (data) {
                 document.getElementById('p-name').value = data.name || '';
+                document.getElementById('p-avatar').value = data.avatar_url || '';
                 document.getElementById('p-bio').value = data.bio || '';
                 document.getElementById('bio-count').innerText = (data.bio ? data.bio.length : 0) + '/180';
                 document.getElementById('p-github').value = data.github || '';
@@ -1753,6 +1759,7 @@
             user_id: currentUserProfileId,
             username: document.getElementById('p-twitter').value.replace('@', '') || `user_${Date.now()}`,
             name: document.getElementById('p-name').value,
+            avatar_url: document.getElementById('p-avatar').value,
             bio: bio,
             github: document.getElementById('p-github').value,
             twitter: document.getElementById('p-twitter').value,
@@ -1835,11 +1842,13 @@
             share: icon('<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/>')
         };
 
+        const avatarToUse = profile.avatar_url || avatar || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png';
+
         content.innerHTML = `
             <div class="p-card">
                 <button class="p-card-close" onclick="closeProfileCard()">✕</button>
                 <div class="p-card-header">
-                    <img src="${avatar || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'}" class="p-card-avatar">
+                    <img src="${avatarToUse}" class="p-card-avatar">
                 </div>
                 
                 <div class="p-card-body">
