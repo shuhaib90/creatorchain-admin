@@ -2146,26 +2146,10 @@
     setupThumbDetection('s-twitter', 'submit-form', 'submitter-handle-badge', 's-detected-thumb');
     setupThumbDetection('f-twitter', 'listing-form', 'f-logo-filename', 'f-detected-thumb');
 
-                card.classList.add('match-card');
-                
-                // Prepend Match Badge
-                const inner = card.querySelector('.card-inner');
-                const badge = document.createElement('div');
-                badge.className = 'match-badge';
-                badge.textContent = `${job.matchScore}% MATCH ✨`;
-                inner.prepend(badge);
-
-                matchGrid.appendChild(card);
-            });
-        }
-
-        // Scroll to results
-        resultsZone.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
     function clearAI() {
-        document.getElementById('ai-results').style.display = 'none';
-        document.getElementById('ai-handle-search').value = '';
+        document.getElementById('tm-results').style.display = 'none';
+        selectedTMSkills = [];
+        renderTMSkills();
     }
 
     // ─── Talent Matching Logic ────────────────────────────
