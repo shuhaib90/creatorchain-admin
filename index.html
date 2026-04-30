@@ -208,50 +208,44 @@
         .user-dropdown-menu a:hover { background: #f8fafc; color: #0f172a; }
 
         /* PROFILE CARD RESPONSIVE BRUTALIST */
-        #profile-card-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9500; display: none; align-items: flex-start; justify-content: center; padding: 40px 10px; overflow-y: auto; backdrop-filter: blur(4px); }
-        .p-card { background: #fff; border: 4px solid var(--black); box-shadow: 10px 10px 0 var(--black); width: 100%; max-width: 480px; position: relative; margin: auto; overflow: visible; border-radius: 0; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        #profile-card-modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); z-index: 10005; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); padding: 20px; }
+        .p-card { background: var(--white); border-radius: 24px; width: 100%; max-width: 480px; position: relative; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); animation: cardIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); border: 1px solid rgba(255,255,255,0.1); }
+        @keyframes cardIn { from { transform: scale(0.95) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
         
-        .p-card-header { height: 80px; background: var(--primary); border-bottom: 4px solid var(--black); position: relative; }
-        .p-card-header::after { content: ''; position: absolute; inset: 0; opacity: 0.1; background-image: radial-gradient(var(--black) 1px, transparent 1px); background-size: 6px 6px; }
+        .p-card-header { height: 120px; background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); position: relative; }
         
-        .p-card-avatar { width: 80px; height: 80px; border-radius: 0; border: 4px solid var(--black); position: absolute; top: 30px; left: 20px; background: #fff; object-fit: cover; z-index: 10; box-shadow: 4px 4px 0 var(--black); }
+        .p-card-avatar { width: 100px; height: 100px; border-radius: 20px; border: 4px solid var(--white); position: absolute; bottom: -50px; left: 30px; background: var(--white); object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         
-        .p-card-body { padding: 50px 20px 20px; display: flex; flex-direction: column; gap: 15px; }
-        .p-card-name-group { display: flex; flex-direction: column; gap: 0; }
-        .p-card-name { font-size: 24px; font-weight: 900; color: var(--black); text-transform: uppercase; }
-        .p-card-handle { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--muted); }
-        .p-card-bio { font-size: 13px; color: #444; line-height: 1.4; margin: 0; }
+        .p-card-body { padding: 60px 30px 30px; }
+        .p-card-name { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 2px; }
+        .p-card-handle { font-family: var(--font-mono); font-size: 14px; color: var(--primary); font-weight: 700; margin-bottom: 15px; }
+        .p-card-bio { font-size: 15px; color: #475569; line-height: 1.6; margin-bottom: 25px; }
         
-        .p-card-section { display: flex; flex-direction: column; gap: 8px; }
-        .p-card-section-title { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 900; color: #777; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
-        .p-card-section-title::after { content: ''; height: 2px; flex: 1; background: var(--black); }
+        .p-card-section { margin-bottom: 25px; }
+        .p-card-section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #94a3b8; letter-spacing: 1px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+        .p-card-section-title::after { content: ''; height: 1px; flex: 1; background: #e2e8f0; }
         
-        .p-card-socials { display: flex; gap: 8px; flex-wrap: wrap; }
-        .p-card-social-btn { width: 34px; height: 34px; border: 2px solid var(--black); display: flex; align-items: center; justify-content: center; background: #fff; text-decoration: none; color: var(--black); border-radius: 0; }
-        .p-card-social-btn svg { width: 16px; height: 16px; }
-        .p-card-social-btn:hover { background: var(--primary); transform: translate(-2px, -2px); box-shadow: 2px 2px 0 var(--black); }
+        .p-card-socials { display: flex; gap: 10px; }
+        .p-card-social-btn { width: 40px; height: 40px; border-radius: 12px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #475569; transition: all 0.2s; border: none; text-decoration: none; }
+        .p-card-social-btn:hover { background: var(--primary); color: white; transform: translateY(-3px); }
+        .p-card-social-btn svg { width: 20px; height: 20px; }
 
-        .p-card-skills { display: flex; flex-wrap: wrap; gap: 6px; }
-        .p-card-skill-tag { background: #fff; border: 2px solid var(--black); padding: 3px 10px; font-size: 11px; font-weight: 700; color: var(--black); box-shadow: 2px 2px 0 var(--black); }
+        .p-card-skills { display: flex; flex-wrap: wrap; gap: 8px; }
+        .p-card-skill-tag { background: #f1f5f9; color: #475569; padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 700; border: 1px solid #e2e8f0; }
 
-        .p-card-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        @media (max-width: 480px) { .p-card-meta-grid { grid-template-columns: 1fr; } }
-        
-        .p-card-meta-card { background: #fff; border: 2px solid var(--black); padding: 10px; display: flex; gap: 8px; align-items: center; }
-        .p-card-meta-icon { width: 24px; height: 24px; background: #eee; border: 2px solid var(--black); display: flex; align-items: center; justify-content: center; color: var(--black); flex-shrink: 0; }
-        .p-card-meta-icon svg { width: 12px; height: 12px; }
+        .p-card-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .p-card-meta-card { background: #f8fafc; padding: 15px; border-radius: 16px; display: flex; align-items: center; gap: 12px; border: 1px solid #f1f5f9; }
+        .p-card-meta-icon { width: 32px; height: 32px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--primary); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .p-card-meta-info { display: flex; flex-direction: column; }
-        .p-card-meta-label { font-size: 8px; font-family: 'Space Mono', monospace; color: #666; font-weight: 700; text-transform: uppercase; }
-        .p-card-meta-value { font-size: 12px; font-weight: 800; color: var(--black); }
+        .p-card-meta-label { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
+        .p-card-meta-value { font-size: 13px; font-weight: 800; color: #1e293b; }
 
-        .p-card-footer { margin-top: 5px; }
-        .p-card-share-btn { width: 100%; padding: 10px; background: var(--primary); color: var(--black); border: 3px solid var(--black); font-size: 13px; font-weight: 900; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: 0; box-shadow: 4px 4px 0 var(--black); }
-        .p-card-share-btn svg { width: 14px; height: 14px; stroke-width: 3; }
-        .p-card-share-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--black); }
+        .p-card-footer { margin-top: 10px; }
+        .p-card-share-btn { width: 100%; padding: 16px; background: var(--black); color: white; border: none; border-radius: 16px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s; }
+        .p-card-share-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.3); opacity: 0.9; }
 
-        .p-card-close { position: absolute; top: -10px; right: -10px; background: var(--black); border: 2px solid #fff; color: #fff; width: 30px; height: 30px; border-radius: 0; cursor: pointer; z-index: 100; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-        .p-card-close:hover { background: var(--accent); transform: translate(-2px, -2px); box-shadow: 3px 3px 0 #fff; }
+        .p-card-close { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; width: 32px; height: 32px; border-radius: 10px; cursor: pointer; z-index: 100; backdrop-filter: blur(10px); font-weight: 800; }
+        .p-card-close:hover { background: rgba(255,255,255,0.3); }
 
         /* FOOTER */
         footer { background: var(--black); border-top: 4px solid var(--primary); padding: 60px 0 40px; color: #fff; margin-top: 80px; }
@@ -1900,57 +1894,59 @@
         const avatarToUse = profile.avatar_url || avatar || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png';
 
         content.innerHTML = `
-            <div class="p-card" style="padding-top:0; overflow:hidden; border:4px solid var(--black); box-shadow: 12px 12px 0 var(--black); background:var(--white); position:relative; max-width:500px; width:95%; margin:auto;">
-                <button class="p-card-close" onclick="closeProfileCard()" style="background:var(--black); color:var(--white); border:none; width:30px; height:30px; cursor:pointer; font-weight:900; position:absolute; top:10px; right:10px; z-index:100;">✕</button>
-                <div style="height:100px; background:var(--primary); border-bottom:4px solid var(--black); display:flex; align-items:flex-end; padding:20px;">
-                    <img src="${avatarToUse}" style="width:100px; height:100px; border:4px solid var(--black); background:var(--white); object-fit:cover; position:relative; bottom:-50px; z-index:2;">
+            <div class="p-card">
+                <button class="p-card-close" onclick="closeProfileCard()">✕</button>
+                <div class="p-card-header">
+                    <img src="${avatarToUse}" class="p-card-avatar">
                 </div>
-                <div style="padding:60px 30px 30px;">
-                    <div>
-                        <h2 style="font-size:32px; font-weight:800; margin:0; text-transform:uppercase; letter-spacing:-1px; color:var(--black);">${profile.name || 'Anonymous Creator'}</h2>
-                        <p class="mono" style="font-size:16px; font-weight:700; color:var(--muted); margin-bottom:20px;">@${handle}</p>
-                    </div>
+                
+                <div class="p-card-body">
+                    <div class="p-card-name">${profile.name || 'Anonymous Creator'}</div>
+                    <div class="p-card-handle">@${handle}</div>
 
-                    <p style="font-size:14px; line-height:1.5; color:#334155; margin-bottom:20px; font-weight:500;">${profile.bio || 'Building the future of Web3 at CreatorChain. No bio provided yet.'}</p>
+                    <p class="p-card-bio">${profile.bio || 'Building the future of Web3 at CreatorChain. No bio provided yet.'}</p>
                     
-                    <div style="margin-bottom:20px;">
-                        <div style="font-size:10px; font-weight:800; text-transform:uppercase; color:var(--muted); margin-bottom:8px;">Connections</div>
-                        <div style="display:flex; flex-wrap:wrap; gap:10px;">
-                            ${profile.twitter ? `<a href="https://x.com/${profile.twitter.replace('@','')}" target="_blank" style="padding:8px; border:2px solid var(--black); background:var(--white); color:var(--black); display:flex; align-items:center; justify-content:center; width:40px; height:40px;">
-                                <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px; height:20px;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    <div class="p-card-section">
+                        <div class="p-card-section-title">Connections</div>
+                        <div class="p-card-socials">
+                            ${profile.twitter ? `<a href="https://x.com/${profile.twitter.replace('@','')}" target="_blank" class="p-card-social-btn" title="𝕏 (Twitter)">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                             </a>` : ''}
-                            ${profile.github ? `<a href="${profile.github.startsWith('http')?profile.github:'https://github.com/'+profile.github}" target="_blank" style="padding:8px; border:2px solid var(--black); background:var(--white); color:var(--black); display:flex; align-items:center; justify-content:center; width:40px; height:40px;">
-                                <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px; height:20px;"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                            ${profile.github ? `<a href="${profile.github.startsWith('http')?profile.github:'https://github.com/'+profile.github}" target="_blank" class="p-card-social-btn" title="GitHub">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
                             </a>` : ''}
                         </div>
                     </div>
 
-                    <div style="margin-bottom:20px;">
-                        <div style="font-size:10px; font-weight:800; text-transform:uppercase; color:var(--muted); margin-bottom:8px;">Expertise</div>
-                        <div style="display:flex; flex-wrap:wrap; gap:8px;">
-                            ${skills.length ? skills.map(s => `<span style="padding:4px 12px; border:2px solid var(--black); font-size:11px; font-weight:700; background:#f8fafc; font-family:'Space Mono';">${s}</span>`).join('') : '<span class="mono" style="font-size:12px; color:var(--muted);">No skills added yet</span>'}
+                    <div class="p-card-section">
+                        <div class="p-card-section-title">Skills & Mastery</div>
+                        <div class="p-card-skills">
+                            ${skills.length ? skills.map(s => `<span class="p-card-skill-tag">${s}</span>`).join('') : '<span style="font-size:12px; color:#94a3b8;">No skills added yet</span>'}
                         </div>
                     </div>
 
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:25px;">
-                        <div style="padding:10px; border:2px solid var(--black); display:flex; align-items:center; gap:10px;">
-                            <div style="width:20px; color:var(--primary);">${icons.level}</div>
-                            <div>
-                                <div style="font-size:9px; font-weight:700; color:var(--muted); text-transform:uppercase;">Level</div>
-                                <div style="font-size:12px; font-weight:800;">${profile.experience_level || 'Builder'}</div>
+                    <div class="p-card-section">
+                        <div class="p-card-section-title">Work Context</div>
+                        <div class="p-card-meta-grid">
+                            <div class="p-card-meta-card">
+                                <div class="p-card-meta-icon">${icons.level}</div>
+                                <div class="p-card-meta-info">
+                                    <span class="p-card-meta-label">Level</span>
+                                    <span class="p-card-meta-value">${profile.experience_level || 'Builder'}</span>
+                                </div>
+                            </div>
+                            <div class="p-card-meta-card">
+                                <div class="p-card-meta-icon">${icons.work}</div>
+                                <div class="p-card-meta-info">
+                                    <span class="p-card-meta-label">Preference</span>
+                                    <span class="p-card-meta-value">${profile.work_preference || 'Flexible'}</span>
+                                </div>
                             </div>
                         </div>
-                        <div style="padding:10px; border:2px solid var(--black); display:flex; align-items:center; gap:10px;">
-                            <div style="width:20px; color:var(--primary);">${icons.work}</div>
-                            <div>
-                                <div style="font-size:9px; font-weight:700; color:var(--muted); text-transform:uppercase;">Work</div>
-                                <div style="font-size:12px; font-weight:800;">${profile.work_preference || 'Flexible'}</div>
-                            </div>
-                        </div>
                     </div>
 
-                    <div class="p-card-footer" style="margin-top:0; padding:0; border:none; background:none;">
-                        <button class="btn btn-black" style="width:100%; padding:15px; font-size:14px;" onclick="shareProfile('${handle}')">
+                    <div class="p-card-footer">
+                        <button class="p-card-share-btn" onclick="shareProfile('${handle}')">
                             ${icons.share} SHARE BUILDER PROFILE
                         </button>
                     </div>
