@@ -2269,26 +2269,32 @@
         card.style.borderColor = 'var(--accent)';
         
         const avatar = p.avatar_url || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png';
-        const skills = (p.skills || []).slice(0, 3);
+        const userSkills = p.skills || [];
+        const matchedSkills = selectedTMSkills.filter(s => userSkills.includes(s));
+        const otherSkills = userSkills.filter(s => !selectedTMSkills.includes(s)).slice(0, 2);
         const handle = p.username || p.twitter?.replace('@','') || 'builder';
 
         card.innerHTML = `
             <div class="match-badge" style="background:var(--accent); color:#000; font-weight:900;">${p.matchScore}% MATCH</div>
             <div class="card-inner" onclick="openPublicProfile('${handle}')">
                 <div style="display:flex; gap:15px; align-items:center; margin-bottom:15px;">
-                    <img src="${avatar}" style="width:50px; height:50px; border:2px solid #000; background:#eee;">
+                    <img src="${avatar}" style="width:50px; height:50px; border:2px solid #000; background:#eee; object-fit:cover;">
                     <div>
-                        <h3 style="font-size:18px; margin:0;">${p.name || 'Builder'}</h3>
+                        <h3 style="font-size:18px; margin:0; line-height:1.2;">${p.name || 'Builder'}</h3>
                         <p class="mono" style="font-size:12px; color:var(--muted); margin:0;">@${handle}</p>
                     </div>
                 </div>
-                <p style="font-size:13px; line-height:1.4; color:#444; margin-bottom:15px; height:3.6em; overflow:hidden;">${p.bio || 'Active Web3 builder and creator.'}</p>
-                <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:15px;">
-                    ${skills.map(s => `<span style="font-size:10px; padding:2px 8px; border:1px solid #000; background:#fff;">${s}</span>`).join('')}
-                    ${p.skills?.length > 3 ? `<span style="font-size:10px; color:var(--muted);">+${p.skills.length - 3} more</span>` : ''}
+                
+                <div style="margin-bottom:15px;">
+                    <div style="font-size:10px; font-weight:900; text-transform:uppercase; color:var(--accent); margin-bottom:5px;">Matching Skills</div>
+                    <div style="display:flex; flex-wrap:wrap; gap:5px;">
+                        ${matchedSkills.map(s => `<span style="font-size:10px; padding:2px 8px; border:1px solid var(--accent); background:rgba(0,245,160,0.1); font-weight:700;">${s}</span>`).join('')}
+                        ${matchedSkills.length === 0 ? '<span style="font-size:10px; color:var(--muted);">None</span>' : ''}
+                    </div>
                 </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #eee; padding-top:10px;">
-                    <span class="mono" style="font-size:10px; text-transform:uppercase;">${p.experience_level || 'Builder'}</span>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #eee; padding-top:10px; margin-top:auto;">
+                    <span class="mono" style="font-size:10px; text-transform:uppercase; background:#f0f0f0; padding:2px 6px;">${p.experience_level || 'Builder'}</span>
                     <span class="mono" style="font-size:10px; text-transform:uppercase; color:var(--accent); font-weight:700;">${p.work_preference || 'Flexible'}</span>
                 </div>
             </div>
