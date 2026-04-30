@@ -195,7 +195,8 @@
         .explore-item { padding: 12px 16px; text-decoration: none; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Space Mono', monospace; transition: 0.1s; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #333; }
         .explore-item:last-child { border-bottom: none; }
         .explore-item:hover { background: var(--primary); color: #000; }
-        .explore-item span { font-size: 16px; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10005; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px; overflow-y: auto; }
+        .outline { -webkit-text-stroke: 1.5px #fff; color: transparent; }
 
         /* LOGIN */
         #login-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10002; display: none; align-items: center; justify-content: center; }
