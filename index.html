@@ -195,52 +195,48 @@
 
         .user-dropdown-menu a:hover { background: #f8fafc; color: #0f172a; }
 
-        /* PROFILE CARD UPGRADED */
-        #profile-card-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9500; display: none; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; backdrop-filter: blur(8px); }
-        .p-card { background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); border: 4px solid var(--black); box-shadow: 16px 16px 0 var(--black); width: 100%; max-width: 520px; position: relative; overflow: hidden; border-radius: 12px; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .p-card-header { height: 140px; background: linear-gradient(135deg, #00ffa3 0%, #00d1ff 100%); border-bottom: 4px solid var(--black); position: relative; }
-        .p-card-header::after { content: ''; position: absolute; inset: 0; opacity: 0.2; background-image: radial-gradient(var(--black) 1px, transparent 1px); background-size: 10px 10px; }
-        .p-card-avatar { width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--black); position: absolute; bottom: -55px; left: 35px; background: #fff; object-fit: cover; z-index: 2; box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
-        .p-card-body { padding: 75px 35px 35px; display: flex; flex-direction: column; gap: 24px; }
-        .p-card-name-group { display: flex; flex-direction: column; gap: 4px; }
-        .p-card-name { font-size: 32px; font-weight: 900; letter-spacing: -1px; color: var(--black); }
-        .p-card-handle { font-family: 'Space Mono', monospace; font-size: 15px; color: var(--muted); font-weight: 600; }
-        .p-card-bio { font-size: 16px; color: #475569; line-height: 1.6; margin: 0; }
+        /* PROFILE CARD UPGRADED BRUTALIST */
+        #profile-card-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9500; display: none; align-items: flex-start; justify-content: center; padding: 60px 20px; overflow-y: auto; backdrop-filter: blur(4px); }
+        .p-card { background: #fff; border: 4px solid var(--black); box-shadow: 12px 12px 0 var(--black); width: 100%; max-width: 480px; position: relative; margin: auto; overflow: visible; border-radius: 0; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .p-card-header { height: 100px; background: var(--primary); border-bottom: 4px solid var(--black); position: relative; }
+        .p-card-header::after { content: ''; position: absolute; inset: 0; opacity: 0.15; background-image: radial-gradient(var(--black) 1px, transparent 1px); background-size: 8px 8px; }
+        .p-card-avatar { width: 90px; height: 90px; border-radius: 0; border: 4px solid var(--black); position: absolute; bottom: -45px; left: 25px; background: #fff; object-fit: cover; z-index: 10; box-shadow: 6px 6px 0 var(--black); }
+        .p-card-body { padding: 60px 25px 25px; display: flex; flex-direction: column; gap: 20px; }
+        .p-card-name-group { display: flex; flex-direction: column; gap: 2px; }
+        .p-card-name { font-size: 28px; font-weight: 900; color: var(--black); text-transform: uppercase; letter-spacing: -0.5px; }
+        .p-card-handle { font-family: 'Space Mono', monospace; font-size: 14px; color: var(--muted); }
+        .p-card-bio { font-size: 14px; color: #444; line-height: 1.4; margin: 0; }
         
-        .p-card-section { display: flex; flex-direction: column; gap: 12px; }
-        .p-card-section-title { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 12px; }
-        .p-card-section-title::after { content: ''; height: 1px; flex: 1; background: #e2e8f0; }
+        .p-card-section { display: flex; flex-direction: column; gap: 10px; }
+        .p-card-section-title { font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 900; color: #777; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+        .p-card-section-title::after { content: ''; height: 2px; flex: 1; background: var(--black); }
         
-        .p-card-socials { display: flex; gap: 14px; flex-wrap: wrap; }
-        .p-card-social-btn { width: 44px; height: 44px; border: 3px solid var(--black); display: flex; align-items: center; justify-content: center; background: #fff; text-decoration: none; color: var(--black); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 10px; }
-        .p-card-social-btn svg { width: 20px; height: 20px; }
-        .p-card-social-btn:hover { transform: translateY(-4px); box-shadow: 0 4px 0 var(--black); }
-        .p-card-social-btn.twitter:hover { background: #1DA1F2; border-color: #1DA1F2; color: #fff; }
-        .p-card-social-btn.github:hover { background: #333; border-color: #333; color: #fff; }
-        .p-card-social-btn.linkedin:hover { background: #0077b5; border-color: #0077b5; color: #fff; }
-        .p-card-social-btn.telegram:hover { background: #0088cc; border-color: #0088cc; color: #fff; }
-        .p-card-social-btn.website:hover { background: var(--primary); border-color: var(--black); color: var(--black); }
+        .p-card-socials { display: flex; gap: 10px; flex-wrap: wrap; }
+        .p-card-social-btn { width: 38px; height: 38px; border: 3px solid var(--black); display: flex; align-items: center; justify-content: center; background: #fff; text-decoration: none; color: var(--black); transition: 0.1s; border-radius: 0; }
+        .p-card-social-btn svg { width: 18px; height: 18px; }
+        .p-card-social-btn:hover { transform: translate(-2px, -2px); box-shadow: 2px 2px 0 var(--black); background: var(--primary); }
 
-        .p-card-skills { display: flex; flex-wrap: wrap; gap: 10px; }
-        .p-card-skill-tag { background: #fff; border: 2px solid var(--black); padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--black); box-shadow: 2px 2px 0 var(--black); transition: 0.2s; cursor: default; }
-        .p-card-skill-tag:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--black); background: var(--secondary); }
+        .p-card-skills { display: flex; flex-wrap: wrap; gap: 8px; }
+        .p-card-skill-tag { background: #fff; border: 2px solid var(--black); padding: 4px 12px; border-radius: 0; font-size: 12px; font-weight: 700; color: var(--black); box-shadow: 3px 3px 0 var(--black); transition: 0.1s; }
+        .p-card-skill-tag:hover { background: var(--secondary); }
 
-        .p-card-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .p-card-meta-card { background: #fff; border: 2px solid #e2e8f0; padding: 16px; border-radius: 12px; display: flex; gap: 12px; align-items: center; transition: 0.2s; }
-        .p-card-meta-card:hover { border-color: var(--black); background: #fdfdfd; }
-        .p-card-meta-icon { width: 32px; height: 32px; background: #f1f5f9; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #64748b; flex-shrink: 0; }
+        .p-card-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .p-card-meta-card { background: #fff; border: 2px solid var(--black); padding: 12px; border-radius: 0; display: flex; gap: 10px; align-items: center; }
+        .p-card-meta-icon { width: 28px; height: 28px; background: #eee; border-radius: 0; border: 2px solid var(--black); display: flex; align-items: center; justify-content: center; color: var(--black); flex-shrink: 0; }
+        .p-card-meta-icon svg { width: 14px; height: 14px; }
         .p-card-meta-info { display: flex; flex-direction: column; }
-        .p-card-meta-label { font-size: 10px; font-family: 'Space Mono', monospace; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
-        .p-card-meta-value { font-size: 14px; font-weight: 800; color: var(--black); }
+        .p-card-meta-label { font-size: 9px; font-family: 'Space Mono', monospace; color: #666; font-weight: 700; }
+        .p-card-meta-value { font-size: 13px; font-weight: 800; color: var(--black); }
 
-        .p-card-footer { margin-top: 10px; }
-        .p-card-share-btn { width: 100%; padding: 18px; background: linear-gradient(90deg, #00ffa3, #00d1ff); color: var(--black); border: 4px solid var(--black); font-size: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; border-radius: 12px; box-shadow: 6px 6px 0 var(--black); }
+        .p-card-footer { margin-top: 5px; }
+        .p-card-share-btn { width: 100%; padding: 12px; background: var(--primary); color: var(--black); border: 4px solid var(--black); font-size: 14px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 0; box-shadow: 6px 6px 0 var(--black); }
+        .p-card-share-btn svg { width: 16px; height: 16px; stroke-width: 3; }
         .p-card-share-btn:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--black); }
-        .p-card-share-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--black); }
+        .p-card-share-btn:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--black); }
 
-        .p-card-close { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.3); border: none; color: #fff; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .p-card-close:hover { background: var(--black); transform: scale(1.1) rotate(90deg); }
+        .p-card-close { position: absolute; top: -15px; right: -15px; background: var(--black); border: 3px solid #fff; color: #fff; width: 34px; height: 34px; border-radius: 0; cursor: pointer; z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .p-card-close:hover { background: var(--accent); color: #fff; transform: translate(-2px, -2px); box-shadow: 4px 4px 0 #fff; }
 
         /* FOOTER */
         footer { background: var(--black); border-top: 4px solid var(--primary); padding: 60px 0 40px; color: #fff; margin-top: 80px; }
