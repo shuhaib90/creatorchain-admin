@@ -48,7 +48,7 @@
         .btn-accent { background: var(--accent); color: var(--black); }
 
         nav {
-            padding: 20px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -58,6 +58,17 @@
             top: 0;
             z-index: 1000;
         }
+
+        /* EXPLORE DROPDOWN */
+        .explore-dropdown { position: relative; display: inline-block; }
+        .explore-btn { background: var(--black); color: var(--accent); border: 2px solid var(--black); padding: 8px 16px; font-family: var(--font-mono); font-weight: 700; cursor: pointer; box-shadow: 4px 4px 0 var(--accent); transition: all 0.2s; }
+        .explore-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--accent); }
+        .explore-menu { position: absolute; top: 100%; right: 0; margin-top: 8px; background: var(--black); border: 2px solid var(--accent); box-shadow: 8px 8px 0 rgba(0,0,0,0.2); min-width: 200px; display: none; flex-direction: column; z-index: 10006; padding: 5px; }
+        .explore-menu.show { display: flex; }
+        .explore-item { padding: 12px 16px; text-decoration: none; color: #fff; font-size: 13px; font-weight: 700; font-family: var(--font-mono); transition: 0.1s; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #333; text-align: left; }
+        .explore-item:last-child { border-bottom: none; }
+        .explore-item:hover { background: var(--accent); color: #000; }
+        .explore-item span { font-size: 16px; }
 
         .logo { font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: -1px; }
 
@@ -253,7 +264,14 @@
     <nav>
         <a href="/" class="logo" style="text-decoration:none; color:inherit;">CREATOR<span class="outline">CHAIN</span></a>
         <div style="display:flex; gap:15px;">
-            <a href="/" class="btn btn-black" style="padding:8px 16px; font-size:12px;">BACK TO HOME</a>
+            <div class="explore-dropdown">
+                <button class="explore-btn" onclick="toggleExplore()">EXPLORE ▼</button>
+                <div class="explore-menu" id="exploreMenu">
+                    <a href="/" class="explore-item"><span>🏠</span> HOME</a>
+                    <a href="/talent.html" class="explore-item"><span>✨</span> FIND TALENT</a>
+                    <a href="/?submit=true" class="explore-item"><span>🚀</span> SUBMIT PROJECT</a>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -568,6 +586,18 @@
             t.style.display = 'block';
             setTimeout(() => t.style.display = 'none', 3000);
         }
+
+        function toggleExplore() {
+            document.getElementById('exploreMenu').classList.toggle('show');
+        }
+
+        // Close dropdowns when clicking outside
+        window.addEventListener('click', function(e) {
+            if (!e.target.closest('.explore-dropdown')) {
+                const menu = document.getElementById('exploreMenu');
+                if (menu && menu.classList.contains('show')) menu.classList.remove('show');
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', init);
     </script>

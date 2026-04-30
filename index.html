@@ -174,16 +174,18 @@
         .status-pending { color: var(--secondary); border-color: var(--secondary); }
         .status-rejected { color: var(--accent); border-color: var(--accent); }
 
-        /* NAV DROPDOWN */
-        .user-dropdown-container { position: relative; display: inline-block; }
-        .user-dropdown-trigger { display: flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 4px 12px 4px 4px; border-radius: 99px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
-        .user-dropdown-trigger:hover { background: #e2e8f0; border-color: #cbd5e1; }
-        .user-dropdown-trigger img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
-        .user-dropdown-trigger span { font-weight: 500; font-size: 14px; color: #334155; }
-        .user-dropdown-menu { position: absolute; top: 100%; right: 0; margin-top: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); min-width: 160px; display: none; flex-direction: column; z-index: 10005; padding: 4px 0; }
-        .user-dropdown-menu.show { display: flex; }
-        .user-dropdown-menu a { padding: 8px 16px; text-decoration: none; color: #475569; font-size: 14px; font-weight: 500; transition: 0.1s; display: block; }
         .user-dropdown-menu a:hover { background: #f8fafc; color: #0f172a; }
+        
+        /* EXPLORE DROPDOWN */
+        .explore-dropdown { position: relative; display: inline-block; }
+        .explore-btn { background: var(--black); color: var(--primary); border: var(--border); padding: 8px 16px; font-family: 'Space Mono', monospace; font-weight: 700; cursor: pointer; box-shadow: 4px 4px 0 var(--primary); transition: all 0.2s; }
+        .explore-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--primary); }
+        .explore-menu { position: absolute; top: 100%; left: 0; margin-top: 8px; background: var(--black); border: 2px solid var(--primary); box-shadow: 8px 8px 0 rgba(0,0,0,0.2); min-width: 200px; display: none; flex-direction: column; z-index: 10006; padding: 5px; }
+        .explore-menu.show { display: flex; }
+        .explore-item { padding: 12px 16px; text-decoration: none; color: #fff; font-size: 13px; font-weight: 700; font-family: 'Space Mono', monospace; transition: 0.1s; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #333; }
+        .explore-item:last-child { border-bottom: none; }
+        .explore-item:hover { background: var(--primary); color: #000; }
+        .explore-item span { font-size: 16px; }
 
         /* LOGIN */
         #login-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10002; display: none; align-items: center; justify-content: center; }
@@ -356,17 +358,20 @@
             <div class="logo" onclick="window.location.reload()">CREATOR<span>CHAIN</span></div>
         </div>
         <div class="nav-links">
-            <a href="/talent.html" class="nav-link" style="color:var(--primary); font-weight:900;">FIND TALENT ✨</a>
+            <div class="explore-dropdown">
+                <button class="explore-btn" onclick="toggleExplore()">EXPLORE ▼</button>
+                <div class="explore-menu" id="exploreMenu">
+                    <a href="/talent.html" class="explore-item"><span>✨</span> FIND TALENT</a>
+                    <a href="#" onclick="openSubmitModal(); toggleExplore(); return false;" class="explore-item"><span>🚀</span> SUBMIT PROJECT</a>
+                    <a href="#" onclick="openStatusModal(); toggleExplore(); return false;" class="explore-item"><span>📋</span> TRACK SUBMISSION</a>
+                </div>
+            </div>
             <a href="#ambassador-section" class="nav-link">AMBASSADORS</a>
             <a href="#discord-section" class="nav-link">DISCORD</a>
             <a href="#bounty-section" class="nav-link">BOUNTIES</a>
-            <a href="#developer-section" class="nav-link">DEVELOPER</a>
-            <a href="#campaign-section" class="nav-link">CAMPAIGNS</a>
-            <a href="#" onclick="openStatusModal(); return false;" class="nav-link">TRACK SUBMISSION</a>
             <div id="auth-nav-box" style="display:inline-flex;">
                 <button class="btn btn-x btn-sm" onclick="signInWithX()"><i>𝕏</i> SIGN IN</button>
             </div>
-            <button class="btn btn-black btn-sm" onclick="openSubmitModal()">+ SUBMIT PROJECT</button>
         </div>
     </div>
 </nav>
@@ -2110,6 +2115,11 @@
 
         // Deep Link: Profiles (?u=@handle)
         const urlParams = new URLSearchParams(window.location.search);
+        
+        if (urlParams.get('submit') === 'true') {
+            openSubmitModal();
+        }
+
         const handle = urlParams.get('u');
         if (handle) {
             const cleanHandle = handle.replace('@', '');
@@ -2122,17 +2132,22 @@
             } catch (e) { console.error('Profile deep link error:', e); }
         }
     });
-    </script>
-    <script>
-        // Close dropdown when clicking outside
-        window.addEventListener('click', function(e) {
-            if (!e.target.closest('.user-dropdown-container')) {
-                const menu = document.getElementById('userDropdownMenu');
-                if (menu && menu.classList.contains('show')) {
-                    menu.classList.remove('show');
-                }
-            }
-        });
+    // ─── Dropdowns ─────────────────────────────────────────
+    function toggleExplore() {
+        document.getElementById('exploreMenu').classList.toggle('show');
+    }
+
+    // Close dropdowns when clicking outside
+    window.addEventListener('click', function(e) {
+        if (!e.target.closest('.explore-dropdown')) {
+            const menu = document.getElementById('exploreMenu');
+            if (menu && menu.classList.contains('show')) menu.classList.remove('show');
+        }
+        if (!e.target.closest('.user-dropdown-container')) {
+            const menu = document.getElementById('userDropdownMenu');
+            if (menu && menu.classList.contains('show')) menu.classList.remove('show');
+        }
+    });
     </script>
 </body>
 </html>
