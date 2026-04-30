@@ -42,18 +42,31 @@ module.exports = async (req, res) => {
       let score = 0;
       const reasons = [];
 
-      // A. Category Match (+50)
       const section = job.section.toLowerCase();
-      const userType = userProfile.user_type.toLowerCase();
+      const jobText = (job.project + ' ' + job.title + ' ' + (job.description || '')).toLowerCase();
+
+      // A. Role/Skill Match (+50)
+      const userType = (userProfile.user_type || '').toLowerCase();
+      const userSkills = userProfile.skills || [];
       
-      if (section.includes(userType)) {
-        score += 50;
+      let roleMatch = false;
+      if (userType && section.includes(userType)) {
+        roleMatch = true;
         reasons.push(`${userProfile.user_type} focus`);
+      } else {
+        userSkills.forEach(skill => {
+          if (section.includes(skill.toLowerCase()) || jobText.includes(skill.toLowerCase())) {
+            if (!roleMatch) {
+              roleMatch = true;
+              reasons.push(`Matches skill: ${skill}`);
+            }
+          }
+        });
       }
+      if (roleMatch) score += 50;
 
       // B. Interest overlap (+30)
       const interests = userProfile.interests || [];
-      const jobText = (job.project + ' ' + job.title + ' ' + (job.description || '')).toLowerCase();
       
       let interestHits = 0;
       interests.forEach(interest => {
@@ -67,12 +80,12 @@ module.exports = async (req, res) => {
         reasons.push(`Matches interests: ${interests.join(', ')}`);
       }
 
-      // C. Skill Alignment (+20)
-      // Logic: Expert matches higher rewards or featured listings
-      if (userProfile.skill_level === 'expert' && (job.featured || job.reward.includes('$'))) {
+      // C. Experience Alignment (+20)
+      const expLevel = userProfile.experience_level || userProfile.skill_level || 'beginner';
+      if ((expLevel === 'expert' || expLevel === 'advanced') && (job.featured || job.reward.includes('$'))) {
         score += 20;
         reasons.push('High-level opportunity');
-      } else if (userProfile.skill_level === 'beginner' && !job.featured) {
+      } else if (expLevel === 'beginner' && !job.featured) {
         score += 20;
         reasons.push('Beginner friendly');
       }

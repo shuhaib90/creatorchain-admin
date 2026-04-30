@@ -132,6 +132,8 @@
         .submit-error { background: #fff0f0; border: 2px solid var(--accent); padding: 12px; margin-top: 15px; font-size: 13px; color: var(--accent); font-weight: 700; display: none; }
         .btn-loading { opacity: 0.7; pointer-events: none; }
 
+        /* PROFILE MODAL */
+        #profile-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9000; display: none; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; }
         /* ADMIN */
         #admin-panel { position: fixed; inset: 0; background: #0a0a0a; color: #fff; z-index: 10001; padding: 0; overflow-y: auto; display: none; }
         .admin-inner { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
@@ -430,6 +432,113 @@
     </div>
 </footer>
 
+<!-- ======================== PROFILE MODAL ======================== -->
+<div id="profile-modal">
+    <div class="submit-card">
+        <div class="submit-header">
+            <h2>Your <span class="outline" style="-webkit-text-stroke: 1.5px #fff; color: transparent;">Profile</span></h2>
+            <p>Complete your profile to get better AI matches and opportunity alerts.</p>
+        </div>
+        <div class="submit-body">
+            <form id="profile-form" onsubmit="saveProfile(event)">
+                <div class="form-section-title">01 // BASIC INFO</div>
+                <div class="field">
+                    <label>NAME</label>
+                    <input type="text" id="p-name" placeholder="E.g., John Doe">
+                </div>
+                <div class="field">
+                    <label>ONE-LINE BIO <span id="bio-count" style="color:var(--muted); float:right;">0/180</span></label>
+                    <input type="text" id="p-bio" maxlength="180" placeholder="E.g., Full-stack Web3 Developer building the future." oninput="document.getElementById('bio-count').innerText = this.value.length + '/180'">
+                </div>
+
+                <div class="form-section-title">02 // SOCIALS</div>
+                <div class="field-row">
+                    <div class="field">
+                        <label>GITHUB <span class="req">*</span></label>
+                        <input type="text" id="p-github" required placeholder="github.com/username">
+                    </div>
+                    <div class="field">
+                        <label>TWITTER (X)</label>
+                        <input type="text" id="p-twitter" placeholder="@username">
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label>DISCORD</label>
+                        <input type="text" id="p-discord" placeholder="username#1234">
+                    </div>
+                    <div class="field">
+                        <label>TELEGRAM</label>
+                        <input type="text" id="p-telegram" placeholder="@username">
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label>LINKEDIN</label>
+                        <input type="text" id="p-linkedin" placeholder="linkedin.com/in/username">
+                    </div>
+                    <div class="field">
+                        <label>WEBSITE</label>
+                        <input type="url" id="p-website" placeholder="https://yourdomain.com">
+                    </div>
+                </div>
+
+                <div class="form-section-title">03 // WORK & EXPERIENCE</div>
+                <div class="field-row">
+                    <div class="field">
+                        <label>EXPERIENCE LEVEL</label>
+                        <select id="p-exp-level">
+                            <option value="">Select Level</option>
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>WORK PREFERENCE</label>
+                        <select id="p-work-pref">
+                            <option value="">Select Preference</option>
+                            <option value="part-time">Part-Time</option>
+                            <option value="full-time">Full-Time</option>
+                            <option value="freelance">Freelance</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>WEB3 INTERESTS (Comma separated)</label>
+                    <input type="text" id="p-interests" placeholder="DeFi, NFTs, DAOs, Gaming, Infrastructure">
+                </div>
+                <div class="field">
+                    <label>SKILLS (Comma separated)</label>
+                    <input type="text" id="p-skills" placeholder="Frontend, Blockchain, Graphic Design, Community Manager...">
+                </div>
+                <div class="field">
+                    <label>CURRENT EMPLOYER</label>
+                    <input type="text" id="p-employer" placeholder="Company Name">
+                </div>
+                <div class="field">
+                    <label>LOCATION</label>
+                    <input type="text" id="p-location" placeholder="City, Country or Remote">
+                </div>
+
+                <div class="form-section-title">04 // NOTIFICATIONS</div>
+                <div class="field">
+                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                        <input type="checkbox" id="p-email-notif" style="width:auto; height:18px;">
+                        Enable email notifications for opportunities matching my skills
+                    </label>
+                </div>
+
+                <div id="profile-error" class="submit-error"></div>
+                <div style="display:flex; gap:15px; margin-top:30px;">
+                    <button type="button" class="btn btn-white" style="flex:1;" onclick="closeProfileModal()">CANCEL</button>
+                    <button type="submit" class="btn btn-primary" style="flex:2;" id="p-submit-btn">SAVE PROFILE</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- ======================== SUBMIT MODAL ======================== -->
 <div id="submit-modal">
     <div class="submit-card" id="submit-card-inner">
@@ -702,6 +811,7 @@
             <div class="user-profile">
                 <img src="${profile.avatar_url || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'}" alt="">
                 <span>${profile.full_name || profile.user_name}</span>
+                <span class="logout" onclick="openProfileModal()">PROFILE</span>
                 <span class="logout" onclick="signOut()">LOGOUT</span>
             </div>
         `;
@@ -1442,6 +1552,120 @@
             }).subscribe();
     }
 
+    // ─── Profile Logic ─────────────────────────────────────
+    let currentUserProfileId = null;
+
+    function openProfileModal() {
+        document.getElementById('profile-modal').style.display = 'flex';
+        loadProfileData();
+    }
+    function closeProfileModal() {
+        document.getElementById('profile-modal').style.display = 'none';
+    }
+
+    async function loadProfileData() {
+        const { data: { user } } = await db.auth.getUser();
+        if (!user) return;
+
+        currentUserProfileId = user.id;
+
+        try {
+            const resp = await fetch(`/api/profile?user_id=${user.id}`);
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data && Object.keys(data).length > 0) {
+                    document.getElementById('p-name').value = data.name || '';
+                    document.getElementById('p-bio').value = data.bio || '';
+                    document.getElementById('bio-count').innerText = (data.bio ? data.bio.length : 0) + '/180';
+                    document.getElementById('p-github').value = data.github || '';
+                    document.getElementById('p-twitter').value = data.twitter || data.username || '';
+                    document.getElementById('p-discord').value = data.discord || '';
+                    document.getElementById('p-telegram').value = data.telegram || '';
+                    document.getElementById('p-linkedin').value = data.linkedin || '';
+                    document.getElementById('p-website').value = data.website || '';
+                    document.getElementById('p-exp-level').value = data.experience_level || '';
+                    document.getElementById('p-work-pref').value = data.work_preference || '';
+                    document.getElementById('p-interests').value = data.interests ? data.interests.join(', ') : '';
+                    document.getElementById('p-skills').value = data.skills ? data.skills.join(', ') : '';
+                    document.getElementById('p-employer').value = data.current_employer || '';
+                    document.getElementById('p-location').value = data.location || '';
+                    document.getElementById('p-email-notif').checked = data.email_notifications || false;
+                }
+            }
+        } catch (err) {
+            console.error('Error loading profile:', err);
+        }
+    }
+
+    async function saveProfile(e) {
+        e.preventDefault();
+        const errEl = document.getElementById('profile-error');
+        const btn = document.getElementById('p-submit-btn');
+        errEl.style.display = 'none';
+
+        if (!currentUserProfileId) {
+            errEl.textContent = 'You must be logged in.';
+            errEl.style.display = 'block';
+            return;
+        }
+
+        const bio = document.getElementById('p-bio').value;
+        if (bio.length > 180) {
+            errEl.textContent = 'Bio must be under 180 characters.';
+            errEl.style.display = 'block';
+            return;
+        }
+
+        btn.textContent = 'SAVING...';
+        btn.disabled = true;
+
+        const interestsVal = document.getElementById('p-interests').value.split(',').map(s=>s.trim()).filter(s=>s);
+        const skillsVal = document.getElementById('p-skills').value.split(',').map(s=>s.trim()).filter(s=>s);
+
+        const payload = {
+            user_id: currentUserProfileId,
+            username: document.getElementById('p-twitter').value.replace('@', '') || `user_${Date.now()}`,
+            name: document.getElementById('p-name').value,
+            bio: bio,
+            github: document.getElementById('p-github').value,
+            twitter: document.getElementById('p-twitter').value,
+            discord: document.getElementById('p-discord').value,
+            telegram: document.getElementById('p-telegram').value,
+            linkedin: document.getElementById('p-linkedin').value,
+            website: document.getElementById('p-website').value,
+            experience_level: document.getElementById('p-exp-level').value,
+            work_preference: document.getElementById('p-work-pref').value,
+            interests: interestsVal,
+            skills: skillsVal,
+            current_employer: document.getElementById('p-employer').value,
+            location: document.getElementById('p-location').value,
+            email_notifications: document.getElementById('p-email-notif').checked,
+            source: 'login'
+        };
+
+        try {
+            const resp = await fetch('/api/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!resp.ok) {
+                const errData = await resp.json();
+                throw new Error(errData.error || 'Failed to save profile');
+            }
+
+            showToast('✓ Profile saved successfully!');
+            closeProfileModal();
+        } catch (err) {
+            errEl.textContent = 'Error: ' + err.message;
+            errEl.style.display = 'block';
+        } finally {
+            btn.textContent = 'SAVE PROFILE';
+            btn.disabled = false;
+        }
+    }
+
     // ─── Thumbnail Auto-Detection ────────────────────────
     const setupThumbDetection = (inputId, formId, statusParentId, hiddenId) => {
         const input = document.getElementById(inputId);
@@ -1564,11 +1788,16 @@
         
         // Render Profile Chips
         const p = data.profile;
+        const typeStr = p.user_type || 'Custom';
+        const skillStr = p.experience_level || p.skill_level || 'Unknown';
+        const focusArr = p.interests || [];
+        const intentStr = p.intent || 'Looking for Web3 opportunities';
+        
         profileSummary.innerHTML = `
-            <div class="profile-chip"><span>TYPE:</span> ${p.user_type}</div>
-            <div class="profile-chip"><span>SKILL:</span> ${p.skill_level}</div>
-            <div class="profile-chip"><span>FOCUS:</span> ${p.interests.join(', ')}</div>
-            <div class="profile-chip"><span>INTENT:</span> ${p.intent}</div>
+            <div class="profile-chip"><span>TYPE:</span> ${typeStr}</div>
+            <div class="profile-chip"><span>EXPERIENCE:</span> ${skillStr}</div>
+            <div class="profile-chip"><span>FOCUS:</span> ${focusArr.join(', ')}</div>
+            <div class="profile-chip"><span>INTENT:</span> ${intentStr}</div>
         `;
 
         // Render Matched Cards
