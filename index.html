@@ -496,8 +496,8 @@
 </div>
 
 <!-- ======================== PROFILE MODAL (EDIT) ======================== -->
-<div id="profile-modal">
-    <div class="submit-card">
+<div id="profile-modal" onclick="if(event.target === this) closeProfileModal()" style="cursor:pointer;">
+    <div class="submit-card" onclick="event.stopPropagation()" style="cursor:default;">
         <div class="submit-header">
             <h2>Your <span class="outline" style="-webkit-text-stroke: 1.5px #fff; color: transparent;">Profile</span></h2>
             <p>Complete your profile to get better AI matches and opportunity alerts.</p>
@@ -634,8 +634,8 @@
 </div>
 
 <!-- ======================== SUBMIT MODAL ======================== -->
-<div id="submit-modal">
-    <div class="submit-card" id="submit-card-inner">
+<div id="submit-modal" onclick="if(event.target === this) closeSubmitModal()" style="cursor:pointer;">
+    <div class="submit-card" id="submit-card-inner" onclick="event.stopPropagation()" style="cursor:default;">
         <div class="submit-header">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                 <div>
@@ -716,8 +716,8 @@
 <!-- ADMIN PANEL below -->
 
 <!-- ======================== ADMIN PANEL ======================== -->
-<div id="admin-panel">
-    <div class="admin-inner">
+<div id="admin-panel" onclick="if(event.target === this) hideAdmin()" style="cursor:pointer;">
+    <div class="admin-inner" onclick="event.stopPropagation()" style="cursor:default;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
             <div>
                 <h2 class="mono" style="font-size:48px; color:var(--primary); letter-spacing:-1px;">ADMIN_DASHBOARD</h2>
@@ -824,8 +824,8 @@
 </div>
 
 <!-- ======================== STATUS CHECKER MODAL ======================== -->
-<div id="status-modal">
-    <div class="status-checker-card">
+<div id="status-modal" onclick="if(event.target === this) closeStatusModal()" style="cursor:pointer;">
+    <div class="status-checker-card" onclick="event.stopPropagation()" style="cursor:default;">
         <button onclick="closeStatusModal()" style="position:absolute; top:20px; right:25px; background:none; border:none; font-size:24px; cursor:pointer; font-weight:900; color:var(--black); z-index:100;">✕</button>
         <h2 style="font-size:28px; margin-bottom:8px;">Track Your Submission</h2>
         <p style="color:var(--muted); font-size:14px;">Enter your tracking code to see its current status.</p>
