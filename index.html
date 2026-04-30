@@ -527,11 +527,8 @@
                             <span id="p-avatar-placeholder" style="font-size:24px;">👤</span>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:8px; flex:1;">
-                            <div style="display:flex; gap:10px;">
-                                <button type="button" class="btn btn-white btn-sm" style="flex:1;" onclick="document.getElementById('p-avatar-file').click()">📤 UPLOAD</button>
-                                <button type="button" class="btn btn-black btn-sm" style="flex:1;" onclick="syncAvatarFromX()">🔄 SYNC X</button>
-                            </div>
-                            <p style="font-size:10px; color:var(--muted); margin:0;">Recommended: Square JPG/PNG, max 2MB</p>
+                            <button type="button" class="btn btn-white btn-sm" style="width:100%;" onclick="document.getElementById('p-avatar-file').click()">📸 CHANGE PROFILE PIC</button>
+                            <p style="font-size:10px; color:var(--muted); margin:0;">Auto-syncs with X profile if no custom pic is uploaded.</p>
                         </div>
                     </div>
                     <input type="file" id="p-avatar-file" accept="image/*" style="display:none;" onchange="handleProfileImageSelect(this)">
@@ -1730,7 +1727,6 @@
             preview.src = url;
             preview.style.display = 'block';
             placeholder.style.display = 'none';
-            showToast('✓ Synced from X profile!');
         }
     }
 
