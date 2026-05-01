@@ -75,11 +75,73 @@
         .subscribe-input:focus { border-color: var(--primary); }
         .subscribe-btn { background: var(--primary); color: #000; border: 3px solid var(--black); padding: 0 30px; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0 var(--black); font-size: 14px; transition: all 0.2s; white-space: nowrap; }
         .subscribe-btn:active { box-shadow: 0 0 0 var(--black); transform: translate(6px, 6px); }
-        .hero-stats-card { background: #fff; border: var(--border); box-shadow: 8px 8px 0 var(--black); padding: 36px; }
-        .stat-item { padding: 12px 0; border-bottom: 2px solid var(--black); }
-        .stat-item:last-child { border-bottom: none; }
-        .stat-num { font-size: 52px; font-family: 'Space Mono', monospace; font-weight: 700; line-height: 1; display: block; }
-        .stat-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+        .hero-stats-card {
+            background: #fff;
+            border: 4px solid var(--black);
+            padding: 30px;
+            box-shadow: 10px 10px 0 var(--black);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-stats-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.1;
+            background-image: radial-gradient(var(--black) 1.5px, transparent 0);
+            background-size: 8px 8px;
+            pointer-events: none;
+        }
+        .stat-item { 
+            position: relative;
+            z-index: 2;
+        }
+        .stat-num { 
+            display: block; 
+            font-size: 48px; 
+            font-weight: 900; 
+            color: var(--black); 
+            line-height: 1;
+            margin-bottom: 5px;
+            letter-spacing: -2px;
+            font-family: 'Space Mono', monospace;
+        }
+        .stat-label { 
+            font-family: 'Space Mono', monospace; 
+            font-size: 11px; 
+            font-weight: 800; 
+            color: #666; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .stat-label::before {
+            content: '';
+            width: 12px;
+            height: 2px;
+            background: var(--primary);
+        }
+        .stat-divider {
+            height: 4px;
+            background: var(--black);
+            margin: 5px 0;
+            position: relative;
+            z-index: 2;
+        }
+        .stat-divider::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -4px;
+            bottom: -4px;
+            width: 10px;
+            background: var(--primary);
+        }
 
         /* SECTIONS */
         section.cat-section { padding: 80px 0; position: relative; }
@@ -451,8 +513,9 @@
                 <span class="stat-num" id="hero-count">09</span>
                 <span class="stat-label">LIVE_ENTRIES</span>
             </div>
+            <div class="stat-divider"></div>
             <div class="stat-item">
-                <span class="stat-num" id="hero-rewards">$387K+</span>
+                <span class="stat-num" style="color:var(--primary);" id="hero-rewards">$387K+</span>
                 <span class="stat-label">TOTAL_REWARD_POOL</span>
             </div>
         </div>
