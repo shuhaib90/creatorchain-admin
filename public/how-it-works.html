@@ -145,6 +145,26 @@
             text-align: center;
         }
 
+        /* REVEAL ANIMATIONS */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .step-visual.reveal {
+            transform: translateX(-40px) scale(0.95);
+        }
+        .step-row:nth-child(even) .step-visual.reveal {
+            transform: translateX(40px) scale(0.95);
+        }
+        .reveal.revealed {
+            transform: translate(0) scale(1);
+        }
+
         @media (max-width: 768px) {
             .step-row { grid-template-columns: 1fr; gap: 40px; margin-bottom: 80px; }
             .hero-section h1 { font-size: 48px; }
@@ -182,14 +202,14 @@
     <div class="container">
         
         <!-- STEP 1 -->
-        <div class="step-row">
-            <div class="step-visual">
+        <div class="step-row reveal">
+            <div class="step-visual reveal">
                 <div class="step-num">01</div>
                 <div style="background: #eee; height: 250px; display:flex; align-items:center; justify-content:center; border: 2px solid #000;">
                     <i data-lucide="shield-check" style="width:100px; height:100px; color:var(--primary);"></i>
                 </div>
             </div>
-            <div class="step-content">
+            <div class="step-content reveal">
                 <h2>CONNECT YOUR <span class="outline">IDENTITY</span></h2>
                 <p>Start by verifying your Web3 presence. Sign in with X (Twitter) to instantly create your authenticated builder identity. We use your social graph to jumpstart your reputation within our ecosystem.</p>
                 <div>
@@ -201,14 +221,14 @@
         </div>
 
         <!-- STEP 2 -->
-        <div class="step-row">
-            <div class="step-visual" style="box-shadow: 20px 20px 0 var(--primary);">
+        <div class="step-row reveal">
+            <div class="step-visual reveal" style="box-shadow: 20px 20px 0 var(--primary);">
                 <div class="step-num" style="color:var(--secondary);">02</div>
                 <div style="background: #eee; height: 250px; display:flex; align-items:center; justify-content:center; border: 2px solid #000;">
                     <i data-lucide="user-plus" style="width:100px; height:100px; color:var(--black);"></i>
                 </div>
             </div>
-            <div class="step-content">
+            <div class="step-content reveal">
                 <h2>BUILD YOUR <span class="outline">LEGACY</span></h2>
                 <p>Define who you are. Add your skills, portfolio, and experience level. Your CreatorChain profile is your digital resume in the decentralized world, visible to hundreds of project leads looking for top talent.</p>
                 <div>
@@ -220,14 +240,14 @@
         </div>
 
         <!-- STEP 3 -->
-        <div class="step-row">
-            <div class="step-visual" style="box-shadow: 20px 20px 0 var(--black);">
+        <div class="step-row reveal">
+            <div class="step-visual reveal" style="box-shadow: 20px 20px 0 var(--black);">
                 <div class="step-num">03</div>
                 <div style="background: #eee; height: 250px; display:flex; align-items:center; justify-content:center; border: 2px solid #000;">
                     <i data-lucide="search" style="width:100px; height:100px; color:var(--accent);"></i>
                 </div>
             </div>
-            <div class="step-content">
+            <div class="step-content reveal">
                 <h2>DISCOVER <span class="outline">GLOBAL</span> ROLES</h2>
                 <p>Browse the largest unfiltered aggregator of Web3 opportunities. From high-stakes bounties to full-time roles in leading protocols, find the path that matches your ambition.</p>
                 <div>
@@ -239,14 +259,14 @@
         </div>
 
         <!-- STEP 4 -->
-        <div class="step-row">
-            <div class="step-visual" style="box-shadow: 20px 20px 0 var(--accent);">
+        <div class="step-row reveal">
+            <div class="step-visual reveal" style="box-shadow: 20px 20px 0 var(--accent);">
                 <div class="step-num" style="color:var(--primary);">04</div>
                 <div style="background: #eee; height: 250px; display:flex; align-items:center; justify-content:center; border: 2px solid #000;">
                     <i data-lucide="zap" style="width:100px; height:100px; color:var(--secondary);"></i>
                 </div>
             </div>
-            <div class="step-content">
+            <div class="step-content reveal">
                 <h2>APPLY & <span class="outline">CONTRIBUTE</span></h2>
                 <p>Found a role that fits? Apply directly through the platform. Whether it's a coding bounty or a marketing campaign, use our submission tracking system to manage your contributions and build your professional history.</p>
                 <div>
@@ -258,14 +278,14 @@
         </div>
 
         <!-- STEP 5 -->
-        <div class="step-row">
-            <div class="step-visual" style="box-shadow: 20px 20px 0 var(--secondary);">
+        <div class="step-row reveal">
+            <div class="step-visual reveal" style="box-shadow: 20px 20px 0 var(--secondary);">
                 <div class="step-num" style="color:var(--black);">05</div>
                 <div style="background: #eee; height: 250px; display:flex; align-items:center; justify-content:center; border: 2px solid #000;">
                     <i data-lucide="plus-square" style="width:100px; height:100px; color:var(--primary);"></i>
                 </div>
             </div>
-            <div class="step-content">
+            <div class="step-content reveal">
                 <h2>SUBMIT YOUR <span class="outline">PROJECT</span></h2>
                 <p>Ready to scale? List your project, bounties, or campaigns on CreatorChain. Provide the details, set your rewards, and get your roles in front of thousands of active Web3 builders instantly.</p>
                 <div>
@@ -277,14 +297,14 @@
         </div>
 
         <!-- STEP 6 -->
-        <div class="step-row">
-            <div class="step-visual" style="box-shadow: 20px 20px 0 var(--black);">
+        <div class="step-row reveal">
+            <div class="step-visual reveal" style="box-shadow: 20px 20px 0 var(--black);">
                 <div class="step-num" style="color:var(--primary);">06</div>
                 <div style="background: #eee; height: 250px; display:flex; align-items:center; justify-content:center; border: 2px solid #000;">
                     <i data-lucide="users" style="width:100px; height:100px; color:var(--accent);"></i>
                 </div>
             </div>
-            <div class="step-content">
+            <div class="step-content reveal">
                 <h2>FIND & <span class="outline">HIRE TALENT</span></h2>
                 <p>Access our global network of verified Web3 builders. Filter by skills, experience, and past contributions to find the perfect match for your project. Reach out directly and scale your team with confidence.</p>
                 <div>
@@ -313,6 +333,26 @@
 
 <script>
     lucide.createIcons();
+
+    // SCROLL REVEAL LOGIC
+    const observerOptions = {
+        threshold: 0.15,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                // Optional: stop observing after reveal
+                // observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal').forEach(el => {
+        observer.observe(el);
+    });
 </script>
 
 </body>
