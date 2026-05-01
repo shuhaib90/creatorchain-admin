@@ -471,6 +471,15 @@
             <div class="grid" id="tm-match-grid">
                 <!-- Results cards -->
             </div>
+            
+            <!-- Pagination Controls -->
+            <div id="tm-pagination" style="display:none; justify-content:center; align-items:center; gap:20px; margin-top:40px; margin-bottom: 60px;">
+                <button class="btn btn-white" id="tm-prev-btn" onclick="changePage(-1)" style="padding:10px 20px; font-size:12px; font-weight:800;">← PREVIOUS</button>
+                <div style="font-family:var(--font-mono); font-weight:800; font-size:14px; background:var(--black); color:var(--white); padding:8px 16px; border:3px solid var(--primary); box-shadow:4px 4px 0 rgba(0,245,160,0.2);">
+                    PAGE <span id="tm-current-page">1</span> / <span id="tm-total-pages">1</span>
+                </div>
+                <button class="btn btn-white" id="tm-next-btn" onclick="changePage(1)" style="padding:10px 20px; font-size:12px; font-weight:800;">NEXT PAGE →</button>
+            </div>
         </section>
     </main>
 
@@ -698,6 +707,9 @@
         ];
 
         let selectedTMSkills = [];
+        let talentResults = [];
+        let talentCurrentPage = 1;
+        const talentPageSize = 5;
 
         function initUnifiedSkills() {
             const talentBox = document.getElementById('tm-suggested-skills');
@@ -741,6 +753,7 @@
             btn.textContent = 'SCANNING NETWORK...';
             btn.disabled = true;
             grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px;"><p class="mono">🔍 ANALYZING BUILDER POOL...</p></div>';
+            document.getElementById('tm-pagination').style.display = 'none';
 
             try {
                 const { data: users, error } = await db.from('user_profiles')
@@ -750,43 +763,30 @@
                 if (error) throw error;
 
                 const matches = users.filter(user => {
-                    // 1. Skill Filter: Must have at least one of the selected skills (if any selected)
                     let matchedSkills = [];
                     if (selectedTMSkills.length > 0) {
                         const userSkills = user.skills || [];
                         matchedSkills = selectedTMSkills.filter(s => userSkills.includes(s));
                         if (matchedSkills.length === 0) return false;
                     }
-
-                    // 2. Experience Filter: Must match exactly if not 'any'
                     if (reqExp !== 'any' && user.experience_level !== reqExp) return false;
-
-                    // 3. Work Type Filter: Must match exactly if not 'any'
                     if (reqWork !== 'any' && user.work_preference !== reqWork) return false;
-
-                    // Add matched skills for rendering
                     user._matchedSkills = matchedSkills;
                     return true;
                 });
 
-                // Simple score for sorting
                 matches.sort((a, b) => {
                     const aCount = (a.skills || []).length;
                     const bCount = (b.skills || []).length;
                     return bCount - aCount;
                 });
 
-                grid.innerHTML = '';
+                talentResults = matches;
+                talentCurrentPage = 1;
                 countEl.textContent = matches.length;
 
-                if (matches.length === 0) {
-                    grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px;"><h3>No builders found matching these criteria.</h3></div>';
-                } else {
-                    matches.forEach(p => {
-                        const card = createCard(p);
-                        grid.appendChild(card);
-                    });
-                }
+                renderTalentPage();
+                
                 document.getElementById('tm-results').style.display = 'block';
                 document.getElementById('tm-results').scrollIntoView({ behavior: 'smooth' });
 
@@ -798,6 +798,48 @@
                 btn.disabled = false;
             }
         }
+
+        function renderTalentPage() {
+            const grid = document.getElementById('tm-match-grid');
+            const total = talentResults.length;
+            const totalPages = Math.ceil(total / talentPageSize) || 1;
+
+            grid.innerHTML = '';
+            
+            if (total === 0) {
+                grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px;"><h3>No builders found matching these criteria.</h3></div>';
+                document.getElementById('tm-pagination').style.display = 'none';
+                return;
+            }
+
+            const start = (talentCurrentPage - 1) * talentPageSize;
+            const end = start + talentPageSize;
+            const pageResults = talentResults.slice(start, end);
+
+            pageResults.forEach(p => {
+                grid.appendChild(createCard(p));
+            });
+
+            // Update Pagination UI
+            document.getElementById('tm-pagination').style.display = total > talentPageSize ? 'flex' : 'none';
+            document.getElementById('tm-current-page').textContent = talentCurrentPage;
+            document.getElementById('tm-total-pages').textContent = totalPages;
+            
+            document.getElementById('tm-prev-btn').disabled = talentCurrentPage === 1;
+            document.getElementById('tm-prev-btn').style.opacity = talentCurrentPage === 1 ? '0.5' : '1';
+            document.getElementById('tm-next-btn').disabled = talentCurrentPage === totalPages;
+            document.getElementById('tm-next-btn').style.opacity = talentCurrentPage === totalPages ? '0.5' : '1';
+        }
+
+        window.changePage = function(delta) {
+            const totalPages = Math.ceil(talentResults.length / talentPageSize);
+            const next = talentCurrentPage + delta;
+            if (next >= 1 && next <= totalPages) {
+                talentCurrentPage = next;
+                renderTalentPage();
+                document.getElementById('tm-results').scrollIntoView({ behavior: 'smooth' });
+            }
+        };
 
         function createCard(p) {
             const card = document.createElement('div');
