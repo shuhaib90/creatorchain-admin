@@ -943,8 +943,9 @@
         if (document.getElementById('auth-hero-box')) {
             document.getElementById('auth-hero-box').style.display = 'none';
         }
-        // Show Admin Terminal Link ONLY for @ZenvicAlpha
-        if (profile.user_name && profile.user_name.toLowerCase() === 'zenvicalpha') {
+        // Show Admin Terminal Link for authorized admins
+        const admins = ['zenvicalpha', 'zenvic_'];
+        if (profile.user_name && admins.includes(profile.user_name.toLowerCase())) {
             const menu = document.getElementById('userDropdownMenu');
             const adminLink = document.createElement('a');
             adminLink.href = '/admin.html';
