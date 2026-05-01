@@ -231,15 +231,51 @@ const Listings = () => {
     fetchListings();
   }, []);
 
+  const notifyMatchingBuilders = async (id: string) => {
+    const { data: project } = await supabase.from('listings').select('*').eq('id', id).single();
+    if (!project) return;
+
+    try {
+      const [{ data: profiles }, { data: subscribers }] = await Promise.all([
+        supabase.from('user_profiles').select('email, email_notifications, telegram_id, telegram_notifications'),
+        supabase.from('telegram_subscribers').select('chat_id')
+      ]);
+
+      const profileTgIds = (profiles || []).filter(p => p.telegram_notifications && p.telegram_id).map(p => p.telegram_id);
+      const globalTgIds = (subscribers || []).map(s => s.chat_id);
+      const tgRecipients = Array.from(new Set([...profileTgIds, ...globalTgIds]));
+
+      if (tgRecipients.length > 0) {
+        await fetch('https://creatorchain-web3-jobs.vercel.app/api/send-telegram', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'new_opportunity',
+            payload: {
+              chat_ids: tgRecipients,
+              project_name: project.project,
+              category: project.section,
+              reward: project.reward || 'TBA',
+              description: project.title
+            }
+          })
+        });
+      }
+    } catch (err) {
+      console.error('Telegram Broadcast Error:', err);
+    }
+  };
+
   const handleApprove = async (id: string) => {
-    await supabase.from('listings').update({ approval_status: 'approved' }).eq('id', id);
+    await supabase.from('listings').update({ approval_status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', id);
     setListings(listings.map(l => l.id === id ? { ...l, approval_status: 'approved' } : l));
+    notifyMatchingBuilders(id);
   };
 
   const handleReject = async (id: string) => {
     const reason = prompt('Rejection reason:');
     if (reason === null) return;
-    await supabase.from('listings').update({ approval_status: 'rejected', rejection_reason: reason }).eq('id', id);
+    await supabase.from('listings').update({ approval_status: 'rejected', rejection_reason: reason, reviewed_at: new Date().toISOString() }).eq('id', id);
     setListings(listings.map(l => l.id === id ? { ...l, approval_status: 'rejected', rejection_reason: reason } : l));
   };
 
@@ -256,6 +292,9 @@ const Listings = () => {
 
   const handleSaveEdit = (updated: any) => {
     setListings(listings.map(l => l.id === updated.id ? updated : l));
+    if (updated.approval_status === 'approved') {
+      notifyMatchingBuilders(updated.id);
+    }
   };
 
   return (
