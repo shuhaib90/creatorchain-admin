@@ -566,6 +566,8 @@
                 checkUser();
                 initUnifiedSkills();
                 lucide.createIcons();
+                // Load talent pool immediately
+                runTalentMatch();
             } catch (e) {
                 console.error("Initialization error:", e);
                 showToast("Failed to connect to network.", true);
