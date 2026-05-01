@@ -229,6 +229,24 @@ const Listings = () => {
       setLoading(false);
     };
     fetchListings();
+
+    // REALTIME_SUBSCRIPTION: Listen for live updates
+    const channel = supabase
+      .channel('admin_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'listings' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          setListings(prev => [payload.new, ...prev]);
+        } else if (payload.eventType === 'UPDATE') {
+          setListings(prev => prev.map(l => l.id === payload.new.id ? payload.new : l));
+        } else if (payload.eventType === 'DELETE') {
+          setListings(prev => prev.filter(l => l.id === payload.old.id));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const notifyMatchingBuilders = async (id: string) => {
@@ -429,46 +447,57 @@ const UsersPage = () => {
 // Main Layout Wrapper
 const Layout = ({ children, onLogout }: { children: React.ReactNode, onLogout: () => void }) => {
   const location = useLocation();
+  const [listings, setListings] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchListings = async () => {
+      const { data } = await supabase.from('listings').select('approval_status');
+      setListings(data || []);
+    };
+    fetchListings();
+
+    const channel = supabase.channel('layout_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'listings' }, () => {
+      fetchListings();
+    }).subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  const pendingCount = listings.filter(l => l.approval_status === 'pending').length;
   const isActive = (path: string) => location.pathname === path;
 
   return (
     <div className="admin-layout">
       <aside className="sidebar">
-        <div className="sidebar-header" style={{ marginBottom: '48px' }}>
+        <div style={{ padding: '0 32px', marginBottom: '48px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--primary)' }}>
             <ShieldCheck size={32} />
             <div>
               <div style={{ fontWeight: '900', fontSize: '18px', lineHeight: '1', color: 'white' }}>CREATOR<span style={{ color: 'var(--primary)' }}>OPS</span></div>
-              <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>ADMIN_TERMINAL_v2.0</div>
+              <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>TERMINAL_v2.0</div>
             </div>
           </div>
         </div>
 
-        <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <Link to="/" className={`btn ${isActive('/') ? 'btn-primary' : 'btn-outline'}`} style={{ width: '100%', justifyContent: 'flex-start' }}>
+        <nav style={{ flex: 1 }}>
+          <Link to="/" className={`nav-item ${isActive('/') ? 'active' : ''}`}>
             <LayoutDashboard size={18} /> DASHBOARD
           </Link>
-          <Link to="/listings" className={`btn ${isActive('/listings') ? 'btn-primary' : 'btn-outline'}`} style={{ width: '100%', justifyContent: 'flex-start' }}>
-            <ListTodo size={18} /> LISTINGS
+          <Link to="/listings" className={`nav-item ${isActive('/listings') ? 'active' : ''}`}>
+            <List size={18} /> LISTINGS 
+            {pendingCount > 0 && <span style={{ marginLeft: 'auto', background: 'var(--accent)', color: 'white', padding: '2px 6px', fontSize: '10px', border: '1px solid var(--black)' }}>{pendingCount}</span>}
           </Link>
-          <Link to="/users" className={`btn ${isActive('/users') ? 'btn-primary' : 'btn-outline'}`} style={{ width: '100%', justifyContent: 'flex-start' }}>
+          <Link to="/users" className={`nav-item ${isActive('/users') ? 'active' : ''}`}>
             <Users size={18} /> USERS
           </Link>
-          <Link to="/settings" className={`btn ${isActive('/settings') ? 'btn-primary' : 'btn-outline'}`} style={{ width: '100%', justifyContent: 'flex-start' }}>
+          <Link to="/settings" className={`nav-item ${isActive('/settings') ? 'active' : ''}`}>
             <Settings size={18} /> SETTINGS
           </Link>
         </nav>
 
-        <div className="sidebar-footer" style={{ marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid var(--border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-            <div style={{ width: '32px', height: '32px', background: 'var(--primary)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bg)', fontWeight: '700' }}>A</div>
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: '600' }}>Admin Ops</div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>System Level 4</div>
-            </div>
-          </div>
-          <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', color: 'var(--accent)' }} onClick={onLogout}>
-            <LogOut size={16} /> LOGOUT
+        <div style={{ padding: '32px', borderTop: '4px solid var(--black)' }}>
+          <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={onLogout}>
+            TERMINATE_SESSION
           </button>
         </div>
       </aside>
