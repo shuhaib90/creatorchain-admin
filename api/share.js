@@ -1,6 +1,6 @@
-import axios from 'axios';
+const axios = require('axios');
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   const { id } = req.query;
 
   if (!id) {
@@ -46,14 +46,14 @@ export default async function handler(req, res) {
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
     <meta property="og:image" content="${image}">
-
+ 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://creatorchain-job-board.vercel.app/api/share?id=${id}">
     <meta name="twitter:title" content="${title}">
     <meta name="twitter:description" content="${description}">
     <meta name="twitter:image" content="${image}">
-
+ 
     <!-- Auto-Redirect Browser to Site -->
     <script>
       window.location.href = "/?id=${id}";
@@ -71,4 +71,4 @@ export default async function handler(req, res) {
     console.error('Proxy Error:', error.message);
     res.redirect('/');
   }
-}
+};
