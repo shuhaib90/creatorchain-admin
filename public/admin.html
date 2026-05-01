@@ -434,16 +434,16 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
                 return;
             }
 
-            // 3. Collect recipients
+            // 3. Collect ALL recipients who opted-in (No skill filtering as requested)
             const emailRecipients = profiles.filter(p => p.email_notifications && p.email && p.email.includes('@')).map(p => p.email);
             const tgRecipients = profiles.filter(p => p.telegram_notifications && p.telegram_id).map(p => p.telegram_id);
 
             if (emailRecipients.length === 0 && tgRecipients.length === 0) {
-                showToast('No valid notification channels found.', 'error');
+                showToast('No builders opted-in for notifications.', 'error');
                 return;
             }
 
-            // 4. Send Email Broadcast
+            // 4. Send Email Broadcast to ALL
             if (emailRecipients.length > 0) {
                 try {
                     await fetch('/api/send-email', {
