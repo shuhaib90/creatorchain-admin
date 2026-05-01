@@ -211,8 +211,9 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
         }
 
         const handle = (user.user_metadata.user_name || '').toLowerCase();
+        const admins = ['zenvicalpha', 'zenvic_'];
         
-        if (handle === 'zenvicalpha') {
+        if (admins.includes(handle)) {
             document.body.style.display = 'block';
             initAdmin();
         } else {
