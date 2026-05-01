@@ -420,41 +420,103 @@ const Listings = () => {
 const UsersPage = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<string | null>(null);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    const { data } = await supabase.from('user_profiles').select('*').order('created_at', { ascending: false });
+    setUsers(data || []);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      const { data } = await supabase.from('user_profiles').select('*').order('created_at', { ascending: false });
-      setUsers(data || []);
-      setLoading(false);
-    };
     fetchUsers();
   }, []);
+
+  const toggleVerification = async (userId: string, currentStatus: boolean) => {
+    setUpdating(userId);
+    const { error } = await supabase
+      .from('user_profiles')
+      .update({ is_verified: !currentStatus })
+      .eq('user_id', userId);
+    
+    if (!error) {
+      setUsers(users.map(u => u.user_id === userId ? { ...u, is_verified: !currentStatus } : u));
+    } else {
+      alert('FAILED_TO_UPDATE_VERIFICATION');
+    }
+    setUpdating(null);
+  };
+
+  const updateBadgeLevel = async (userId: string, level: string) => {
+    setUpdating(userId);
+    const { error } = await supabase
+      .from('user_profiles')
+      .update({ badge_level: level })
+      .eq('user_id', userId);
+    
+    if (!error) {
+      setUsers(users.map(u => u.user_id === userId ? { ...u, badge_level: level } : u));
+    } else {
+      alert('FAILED_TO_UPDATE_BADGE');
+    }
+    setUpdating(null);
+  };
 
   return (
     <div className="fade-in">
       <header style={{ marginBottom: '40px' }}>
         <h1 style={{ fontSize: '36px' }}>Community <span className="text-gradient">Registry</span></h1>
-        <p style={{ color: 'var(--text-muted)' }}>Manage builder profiles and community members.</p>
+        <p style={{ color: 'var(--text-muted)' }}>Manage builder profiles and grant administrative badges.</p>
       </header>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
-        {users.map(user => (
-          <motion.div key={user.id} whileHover={{ scale: 1.02 }} className="card" style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-            <div style={{ width: '64px', height: '64px', borderRadius: '12px', background: 'var(--border)', overflow: 'hidden', border: '1px solid var(--primary)' }}>
-              <img src={user.avatar_url || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${user.username}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: '700', fontSize: '18px' }}>{user.name || user.username}</div>
-              <div className="mono" style={{ fontSize: '12px', color: 'var(--primary)' }}>@{user.username}</div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>{user.experience_level || 'Builder'}</div>
-            </div>
-            <button className="btn btn-outline" style={{ padding: '8px' }}>
-              <Settings size={14} />
-            </button>
-          </motion.div>
-        ))}
-      </div>
-      {loading && <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Synchronizing community database...</div>}
+      {loading ? (
+        <div className="card mono" style={{ textAlign: 'center', padding: '60px' }}>SCANNING_USER_DATABASE...</div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '24px' }}>
+          {users.map(user => (
+            <motion.div key={user.user_id} className="card" style={{ border: user.is_verified ? '1px solid var(--primary)' : '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', marginBottom: '20px' }}>
+                <div style={{ width: '64px', height: '64px', borderRadius: '12px', background: 'var(--border)', overflow: 'hidden', border: user.badge_level === 'pro' ? '2px solid var(--secondary)' : '1px solid var(--border)', flexShrink: 0 }}>
+                  <img src={user.avatar_url || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${user.username}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: '700', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {user.name || user.username}
+                    {user.is_verified && <ShieldCheck size={16} color="var(--primary)" />}
+                    {user.badge_level === 'pro' && <span style={{ fontSize: '10px', background: 'var(--secondary)', color: 'black', padding: '2px 4px', borderRadius: '4px', fontWeight: '900' }}>PRO</span>}
+                  </div>
+                  <div className="mono" style={{ fontSize: '12px', color: 'var(--primary)' }}>@{user.username}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>{user.email}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>LVL: {user.experience_level || 'Builder'} • SCORE: {user.score || 0}</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid var(--border)' }}>
+                <button 
+                  className={`btn ${user.is_verified ? 'btn-primary' : 'btn-outline'}`} 
+                  style={{ flex: 1, fontSize: '10px', padding: '8px' }}
+                  onClick={() => toggleVerification(user.user_id, user.is_verified)}
+                  disabled={updating === user.user_id}
+                >
+                  {user.is_verified ? 'VERIFIED' : 'GRANT_VERIFIED'}
+                </button>
+                <select 
+                  className="btn btn-outline" 
+                  style={{ flex: 1, fontSize: '10px', padding: '8px', textAlign: 'center' }}
+                  value={user.badge_level || ''}
+                  onChange={(e) => updateBadgeLevel(user.user_id, e.target.value)}
+                  disabled={updating === user.user_id}
+                >
+                  <option value="">NO_BADGE</option>
+                  <option value="pro">PRO_BADGE</option>
+                  <option value="vip">VIP_BADGE</option>
+                </select>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
