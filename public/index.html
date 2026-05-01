@@ -487,6 +487,39 @@
             pointer-events: none;
         }
 
+        /* PRO CARD & MODAL ENHANCEMENTS */
+        .is-pro-card, .p-card.is-pro-card {
+            border: 4px solid #FFD600 !important;
+            box-shadow: 15px 15px 0 rgba(255, 214, 0, 0.4) !important;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(to bottom right, #fff, #fff9e6) !important;
+        }
+        .is-pro-card::before, .p-card.is-pro-card::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 214, 0, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: proShimmer 4s infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+        @keyframes proShimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+        .is-pro-card .verification-badge svg, .p-card.is-pro-card .verification-badge svg {
+            filter: drop-shadow(0 0 5px rgba(255, 214, 0, 0.8));
+            animation: badgePulse 2s infinite;
+        }
+        @keyframes badgePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
         /* AUTH MODAL */
         .auth-modal {
             position: fixed;
@@ -1891,11 +1924,12 @@
         const content = document.getElementById('profile-card-content');
         const skills = profile.skills || [];
         const handle = profile.username || profile.twitter?.replace('@', '') || 'anonymous';
+        const isPro = profile.badge_level === 'pro' || (profile.approved_submissions || 0) > 5;
         
         const avatarToUse = profile.avatar_url || avatar || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png';
 
         content.innerHTML = `
-            <div class="p-card">
+            <div class="p-card ${isPro ? 'is-pro-card' : ''}">
                 <button class="p-card-close" onclick="closeProfileCard()">✕</button>
                 <div class="p-card-header">
                     <div class="p-card-banner-box">
