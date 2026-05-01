@@ -443,7 +443,8 @@ const UsersPage = () => {
     if (!error) {
       setUsers(users.map(u => u.user_id === userId ? { ...u, is_verified: !currentStatus } : u));
     } else {
-      alert('FAILED_TO_UPDATE_VERIFICATION');
+      console.error('VERIFICATION_UPDATE_ERROR:', error);
+      alert(`FAILED_TO_UPDATE_VERIFICATION: ${error.message} (${error.code})`);
     }
     setUpdating(null);
   };
@@ -458,7 +459,8 @@ const UsersPage = () => {
     if (!error) {
       setUsers(users.map(u => u.user_id === userId ? { ...u, badge_level: level } : u));
     } else {
-      alert('FAILED_TO_UPDATE_BADGE');
+      console.error('BADGE_UPDATE_ERROR:', error);
+      alert(`FAILED_TO_UPDATE_BADGE: ${error.message} (${error.code})`);
     }
     setUpdating(null);
   };
