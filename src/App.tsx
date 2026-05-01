@@ -100,44 +100,104 @@ const EditListingModal = ({ listing, onClose, onSave }: { listing: any, onClose:
         animate={{ opacity: 1, scale: 1 }}
         className="modal-content" 
         onClick={e => e.stopPropagation()}
+        style={{ maxWidth: '800px' }}
       >
-        <div style={{ padding: '32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 className="mono" style={{ fontSize: '18px' }}>EDIT_LISTING</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>✕</button>
+        <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
+          <div>
+            <h2 className="mono" style={{ fontSize: '18px', color: 'var(--primary)' }}>EDIT_SYSTEM_ENTRY</h2>
+            <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>UUID: {listing.id}</div>
+          </div>
+          <button onClick={onClose} style={{ background: 'var(--border)', border: 'none', color: 'white', cursor: 'pointer', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
         </div>
         
         <form onSubmit={handleSubmit} style={{ padding: '32px' }}>
-          <div className="form-group">
-            <label>PROJECT_NAME</label>
-            <input className="form-input" value={formData.project} onChange={e => setFormData({...formData, project: e.target.value})} required />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            <div className="form-group">
+              <label>PROJECT_NAME</label>
+              <input className="form-input" value={formData.project} onChange={e => setFormData({...formData, project: e.target.value})} required />
+            </div>
+            <div className="form-group">
+              <label>CATEGORY</label>
+              <select className="form-input" value={formData.section} onChange={e => setFormData({...formData, section: e.target.value})}>
+                <option value="ambassador">Ambassador</option>
+                <option value="discord">Discord</option>
+                <option value="bounty">Bounty</option>
+                <option value="developer">Developer</option>
+                <option value="campaign">Campaign</option>
+              </select>
+            </div>
           </div>
+
           <div className="form-group">
             <label>ROLE_TITLE</label>
             <input className="form-input" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
           </div>
-          <div className="form-group">
-            <label>CATEGORY</label>
-            <select className="form-input" value={formData.section} onChange={e => setFormData({...formData, section: e.target.value})}>
-              <option value="ambassador">Ambassador</option>
-              <option value="discord">Discord</option>
-              <option value="bounty">Bounty</option>
-              <option value="developer">Developer</option>
-              <option value="campaign">Campaign</option>
-            </select>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            <div className="form-group">
+              <label>REWARD_VALUE</label>
+              <input className="form-input" value={formData.reward || ''} onChange={e => setFormData({...formData, reward: e.target.value})} placeholder="e.g. $500 USDC" />
+            </div>
+            <div className="form-group">
+              <label>DEADLINE</label>
+              <input className="form-input" value={formData.deadline || ''} onChange={e => setFormData({...formData, deadline: e.target.value})} placeholder="YYYY-MM-DD or OPEN" />
+            </div>
           </div>
+
           <div className="form-group">
-            <label>REWARD</label>
-            <input className="form-input" value={formData.reward || ''} onChange={e => setFormData({...formData, reward: e.target.value})} />
+            <label>DESCRIPTION_LOG</label>
+            <textarea className="form-input" style={{ minHeight: '120px' }} value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} />
           </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            <div className="form-group">
+              <label>APPLY_URL</label>
+              <input className="form-input" value={formData.apply_url || ''} onChange={e => setFormData({...formData, apply_url: e.target.value})} placeholder="https://..." />
+            </div>
+            <div className="form-group">
+              <label>TWITTER_X_URL</label>
+              <input className="form-input" value={formData.twitter_url || ''} onChange={e => setFormData({...formData, twitter_url: e.target.value})} placeholder="https://x.com/..." />
+            </div>
+          </div>
+
           <div className="form-group">
-            <label>DESCRIPTION</label>
-            <textarea className="form-input" style={{ minHeight: '100px' }} value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} />
+            <label>LOGO_CDN_URL</label>
+            <input className="form-input" value={formData.logo || ''} onChange={e => setFormData({...formData, logo: e.target.value})} placeholder="https://..." />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '24px', alignItems: 'center' }}>
+            <div className="form-group">
+              <label>URGENCY_LEVEL</label>
+              <select className="form-input" value={formData.urgency || 'MEDIUM'} onChange={e => setFormData({...formData, urgency: e.target.value})}>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="HIGH">HIGH</option>
+                <option value="CRITICAL">CRITICAL</option>
+              </select>
+            </div>
+            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '20px' }}>
+              <input 
+                type="checkbox" 
+                id="featured"
+                checked={formData.featured} 
+                onChange={e => setFormData({...formData, featured: e.target.checked})}
+                style={{ width: '20px', height: '20px', accentColor: 'var(--primary)' }}
+              />
+              <label htmlFor="featured" style={{ margin: 0, cursor: 'pointer' }}>FEATURE_OPPORTUNITY</label>
+            </div>
+            <div className="form-group">
+              <label>APPROVAL_STATUS</label>
+              <select className="form-input" value={formData.approval_status} onChange={e => setFormData({...formData, approval_status: e.target.value})}>
+                <option value="pending">PENDING</option>
+                <option value="approved">APPROVED</option>
+                <option value="rejected">REJECTED</option>
+              </select>
+            </div>
           </div>
           
-          <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
-            <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={onClose}>CANCEL</button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 2 }} disabled={saving}>
-              {saving ? 'SYNCING...' : 'SAVE_CHANGES'}
+          <div style={{ display: 'flex', gap: '12px', marginTop: '40px' }}>
+            <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={onClose}>ABORT_CHANGES</button>
+            <button type="submit" className="btn btn-primary" style={{ flex: 2, padding: '16px' }} disabled={saving}>
+              {saving ? 'SYNCING_WITH_CORE...' : 'EXECUTE_UPDATE'}
             </button>
           </div>
         </form>
