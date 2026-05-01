@@ -447,6 +447,104 @@
         .user-profile { display: flex; align-items: center; gap: 10px; font-family: 'Space Mono', monospace; font-size: 11px; }
         .user-profile img { width: 32px; height: 32px; border: 2px solid var(--black); border-radius: 0; }
         .user-profile .logout { color: var(--accent); cursor: pointer; text-decoration: underline; margin-left: 10px; }
+
+        /* VERIFICATION BADGE SYSTEM */
+        .verification-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
+            margin-left: 6px;
+            flex-shrink: 0;
+            cursor: help;
+            position: relative;
+        }
+        .verification-badge svg {
+            width: 16px;
+            height: 16px;
+            display: block;
+        }
+        .verification-badge.medium svg {
+            width: 24px;
+            height: 24px;
+            margin-left: 10px;
+        }
+        .verification-badge:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--black);
+            color: #fff;
+            padding: 5px 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            white-space: nowrap;
+            z-index: 1000;
+            margin-bottom: 5px;
+            border: 1px solid var(--primary);
+            pointer-events: none;
+        }
+
+        /* AUTH MODAL */
+        .auth-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100000;
+            backdrop-filter: blur(4px);
+        }
+        .auth-card {
+            background: #fff;
+            border: 4px solid var(--black);
+            box-shadow: 20px 20px 0 var(--primary);
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            position: relative;
+        }
+        .auth-card h2 {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 30px;
+            letter-spacing: -1.5px;
+            text-transform: uppercase;
+        }
+        .auth-btn-list { display: flex; flex-direction: column; gap: 15px; }
+        .auth-social-btn {
+            width: 100%;
+            padding: 16px;
+            border: 3px solid var(--black);
+            font-family: var(--font-mono);
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: 0.1s;
+            text-decoration: none;
+            color: var(--black);
+        }
+        .auth-social-btn:hover { transform: translate(-4px, -4px); box-shadow: 6px 6px 0 var(--black); }
+        .auth-social-btn.google { background: #fff; }
+        .auth-social-btn.x { background: var(--black); color: #fff; }
+        .auth-close {
+            position: absolute;
+            top: -10px; right: -10px;
+            background: var(--black);
+            color: #fff;
+            width: 32px; height: 32px;
+            border: 2px solid #fff;
+            cursor: pointer;
+            font-weight: 900;
+        }
     </style>
     <script>
         window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -478,8 +576,8 @@
             <a href="#ambassador-section" class="nav-link">AMBASSADORS</a>
             <a href="#discord-section" class="nav-link">DISCORD</a>
             <a href="#bounty-section" class="nav-link">BOUNTIES</a>
-            <div id="auth-nav-box" style="display:inline-flex;">
-                <button class="btn btn-x btn-sm" onclick="signInWithX()"><i>𝕏</i> SIGN IN</button>
+            <div id="auth-nav-box" style="display:inline-flex; gap:10px;">
+                <button class="btn btn-black btn-sm" onclick="openAuthModal()">SIGN IN</button>
             </div>
             <a href="/how-it-works.html" class="btn btn-sm btn-black" style="border-width:2px; height:36px; padding:0 12px; gap:6px; margin-left:12px;">
                 <i data-lucide="help-circle" style="width:14px; height:14px;"></i> HOW IT WORKS
@@ -509,7 +607,9 @@
                 <button class="btn btn-secondary" style="font-size:14px; padding:12px 24px;" onclick="openSubmitModal()">Submit Your Project &rarr;</button>
                 <div style="display:flex; align-items:center; gap:15px;">
                     <div id="auth-hero-box">
-                        <button class="btn btn-x" style="font-size:14px; padding:12px 24px;" onclick="signInWithX()"><i>𝕏</i> SIGN IN WITH X</button>
+                        <button class="btn btn-black" style="font-size:16px; padding:16px 32px; box-shadow: 10px 10px 0 var(--primary);" onclick="openAuthModal()">
+                            START EARNING NOW &rarr;
+                        </button>
                     </div>
                     <a href="/how-it-works.html" class="btn btn-sm btn-black" style="border-width:2px; height:38px; padding:0 15px; gap:6px; background:var(--primary); color:var(--black);">
                         <i data-lucide="help-circle" style="width:16px; height:16px;"></i> HOW IT WORKS
@@ -878,6 +978,43 @@
     const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
     let db;
 
+    // BADGE LOGIC & SVG GENERATOR
+    function getBadgeHtml(profile, size = 'small') {
+        if (!profile) return '';
+        const score = profile.score || 0;
+        const completion = profile.profile_completion || 0;
+        const approved = profile.approved_submissions || 0;
+        const isVerified = profile.is_verified || false;
+        const badgeLevel = profile.badge_level || '';
+
+        let badgeType = null;
+        let tooltip = '';
+
+        // Prioritize explicit database fields
+        if (badgeLevel === 'pro' || approved > 5) {
+            badgeType = 'pro';
+            tooltip = 'Top Contributor (5+ Approved Projects)';
+        } else if (isVerified || completion >= 90) {
+            badgeType = 'verified';
+            tooltip = 'Verified Contributor (90% Profile Complete)';
+        }
+
+        if (!badgeType) return '';
+
+        const sizeClass = size === 'medium' ? 'medium' : '';
+        const color = badgeType === 'pro' ? '#FFD600' : '#00E676';
+        const checkColor = badgeType === 'pro' ? '#000' : '#fff';
+
+        return `
+            <span class="verification-badge ${sizeClass}" data-tooltip="${tooltip}">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="11" fill="${color}"/>
+                    <path d="M17.33 8.33L10 15.67L6.67 12.33" stroke="${checkColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+        `;
+    }
+
     // ─── Helpers ──────────────────────────────────────────
     const parseReward = (s) => { if(!s) return 0; const m = s.replace(/,/g,'').match(/\d+/); return m ? parseInt(m[0]) : 0; };
     const isUrl = (s) => s && (s.startsWith('http')||s.startsWith('/'));
@@ -894,12 +1031,40 @@
         catch(e) { console.error(e); return false; }
     }
 
+    function openAuthModal() {
+        document.getElementById('auth-modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeAuthModal() {
+        document.getElementById('auth-modal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    async function signInWithGoogle() {
+        if (window.va) window.va('track', 'Auth_Google_Login_Click');
+        const { error } = await db.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin + '/auth/callback',
+                queryParams: {
+                    access_type: 'offline',
+                    prompt: 'consent',
+                }
+            }
+        });
+        if (error) {
+            console.error(error);
+            showToast('Auth failed. Google Login is not configured in Supabase.', 'error');
+        }
+    }
+
     async function signInWithX() {
         if (window.va) window.va('track', 'Auth_X_Login_Click');
         const { error } = await db.auth.signInWithOAuth({
             provider: 'x',
             options: {
-                redirectTo: 'http://localhost:3000/auth/callback'
+                redirectTo: window.location.origin + '/auth/callback'
             }
         });
         if (error) {
@@ -920,13 +1085,27 @@
         }
     }
 
-    function updateUIForUser(user) {
-        const profile = user.user_metadata;
+    async function updateUIForUser(user) {
+        // Try to fetch custom profile data first
+        const { data: dbProfile } = await db.from('user_profiles').select('*').eq('user_id', user.id).single();
+        
+        // Auto-prompt to complete profile if it doesn't exist
+        if (!dbProfile) {
+            console.log("No profile found, opening setup modal...");
+            openProfileModal();
+        }
+
+        const metadata = user.user_metadata;
+        const displayName = dbProfile?.name || metadata.full_name || metadata.user_name || 'User';
+        const displayAvatar = dbProfile?.avatar_url || metadata.avatar_url || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png';
+        const handle = dbProfile?.username || metadata.user_name || 'user';
+
         const html = `
             <div class="user-dropdown-container">
                 <div class="user-dropdown-trigger" onclick="document.getElementById('userDropdownMenu').classList.toggle('show')">
-                    <img src="${profile.avatar_url || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'}" alt="">
-                    <span>${profile.user_name || profile.full_name || 'User'}</span>
+                    <img src="${displayAvatar}" alt="Profile">
+                    <span>${displayName}</span>
+                    ${getBadgeHtml(dbProfile || metadata)}
                     <i data-lucide="chevron-down" style="width:12px; height:12px; margin-left: 4px;"></i>
                 </div>
                 <div class="user-dropdown-menu" id="userDropdownMenu">
@@ -940,12 +1119,14 @@
         `;
         document.getElementById('auth-nav-box').innerHTML = html;
         lucide.createIcons();
+        
         if (document.getElementById('auth-hero-box')) {
             document.getElementById('auth-hero-box').style.display = 'none';
         }
+
         // Show Admin Terminal Link for authorized admins
         const admins = ['zenvicalpha', 'zenvic_'];
-        if (profile.user_name && admins.includes(profile.user_name.toLowerCase())) {
+        if (admins.includes(handle.toLowerCase())) {
             const menu = document.getElementById('userDropdownMenu');
             const adminLink = document.createElement('a');
             adminLink.href = '/admin.html';
@@ -1726,7 +1907,10 @@
                 </div>
                 
                 <div class="p-card-body">
-                    <div class="p-card-name">${profile.name || 'Anonymous'}</div>
+                    <div class="p-card-name" style="display:flex; align-items:center;">
+                        ${profile.name || 'Anonymous'}
+                        ${getBadgeHtml(profile, 'medium')}
+                    </div>
                     <div class="p-card-handle">@${handle}</div>
 
                     <p class="p-card-bio">${profile.bio || 'Building the future of Web3 at CreatorChain. No bio provided yet.'}</p>
@@ -1959,5 +2143,25 @@
         }
     });
     </script>
+    <!-- AUTH MODAL -->
+    <div id="auth-modal" class="auth-modal">
+        <div class="auth-card">
+            <button class="auth-close" onclick="closeAuthModal()">✕</button>
+            <h2>ACCESS <span class="outline">PORTAL</span></h2>
+            <p class="mono" style="font-size:12px; color:#666; margin-bottom:30px;">Choose your authentication method to enter the ecosystem.</p>
+            <div class="auth-btn-list">
+                <button class="auth-social-btn google" onclick="signInWithGoogle()">
+                    <i data-lucide="mail" style="width:20px; height:20px;"></i> CONTINUE WITH GOOGLE
+                </button>
+                <button class="auth-social-btn x" onclick="signInWithX()">
+                    <i>𝕏</i> SIGN IN WITH X
+                </button>
+            </div>
+            <div style="margin-top:30px; padding-top:20px; border-top:2px dashed #eee;">
+                <p class="mono" style="font-size:10px; color:#888;">By signing in, you agree to our Terms of Service.</p>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
