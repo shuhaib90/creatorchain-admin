@@ -461,6 +461,7 @@ const UsersPage = () => {
 
 const Broadcast = () => {
   const [message, setMessage] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [sending, setSending] = useState(false);
 
   const handleBroadcast = async (e: React.FormEvent) => {
@@ -487,7 +488,8 @@ const Broadcast = () => {
             type: 'custom',
             payload: {
               chat_ids: tgRecipients,
-              message: message
+              message: message,
+              image_url: imageUrl.trim() || null
             }
           })
         });
@@ -495,6 +497,7 @@ const Broadcast = () => {
         if (!response.ok) throw new Error(await response.text());
         alert(`🚀 Broadcast sent to ${tgRecipients.length} users!`);
         setMessage('');
+        setImageUrl('');
       } else {
         alert('No subscribers found.');
       }
@@ -509,11 +512,24 @@ const Broadcast = () => {
     <div className="fade-in">
       <header style={{ marginBottom: '40px' }}>
         <h1 style={{ fontSize: '36px' }}>Global <span className="text-gradient">Broadcast</span></h1>
-        <p style={{ color: 'var(--text-muted)' }}>Send a priority message to all Telegram bot subscribers.</p>
+        <p style={{ color: 'var(--text-muted)' }}>Send a priority message or image to all Telegram bot subscribers.</p>
       </header>
 
       <div className="card" style={{ maxWidth: '800px' }}>
         <form onSubmit={handleBroadcast}>
+          <div className="form-group">
+            <label>IMAGE_URL (Optional)</label>
+            <input 
+              type="url" 
+              className="form-input" 
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://example.com/image.jpg"
+              style={{ marginBottom: '10px' }}
+            />
+            <p style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '20px' }}>Provide a direct link to an image. Leave empty for text-only broadcast.</p>
+          </div>
+
           <div className="form-group">
             <label>MESSAGE_CONTENT (HTML Supported)</label>
             <textarea 
