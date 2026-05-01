@@ -335,8 +335,18 @@
     }
 
     async function approveListing(id) {
-        await db.from('listings').update({ approval_status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', id);
+        if(!confirm('Approve this listing and NOTIFY matching builders?')) return;
+        
+        await db.from('listings').update({ 
+            approval_status: 'approved', 
+            reviewed_at: new Date().toISOString() 
+        }).eq('id', id);
+        
         showToast('✓ Listing Approved!');
+        
+        // Automatically trigger broadcast to matching builders
+        notifyMatchingBuilders(id);
+        
         initAdmin();
     }
 
