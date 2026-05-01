@@ -2,7 +2,7 @@ const { Resend } = require('resend');
 
 // Initialize Resend with the provided API key
 // In production, you should set this as an Environment Variable: RESEND_API_KEY
-const resend = new Resend(process.env.RESEND_API_KEY || 're_6uDjhbju_JqPdqWgPvH2wKbA8AJhTYmdr');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 module.exports = async (req, res) => {
   // Only allow POST requests

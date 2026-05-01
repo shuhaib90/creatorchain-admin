@@ -1,8 +1,9 @@
 const axios = require('axios');
 
 // Config
-const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
 module.exports = async (req, res) => {
   const { method, body, query } = req;
