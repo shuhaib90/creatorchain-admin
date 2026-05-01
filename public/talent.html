@@ -458,7 +458,7 @@
         </section>
 
         <section class="results-section" id="tm-results" style="display:none;">
-            <h2 style="font-size: 24px; margin-bottom: 20px;">
+            <h2 id="tm-results-header" style="font-size: 24px; margin-bottom: 20px; display:none;">
                 <span style="background:var(--accent); display:inline-block; width:15px; height:15px; border:2px solid #000; margin-right:10px;"></span>
                 Top Matches Found (<span id="tm-match-count" style="color:var(--primary);">0</span>)
             </h2>
@@ -861,6 +861,7 @@
             if (total === 0) {
                 grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px;"><h3>No builders found matching these criteria.</h3></div>';
                 document.getElementById('tm-pagination').style.display = 'none';
+                document.getElementById('tm-results-header').style.display = 'none';
                 return;
             }
 
@@ -871,6 +872,10 @@
             pageResults.forEach(p => {
                 grid.appendChild(createCard(p));
             });
+
+            // Toggle Header visibility
+            const isFiltered = selectedTMSkills.length > 0 || selectedTMExp.length > 0 || selectedTMWork.length > 0;
+            document.getElementById('tm-results-header').style.display = isFiltered ? 'block' : 'none';
 
             // Update Pagination UI
             document.getElementById('tm-pagination').style.display = total > talentPageSize ? 'flex' : 'none';
