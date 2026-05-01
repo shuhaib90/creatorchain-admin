@@ -321,8 +321,11 @@
                             <td>${l.reward || 'TBA'}</td>
                             <td><span class="status-badge status-${l.approval_status}">${l.approval_status.toUpperCase()}</span></td>
                             <td>
-                                <button class="btn btn-sm" onclick="editItem('${l.id}')">EDIT</button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteItem('${l.id}')">DEL</button>
+                                <div style="display:flex; gap:5px;">
+                                    <button class="btn btn-sm btn-black" onclick="notifyMatchingBuilders('${l.id}')" title="Notify matching builders"><i data-lucide="megaphone" style="width:12px; height:12px;"></i></button>
+                                    <button class="btn btn-sm" onclick="editItem('${l.id}')">EDIT</button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteItem('${l.id}')">DEL</button>
+                                </div>
                             </td>
                         </tr>
                     `).join('')}
@@ -399,6 +402,60 @@
         initAdmin();
         switchTab('tab-all');
     });
+
+    async function notifyMatchingBuilders(id) {
+        if(!confirm('Broadcast this opportunity to matching builders?')) return;
+        
+        const { data: project } = await db.from('listings').select('*').eq('id', id).single();
+        if (!project) return;
+
+        showToast('📣 Initializing broadcast...', 'info');
+
+        try {
+            // Fetch builders who opted-in for notifications
+            const { data: profiles, error } = await db.from('user_profiles')
+                .select('email, skills, email_notifications')
+                .eq('email_notifications', true);
+
+            if (error) throw error;
+
+            if (!profiles || profiles.length === 0) {
+                showToast('No builders opted-in for notifications.', 'error');
+                return;
+            }
+
+            // Simple matching: For now, notify builders who have skills or 
+            // just notify all opted-in builders to ensure they don't miss out
+            const recipients = profiles.filter(p => p.email && p.email.includes('@')).map(p => p.email);
+
+            if (recipients.length === 0) {
+                showToast('No valid builder emails found.', 'error');
+                return;
+            }
+
+            // Send via API (resend handles arrays up to 50 recipients)
+            const resp = await fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'new_opportunity',
+                    payload: {
+                        to: recipients,
+                        project_name: project.project,
+                        description: project.title,
+                        budget: project.reward || 'TBA'
+                    }
+                })
+            });
+
+            if (!resp.ok) throw new Error('Email service failed');
+
+            showToast(`🚀 Broadcast sent to ${recipients.length} builders!`);
+        } catch (err) {
+            console.error('Broadcast Error:', err);
+            showToast('Broadcast failed: ' + err.message, 'error');
+        }
+    }
 
     function subscribeRealtime() {
         db.channel('admin-updates').on('postgres_changes', { event:'*', schema:'public', table:'listings' }, () => {

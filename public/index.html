@@ -893,7 +893,7 @@
         const { error } = await db.auth.signInWithOAuth({
             provider: 'x',
             options: {
-                redirectTo: window.location.origin + '/auth/callback'
+                redirectTo: 'http://localhost:3000/auth/callback'
             }
         });
         if (error) {
