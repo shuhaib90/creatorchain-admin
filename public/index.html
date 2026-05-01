@@ -1039,6 +1039,9 @@
         `;
         document.getElementById('auth-nav-box').innerHTML = html;
         lucide.createIcons();
+        if (document.getElementById('auth-hero-box')) {
+            document.getElementById('auth-hero-box').style.display = 'none';
+        }
         // Show Admin Access ONLY for @ZenvicAlpha
         if (profile.user_name && profile.user_name.toLowerCase() === 'zenvicalpha') {
             document.getElementById('admin-link-wrapper').style.display = 'block';
