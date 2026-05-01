@@ -283,11 +283,18 @@ const Listings = () => {
         });
         
         if (!response.ok) {
-          console.error('Telegram API response error:', await response.text());
+          throw new Error(await response.text());
         }
+        
+        const data = await response.json();
+        console.log('Telegram Broadcast Result:', data);
+        alert(`🚀 Broadcast sent! (Recipients: ${tgRecipients.length})`);
+      } else {
+        console.log('No Telegram recipients found.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Telegram Broadcast Error:', err);
+      alert('Telegram Broadcast Failed: ' + err.message);
     }
   };
 
