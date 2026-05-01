@@ -194,6 +194,17 @@ const EditListingModal = ({ listing, onClose, onSave }: { listing: any, onClose:
             </div>
           </div>
           
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            <div className="form-group">
+              <label>SUBMITTED_BY (X_HANDLE)</label>
+              <input className="form-input" value={formData.submitted_by || ''} onChange={e => setFormData({...formData, submitted_by: e.target.value})} placeholder="@username" />
+            </div>
+            <div className="form-group">
+              <label>SUBMITTER_EMAIL</label>
+              <input className="form-input" value={formData.submitter_email || ''} onChange={e => setFormData({...formData, submitter_email: e.target.value})} placeholder="email@example.com" />
+            </div>
+          </div>
+
           <div style={{ display: 'flex', gap: '12px', marginTop: '40px' }}>
             <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={onClose}>ABORT_CHANGES</button>
             <button type="submit" className="btn btn-primary" style={{ flex: 2, padding: '16px' }} disabled={saving}>
