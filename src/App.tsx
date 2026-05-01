@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   Clock,
   Radio,
+  Search,
   LogOut
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
