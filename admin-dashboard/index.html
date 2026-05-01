@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreatorChain | Admin Terminal</title>
+    <link rel="icon" type="image/png" href="https://creatorchain.io/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #00f5a0;
+            --accent: #ff3e00;
+            --secondary: #ffee00;
+            --black: #000000;
+            --white: #ffffff;
+            --muted: #666666;
+            --bg: #0a0a0a;
+            --card-bg: #111111;
+            --border: 2px solid #333;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-main); background: var(--bg); color: var(--white); line-height: 1.6; display: none; overflow-x: hidden; }
+
+        .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 280px; background: #000; border-right: 2px solid #222; padding: 40px 20px; display: flex; flex-direction: column; z-index: 1000; }
+        .logo-box { display: flex; align-items: center; gap: 12px; margin-bottom: 60px; text-decoration: none; color: var(--primary); font-weight: 800; font-size: 18px; }
+        .logo-box img { height: 32px; filter: drop-shadow(0 0 10px var(--primary)); }
+
+        .nav-menu { flex-grow: 1; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 15px; border-radius: 8px; color: #888; text-decoration: none; font-family: var(--font-mono); font-size: 13px; margin-bottom: 8px; transition: 0.2s; cursor: pointer; }
+        .nav-item:hover { background: #111; color: var(--white); }
+        .nav-item.active { background: var(--primary); color: var(--black); font-weight: 700; box-shadow: 0 0 20px rgba(0,245,160,0.3); }
+
+        .main-content { margin-left: 280px; padding: 60px; min-height: 100vh; }
+        
+        header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 60px; }
+        .header-title h1 { font-size: 32px; font-weight: 900; letter-spacing: -1px; }
+        .header-title p { color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 40px; }
+        .stat-card { background: var(--card-bg); border: var(--border); padding: 30px; border-radius: 12px; position: relative; overflow: hidden; }
+        .stat-card::after { content: ''; position: absolute; top: 0; right: 0; width: 40px; height: 40px; background: var(--primary); opacity: 0.1; transform: rotate(45deg) translate(20px, -20px); }
+        .stat-value { font-size: 32px; font-weight: 800; color: var(--primary); display: block; }
+        .stat-label { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; }
+
+        .content-box { background: var(--card-bg); border: var(--border); border-radius: 16px; padding: 40px; }
+        
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* TABLE STYLES */
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .admin-table th { text-align: left; padding: 15px; color: var(--muted); font-family: var(--font-mono); font-size: 11px; border-bottom: 2px solid #222; }
+        .admin-table td { padding: 20px 15px; border-bottom: 1px solid #1a1a1a; }
+        .admin-table tr:hover { background: rgba(255,255,255,0.02); }
+
+        .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; font-family: var(--font-mono); }
+        .status-pending { background: rgba(255, 238, 0, 0.1); color: var(--secondary); border: 1px solid var(--secondary); }
+        .status-approved { background: rgba(0, 245, 160, 0.1); color: var(--primary); border: 1px solid var(--primary); }
+        .status-rejected { background: rgba(255, 62, 0, 0.1); color: var(--accent); border: 1px solid var(--accent); }
+
+        .btn { padding: 12px 24px; border-radius: 8px; border: none; font-family: var(--font-mono); font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: var(--primary); color: var(--black); }
+        .btn-primary:hover { box-shadow: 0 0 20px rgba(0,245,160,0.4); transform: translateY(-2px); }
+        .btn-outline { background: transparent; border: 2px solid #333; color: var(--white); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-danger { background: rgba(255,62,0,0.1); color: var(--accent); border: 1px solid var(--accent); }
+
+        /* FORM */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .input-group { margin-bottom: 25px; }
+        .input-group label { display: block; font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; }
+        .input-group input, .input-group select, .input-group textarea { width: 100%; background: #000; border: 2px solid #222; padding: 15px; color: #fff; border-radius: 8px; outline: none; transition: 0.2s; }
+        .input-group input:focus { border-color: var(--primary); }
+
+        #toast-container { position: fixed; top: 30px; right: 30px; z-index: 2000; }
+        .toast { background: #000; border: 2px solid var(--primary); padding: 15px 25px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: var(--font-mono); font-size: 13px; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        .pending-card { background: #000; border: 1px solid #222; border-radius: 12px; padding: 25px; margin-bottom: 20px; }
+        .pending-actions { display: flex; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #1a1a1a; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <a href="#" class="logo-box">
+        <img src="https://creatorchain.io/logo.png" alt="Logo">
+        <span>CREATOR_ADMIN</span>
+    </a>
+    
+    <nav class="nav-menu">
+        <div class="nav-item active" onclick="switchTab('tab-dashboard', this)"><i data-lucide="layout-dashboard"></i> DASHBOARD</div>
+        <div class="nav-item" onclick="switchTab('tab-pending', this)"><i data-lucide="clock"></i> PENDING REVIEW</div>
+        <div class="nav-item" onclick="switchTab('tab-all', this)"><i data-lucide="list"></i> ACTIVE LISTINGS</div>
+        <div class="nav-item" onclick="switchTab('tab-add', this)"><i data-lucide="plus-circle"></i> ADD NEW ENTRY</div>
+    </nav>
+
+    <div style="padding-top:20px; border-top:1px solid #222;">
+        <div class="nav-item" onclick="signOut()"><i data-lucide="log-out"></i> SYSTEM LOGOUT</div>
+    </div>
+</aside>
+
+<main class="main-content">
+    <header>
+        <div class="header-title">
+            <p>ACCESS_LEVEL: FULL_ADMIN // SESSION: ACTIVE</p>
+            <h1 id="page-title">Management Dashboard</h1>
+        </div>
+        <button class="btn btn-primary" onclick="switchTab('tab-add')"><i data-lucide="plus"></i> NEW LISTING</button>
+    </header>
+
+    <!-- DASHBOARD VIEW -->
+    <div id="tab-dashboard" class="tab-pane active">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Pending Reviews</span>
+                <span class="stat-value" id="stat-pending">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Live Opportunities</span>
+                <span class="stat-value" id="stat-active">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Total Submissions</span>
+                <span class="stat-value" id="stat-total">0</span>
+            </div>
+        </div>
+        
+        <div class="content-box">
+            <h3 class="mono" style="margin-bottom:20px; font-size:14px; color:var(--primary);">RECENT_SYSTEM_ACTIVITY</h3>
+            <div id="activity-log" style="font-family:var(--font-mono); font-size:12px; color:#666;">
+                <p>> Initializing administrative connection...</p>
+                <p>> Authenticating against Supabase core...</p>
+                <p>> Access granted. Welcome back, Admin.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PENDING VIEW -->
+    <div id="tab-pending" class="tab-pane">
+        <div id="pending-list-container">
+            <!-- Cards rendered here -->
+        </div>
+    </div>
+
+    <!-- ALL LISTINGS VIEW -->
+    <div id="tab-all" class="tab-pane">
+        <div class="content-box" style="padding:0;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>PROJECT</th>
+                        <th>CATEGORY</th>
+                        <th>REWARD</th>
+                        <th>STATUS</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="listings-table-body">
+                    <!-- Rows rendered here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ADD/EDIT VIEW -->
+    <div id="tab-add" class="tab-pane">
+        <div class="content-box">
+            <form id="listing-form">
+                <input type="hidden" id="f-id">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Project Name</label>
+                        <input type="text" id="f-project" required placeholder="e.g. CreatorChain">
+                    </div>
+                    <div class="input-group">
+                        <label>Category</label>
+                        <select id="f-section">
+                            <option value="ambassador">AMBASSADOR</option>
+                            <option value="discord">DISCORD</option>
+                            <option value="bounty">BOUNTY</option>
+                            <option value="developer">DEVELOPER</option>
+                            <option value="campaign">CAMPAIGN</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Position / Role Title</label>
+                    <input type="text" id="f-title" required placeholder="e.g. Lead Designer">
+                </div>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Reward / Pay</label>
+                        <input type="text" id="f-reward" placeholder="e.g. $1,500 USDC">
+                    </div>
+                    <div class="input-group">
+                        <label>Urgency</label>
+                        <select id="f-urgency">
+                            <option value="MEDIUM">MEDIUM</option>
+                            <option value="HIGH">HIGH</option>
+                            <option value="CRITICAL">CRITICAL</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Brief Description</label>
+                    <textarea id="f-desc" rows="4"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Application Link</label>
+                    <input type="url" id="f-url" placeholder="https://...">
+                </div>
+                <div class="input-group">
+                    <label>Logo URL</label>
+                    <input type="text" id="f-logo">
+                </div>
+                <div style="display:flex; gap:15px; margin-top:20px;">
+                    <button type="submit" class="btn btn-primary" id="save-btn">PUBLISH LISTING</button>
+                    <button type="button" class="btn btn-outline" onclick="resetForm()">DISCARD</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<div id="toast-container"></div>
+
+<script>
+    // SUPABASE INTEGRATION
+    const SUPABASE_URL = 'https://ayemstxbtjphoxdnmwcl.supabase.co';
+    const SUPABASE_KEY = 'sb_live_MDDox9VP_6MW7JCnZ750TSB_CrpSywsNlZJa8jqRkC0';
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function checkAuth() {
+        const { data: { user } } = await db.auth.getUser();
+        if (!user) { window.location.href = 'https://creatorchain.io'; return; }
+        
+        const handle = (user.user_metadata.user_name || '').toLowerCase();
+        if (handle === 'zenvicalpha') {
+            document.body.style.display = 'block';
+            init();
+        } else {
+            alert('UNAUTHORIZED_ACCESS: Admin credentials required.');
+            window.location.href = 'https://creatorchain.io';
+        }
+    }
+
+    async function signOut() {
+        await db.auth.signOut();
+        window.location.href = 'https://creatorchain.io';
+    }
+
+    function switchTab(id, el) {
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        
+        document.getElementById(id).classList.add('active');
+        if(el) el.classList.add('active');
+        
+        const titles = {
+            'tab-dashboard': 'Management Dashboard',
+            'tab-pending': 'Pending Review Queue',
+            'tab-all': 'Active Opportunities',
+            'tab-add': 'Create New Entry'
+        };
+        document.getElementById('page-title').textContent = titles[id];
+    }
+
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = msg;
+        document.getElementById('toast-container').appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+
+    // DATA LOGIC
+    async function init() {
+        lucide.createIcons();
+        refreshData();
+        subscribe();
+    }
+
+    async function refreshData() {
+        const { data: all } = await db.from('listings').select('*').order('created_at', { ascending: false });
+        const pending = all.filter(l => l.approval_status === 'pending');
+        const active = all.filter(l => l.approval_status === 'approved');
+
+        document.getElementById('stat-pending').textContent = pending.length;
+        document.getElementById('stat-active').textContent = active.length;
+        document.getElementById('stat-total').textContent = all.length;
+
+        renderPending(pending);
+        renderTable(all);
+    }
+
+    function renderPending(listings) {
+        const container = document.getElementById('pending-list-container');
+        if(!listings.length) {
+            container.innerHTML = '<div style="text-align:center; padding:100px; color:#555;">No pending reviews. System is synchronized.</div>';
+            return;
+        }
+        container.innerHTML = listings.map(l => `
+            <div class="pending-card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <h3 style="font-size:20px; color:var(--primary);">${l.project}</h3>
+                        <p style="font-weight:700;">${l.title}</p>
+                        <p style="font-size:12px; color:var(--muted); margin-top:5px;">${l.reward || 'TBA'}</p>
+                    </div>
+                    <span class="status-pill status-pending">IN_QUEUE</span>
+                </div>
+                <p style="margin-top:15px; font-size:14px; opacity:0.8;">${l.description || 'No description provided.'}</p>
+                <div class="pending-actions">
+                    <button class="btn btn-primary" onclick="updateStatus('${l.id}', 'approved')">APPROVE & PUBLISH</button>
+                    <button class="btn btn-outline" style="border-color:var(--accent); color:var(--accent);" onclick="updateStatus('${l.id}', 'rejected')">REJECT</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderTable(listings) {
+        const body = document.getElementById('listings-table-body');
+        body.innerHTML = listings.map(l => `
+            <tr>
+                <td><strong>${l.project}</strong><br><small style="color:#666">${l.title}</small></td>
+                <td><span class="mono" style="font-size:11px;">${l.section.toUpperCase()}</span></td>
+                <td>${l.reward || 'TBA'}</td>
+                <td><span class="status-pill status-${l.approval_status}">${l.approval_status}</span></td>
+                <td>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn btn-outline btn-sm" style="padding:6px 12px;" onclick="editListing('${l.id}')">EDIT</button>
+                        <button class="btn btn-danger btn-sm" style="padding:6px 12px;" onclick="deleteListing('${l.id}')">DEL</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function updateStatus(id, status) {
+        await db.from('listings').update({ approval_status: status, reviewed_at: new Date().toISOString() }).eq('id', id);
+        showToast(`Listing ${status} successfully.`);
+        refreshData();
+    }
+
+    async function editListing(id) {
+        const { data } = await db.from('listings').select('*').eq('id', id).single();
+        if(data) {
+            document.getElementById('f-id').value = data.id;
+            document.getElementById('f-project').value = data.project;
+            document.getElementById('f-section').value = data.section;
+            document.getElementById('f-title').value = data.title;
+            document.getElementById('f-reward').value = data.reward || '';
+            document.getElementById('f-desc').value = data.description || '';
+            document.getElementById('f-url').value = data.apply_url || '';
+            document.getElementById('f-logo').value = data.logo || '';
+            document.getElementById('f-urgency').value = data.urgency || 'MEDIUM';
+            document.getElementById('save-btn').textContent = 'UPDATE LISTING';
+            switchTab('tab-add');
+        }
+    }
+
+    async function deleteListing(id) {
+        if(confirm('Permanently delete this entry?')) {
+            await db.from('listings').delete().eq('id', id);
+            showToast('Listing removed from database.');
+            refreshData();
+        }
+    }
+
+    document.getElementById('listing-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('f-id').value;
+        const item = {
+            project: document.getElementById('f-project').value,
+            section: document.getElementById('f-section').value,
+            title: document.getElementById('f-title').value,
+            reward: document.getElementById('f-reward').value,
+            description: document.getElementById('f-desc').value,
+            apply_url: document.getElementById('f-url').value,
+            logo: document.getElementById('f-logo').value,
+            urgency: document.getElementById('f-urgency').value,
+            approval_status: 'approved'
+        };
+
+        if(id) await db.from('listings').update(item).eq('id', id);
+        else await db.from('listings').insert([item]);
+
+        showToast('System updated. Listing is live.');
+        resetForm();
+        refreshData();
+        switchTab('tab-all');
+    });
+
+    function resetForm() {
+        document.getElementById('listing-form').reset();
+        document.getElementById('f-id').value = '';
+        document.getElementById('save-btn').textContent = 'PUBLISH LISTING';
+    }
+
+    function subscribe() {
+        db.channel('admin-realtime').on('postgres_changes', { event:'*', schema:'public', table:'listings' }, () => {
+            refreshData();
+        }).subscribe();
+    }
+
+    checkAuth();
+</script>
+
+</body>
+</html>
