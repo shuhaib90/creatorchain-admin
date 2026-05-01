@@ -412,10 +412,10 @@
         showToast('📣 Initializing broadcast...', 'info');
 
         try {
-            // Fetch builders who opted-in for notifications
+            // 2. Fetch builders who opted-in for notifications
             const { data: profiles, error } = await db.from('user_profiles')
-                .select('email, skills, email_notifications')
-                .eq('email_notifications', true);
+                .select('email, skills, email_notifications, telegram_id, telegram_notifications')
+                .or('email_notifications.eq.true,telegram_notifications.eq.true');
 
             if (error) throw error;
 
@@ -424,33 +424,54 @@
                 return;
             }
 
-            // Simple matching: For now, notify builders who have skills or 
-            // just notify all opted-in builders to ensure they don't miss out
-            const recipients = profiles.filter(p => p.email && p.email.includes('@')).map(p => p.email);
+            // 3. Collect recipients
+            const emailRecipients = profiles.filter(p => p.email_notifications && p.email && p.email.includes('@')).map(p => p.email);
+            const tgRecipients = profiles.filter(p => p.telegram_notifications && p.telegram_id).map(p => p.telegram_id);
 
-            if (recipients.length === 0) {
-                showToast('No valid builder emails found.', 'error');
+            if (emailRecipients.length === 0 && tgRecipients.length === 0) {
+                showToast('No valid notification channels found.', 'error');
                 return;
             }
 
-            // Send via API (resend handles arrays up to 50 recipients)
-            const resp = await fetch('/api/send-email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'new_opportunity',
-                    payload: {
-                        to: recipients,
-                        project_name: project.project,
-                        description: project.title,
-                        budget: project.reward || 'TBA'
-                    }
-                })
-            });
+            // 4. Send Email Broadcast
+            if (emailRecipients.length > 0) {
+                try {
+                    await fetch('/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'new_opportunity',
+                            payload: {
+                                to: emailRecipients,
+                                project_name: project.project,
+                                description: project.title,
+                                budget: project.reward || 'TBA'
+                            }
+                        })
+                    });
+                } catch (emailErr) { console.error('Email Broadcast Error:', emailErr); }
+            }
 
-            if (!resp.ok) throw new Error('Email service failed');
+            // 5. Send Telegram Broadcast
+            if (tgRecipients.length > 0) {
+                try {
+                    await fetch('/api/send-telegram', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'new_opportunity',
+                            payload: {
+                                chat_ids: tgRecipients,
+                                project_name: project.project,
+                                category: project.section,
+                                reward: project.reward || 'TBA'
+                            }
+                        })
+                    });
+                } catch (tgErr) { console.error('Telegram Broadcast Error:', tgErr); }
+            }
 
-            showToast(`🚀 Broadcast sent to ${recipients.length} builders!`);
+            showToast(`🚀 Broadcast sent! (${emailRecipients.length} Email, ${tgRecipients.length} Telegram)`);
         } catch (err) {
             console.error('Broadcast Error:', err);
             showToast('Broadcast failed: ' + err.message, 'error');

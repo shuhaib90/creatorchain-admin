@@ -746,6 +746,12 @@
                         Enable email notifications for opportunities matching my skills
                     </label>
                 </div>
+                <div class="field">
+                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                        <input type="checkbox" id="p-tg-notif" style="width:auto; height:18px;">
+                        Enable Telegram notifications for matching opportunities
+                    </label>
+                </div>
 
                 <div id="profile-error" class="submit-error"></div>
                 <div style="display:flex; gap:15px; margin-top:30px;">
@@ -1243,6 +1249,23 @@
             const { error } = await db.from('listings').insert([item]);
             if (error) throw error;
 
+            // Notify Admin via Telegram
+            try {
+                fetch('/api/send-telegram', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'admin_alert',
+                        payload: {
+                            project_name: item.project,
+                            submitted_by: item.submitted_by,
+                            category: item.section,
+                            chat_ids: '1540546252' // Replace with your actual admin chat_id
+                        }
+                    })
+                });
+            } catch (tgErr) { console.warn('Admin TG alert failed:', tgErr); }
+
             if (window.va) window.va('track', 'Project_Submitted', { category: item.section, project: item.project });
 
             document.getElementById('submit-form-body').innerHTML = `
@@ -1539,10 +1562,11 @@
                 selectedProfileSkills = data.skills || [];
                 renderProfileSkills();
                 document.getElementById('p-employer').value = data.current_employer || '';
-                document.getElementById('p-location').value = data.location || '';
                 document.getElementById('p-email').value = data.email || user.email || '';
+                document.getElementById('p-telegram').value = data.telegram || '';
                 document.getElementById('p-available').checked = data.available_for_work !== false;
                 document.getElementById('p-email-notif').checked = data.email_notifications || false;
+                document.getElementById('p-tg-notif').checked = data.telegram_notifications || false;
             }
         } catch (err) {
             console.error('Error loading profile:', err);
@@ -1624,8 +1648,10 @@
             current_employer: document.getElementById('p-employer').value,
             location: document.getElementById('p-location').value,
             email: document.getElementById('p-email').value,
+            telegram: document.getElementById('p-telegram').value,
             available_for_work: document.getElementById('p-available').checked,
             email_notifications: document.getElementById('p-email-notif').checked,
+            telegram_notifications: document.getElementById('p-tg-notif').checked,
             source: 'login'
         };
 
