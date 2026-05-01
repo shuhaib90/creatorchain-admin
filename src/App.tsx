@@ -462,7 +462,33 @@ const UsersPage = () => {
 const Broadcast = () => {
   const [message, setMessage] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `public/broadcasts/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('logos') // Reusing the same bucket
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('logos').getPublicUrl(filePath);
+      setImageUrl(data.publicUrl);
+    } catch (err: any) {
+      alert('Upload Failed: ' + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleBroadcast = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -518,16 +544,37 @@ const Broadcast = () => {
       <div className="card" style={{ maxWidth: '800px' }}>
         <form onSubmit={handleBroadcast}>
           <div className="form-group">
-            <label>IMAGE_URL (Optional)</label>
-            <input 
-              type="url" 
-              className="form-input" 
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://example.com/image.jpg"
-              style={{ marginBottom: '10px' }}
-            />
-            <p style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '20px' }}>Provide a direct link to an image. Leave empty for text-only broadcast.</p>
+            <label>BROADCAST_MEDIA</label>
+            <div style={{ display: 'flex', gap: '15px', marginBottom: '10px' }}>
+              <input 
+                type="url" 
+                className="form-input" 
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="Paste Image URL or Upload below..."
+                style={{ flex: 1 }}
+              />
+              <button 
+                type="button" 
+                className="btn btn-outline" 
+                onClick={() => document.getElementById('broadcast-image-upload')?.click()}
+                disabled={uploading}
+              >
+                {uploading ? 'UPLOADING...' : '📁 UPLOAD_IMAGE'}
+              </button>
+              <input 
+                id="broadcast-image-upload" 
+                type="file" 
+                accept="image/*" 
+                onChange={handleImageUpload} 
+                style={{ display: 'none' }} 
+              />
+            </div>
+            {imageUrl && (
+              <div style={{ padding: '10px', background: 'var(--black)', border: '1px solid var(--primary)', marginBottom: '20px' }}>
+                <img src={imageUrl} alt="Preview" style={{ maxHeight: '150px', display: 'block', margin: '0 auto' }} />
+              </div>
+            )}
           </div>
 
           <div className="form-group">
