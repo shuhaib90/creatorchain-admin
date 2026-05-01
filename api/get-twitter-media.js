@@ -1,6 +1,6 @@
-import axios from 'axios';
+const axios = require('axios');
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   const { url } = req.query;
 
   if (!url) {
@@ -35,4 +35,4 @@ export default async function handler(req, res) {
     console.error('Scraper Error:', error.response?.data || error.message);
     res.status(500).json({ error: 'Failed to fetch X media' });
   }
-}
+};
