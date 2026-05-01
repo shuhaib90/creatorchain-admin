@@ -1953,10 +1953,10 @@
                         <div class="p-card-section-title">Connections</div>
                         <div class="p-card-socials">
                             ${profile.twitter ? `<a href="https://x.com/${profile.twitter.replace('@','')}" target="_blank" class="p-card-social-btn">
-                                <i data-lucide="twitter"></i>
+                                <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                             </a>` : ''}
                             ${profile.github ? `<a href="${profile.github.startsWith('http')?profile.github:'https://github.com/'+profile.github}" target="_blank" class="p-card-social-btn">
-                                <i data-lucide="github"></i>
+                                <svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
                             </a>` : ''}
                         </div>
                     </div>
@@ -1972,28 +1972,28 @@
                         <div class="p-card-section-title">Work Context</div>
                         <div class="p-card-meta-grid">
                             <div class="p-card-meta-card">
-                                <div class="p-card-meta-icon"><i data-lucide="list"></i></div>
+                                <div class="p-card-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M6 18h12M6 14h12M6 10h12M6 6h12"/></svg></div>
                                 <div class="p-card-meta-info">
                                     <span class="p-card-meta-label">Level</span>
                                     <span class="p-card-meta-value">${profile.experience_level || 'Beginner'}</span>
                                 </div>
                             </div>
                             <div class="p-card-meta-card">
-                                <div class="p-card-meta-icon"><i data-lucide="briefcase"></i></div>
+                                <div class="p-card-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
                                 <div class="p-card-meta-info">
                                     <span class="p-card-meta-label">Preference</span>
                                     <span class="p-card-meta-value">${profile.work_preference || 'Part-time'}</span>
                                 </div>
                             </div>
                             <div class="p-card-meta-card">
-                                <div class="p-card-meta-icon"><i data-lucide="map-pin"></i></div>
+                                <div class="p-card-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
                                 <div class="p-card-meta-info">
                                     <span class="p-card-meta-label">Location</span>
                                     <span class="p-card-meta-value">${profile.location || 'GLOBAL'}</span>
                                 </div>
                             </div>
                             <div class="p-card-meta-card">
-                                <div class="p-card-meta-icon"><i data-lucide="building"></i></div>
+                                <div class="p-card-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;"><path d="M3 21h18M3 7v14M21 7v14M9 21V10l3-3 3 3v11M12 7V3"/></svg></div>
                                 <div class="p-card-meta-info">
                                     <span class="p-card-meta-label">Company</span>
                                     <span class="p-card-meta-value">${profile.company || 'Freelance'}</span>
@@ -2004,13 +2004,13 @@
 
                     <div class="p-card-footer">
                         <button class="p-card-share-btn" onclick="shareProfile('${handle}')">
-                            <i data-lucide="share-2"></i> SHARE BUILDER PROFILE
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg> SHARE BUILDER PROFILE
                         </button>
                     </div>
                 </div>
             </div>
         `;
-        lucide.createIcons();
+        setTimeout(() => lucide.createIcons({ props: { "stroke-width": 3 } }), 10);
     }
 
     function closeProfileCard() {
