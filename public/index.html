@@ -307,12 +307,24 @@
             .field-row { grid-template-columns: 1fr; }
             .footer-inner { grid-template-columns: 1fr; }
             .admin-tabs { overflow-x: auto; }
-            .hero-graphic { margin-top: 40px; width: 100%; }
         }
 
-        .hero-graphic { position: relative; border: 4px solid var(--black); box-shadow: 12px 12px 0 var(--black); background: #fff; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .hero-graphic img { width: 100%; height: auto; display: block; }
-        .hero-graphic::after { content: ''; position: absolute; inset: 0; opacity: 0.1; background-image: radial-gradient(var(--black) 1.5px, transparent 0); background-size: 8px 8px; pointer-events: none; }
+        .hero-section { 
+            padding: 100px 0; 
+            background-image: url('/landing-hero.png'); 
+            background-size: cover; 
+            background-position: center; 
+            position: relative; 
+            border-bottom: 4px solid var(--black); 
+        }
+        .hero-section::before { 
+            content: ''; 
+            position: absolute; 
+            inset: 0; 
+            background: rgba(255, 255, 255, 0.85); 
+            z-index: 1; 
+        }
+        .hero-section .container { position: relative; z-index: 2; }
 
 
         /* TRACKING SYSTEM CSS */
@@ -418,11 +430,11 @@
 </div>
 
 <!-- HERO -->
-<section style="padding: 80px 0; background: var(--bg);">
+<section class="hero-section">
     <div class="container hero">
         <div>
             <h1>EARN FROM <span class="outline">WEB3</span>:<br><span class="green" style="font-size: 0.8em; display:inline-block; margin-top:8px;">FIND BOUNTIES, JOBS & PAID CAMPAIGNS</span></h1>
-            <p style="font-size:16px; color:var(--muted); max-width:440px;">The unfiltered aggregator for the best roles in the decentralized economy. Built for creators, community leads, and devs.</p>
+            <p style="font-size:16px; color:var(--muted); max-width:440px; font-weight: 500;">The unfiltered aggregator for the best roles in the decentralized economy. Built for creators, community leads, and devs.</p>
             <div class="subscribe-group">
                 <input type="email" id="sub-email" class="subscribe-input" placeholder="Enter your email for updates...">
                 <button class="subscribe-btn" id="sub-btn" onclick="handleSubscribe()">GET UPDATES</button>
@@ -434,17 +446,14 @@
                 </div>
             </div>
         </div>
-        <div class="hero-graphic">
-            <img src="/landing-hero.png" alt="CreatorChain Ecosystem" onerror="this.style.display='none'">
-            <div style="position:absolute; bottom:20px; left:20px; right:20px; background:rgba(255,255,255,0.9); border:2px solid var(--black); padding:15px; display:flex; justify-content:space-around; z-index:10;">
-                <div style="text-align:center;">
-                    <div id="hero-count" style="font-weight:900; font-size:24px; color:var(--black);">00</div>
-                    <div style="font-size:10px; font-weight:700; color:#888;">LIVE_ENTRIES</div>
-                </div>
-                <div style="text-align:center;">
-                    <div id="hero-rewards" style="font-weight:900; font-size:24px; color:var(--primary);">$0K</div>
-                    <div style="font-size:10px; font-weight:700; color:#888;">TOTAL_POOL</div>
-                </div>
+        <div class="hero-stats-card">
+            <div class="stat-item">
+                <span class="stat-num" id="hero-count">09</span>
+                <span class="stat-label">LIVE_ENTRIES</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-num" id="hero-rewards">$387K+</span>
+                <span class="stat-label">TOTAL_REWARD_POOL</span>
             </div>
         </div>
     </div>
