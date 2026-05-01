@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
                 `<b>Project:</b> ${payload.project_name}\n` +
                 `<b>From:</b> ${payload.submitted_by}\n` +
                 `<b>Category:</b> ${payload.category}\n\n` +
-                `👉 <a href="https://creatorchain-web3-jobs.vercel.app/admin.html">Open Admin Terminal</a>`;
+                `👉 <a href="https://creatorchain-admin-fo2n.vercel.app/">Open Admin Terminal</a>`;
     } else if (type === 'new_opportunity') {
       message = `🔥 <b>NEW OPPORTUNITY</b>\n\n` +
                 `<b>${payload.project_name}</b>\n` +
