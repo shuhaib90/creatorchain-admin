@@ -1,8 +1,8 @@
 const axios = require('axios');
 
 // Config
-const SUPABASE_URL = 'https://ayemstxbtjphoxdnmwcl.supabase.co';
-const SUPABASE_KEY = 'sb_live_MDDox9VP_6MW7JCnZ750TSB_CrpSywsNlZJa8jqRkC0';
+const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
 
 module.exports = async (req, res) => {
   const { method, body, query } = req;
