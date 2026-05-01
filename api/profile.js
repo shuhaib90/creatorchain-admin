@@ -1,10 +1,10 @@
-const axios = require('axios');
+import axios from 'axios';
 
 // Config
 const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   const { method, body, query } = req;
   const userId = body?.user_id || query?.user_id;
 

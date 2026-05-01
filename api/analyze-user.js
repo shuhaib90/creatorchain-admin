@@ -1,5 +1,5 @@
-const axios = require('axios');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+import axios from 'axios';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Config
 const X_BEARER_TOKEN = 'AAAAAAAAAAAAAAAAAAAAAHER8wEAAAAAdhTJoHQk1CFvxfJ6h1H%2BUzVDTD0%3Dz37Ujrc424aMXi6TohjAI7RuYMtOWvtkyONHggR54jdKnExnu1';
@@ -9,7 +9,7 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   const { username } = req.query;
 
   if (!username) {
