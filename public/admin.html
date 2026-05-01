@@ -336,8 +336,6 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
     }
 
     async function approveListing(id) {
-        if(!confirm('Approve this listing and NOTIFY matching builders?')) return;
-        
         await db.from('listings').update({ 
             approval_status: 'approved', 
             reviewed_at: new Date().toISOString() 
@@ -415,8 +413,6 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
     });
 
     async function notifyMatchingBuilders(id) {
-        if(!confirm('Broadcast this opportunity to matching builders?')) return;
-        
         const { data: project } = await db.from('listings').select('*').eq('id', id).single();
         if (!project) return;
 
