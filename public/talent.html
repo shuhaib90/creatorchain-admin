@@ -549,13 +549,14 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        // Initialize Supabase
         const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
-        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let db;
 
         async function init() {
             try {
+                db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 checkUser();
                 initUnifiedSkills();
                 lucide.createIcons();
