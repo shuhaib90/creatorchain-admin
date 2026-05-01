@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Terminal | CreatorChain</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #00f5a0;
+            --accent: #ff3e00;
+            --secondary: #ffee00;
+            --black: #000000;
+            --white: #ffffff;
+            --muted: #666666;
+            --bg: #f8f8f8;
+            --border: 3px solid #000;
+            --shadow: 6px 6px 0 #000;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-main); background: var(--bg); color: var(--black); line-height: 1.6; display: none; } /* Hidden until auth check */
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+        
+        nav { background: #fff; border-bottom: 4px solid var(--black); padding: 15px 0; position: sticky; top: 0; z-index: 100; }
+        .nav-inner { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px; text-decoration: none; color: #000; }
+        .logo img { height: 40px; }
+
+        .admin-header { background: var(--black); color: #fff; padding: 40px 0; border-bottom: 4px solid var(--primary); margin-bottom: 40px; }
+        .admin-header h1 { font-size: 42px; font-weight: 900; letter-spacing: -1.5px; color: var(--primary); }
+        .admin-header p { font-family: var(--font-mono); font-size: 14px; opacity: 0.8; }
+
+        .admin-tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 3px solid var(--black); padding-bottom: 10px; }
+        .admin-tab { padding: 12px 24px; background: #fff; border: 3px solid var(--black); font-family: var(--font-mono); font-weight: 800; cursor: pointer; transition: 0.1s; }
+        .admin-tab:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--black); }
+        .admin-tab.active { background: var(--primary); box-shadow: 4px 4px 0 var(--black); transform: translate(-2px, -2px); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* LISTINGS TABLE */
+        .listings-table { width: 100%; border-collapse: collapse; background: #fff; border: 3px solid var(--black); box-shadow: 10px 10px 0 var(--black); margin-bottom: 50px; }
+        .listings-table th { background: var(--black); color: #fff; text-align: left; padding: 15px; font-family: var(--font-mono); font-size: 12px; }
+        .listings-table td { padding: 15px; border-bottom: 2px solid #eee; }
+        .listings-table tr:last-child td { border-bottom: none; }
+        
+        .status-badge { padding: 4px 10px; border-radius: 0; font-family: var(--font-mono); font-size: 10px; font-weight: 800; border: 2px solid var(--black); }
+        .status-pending { background: var(--secondary); }
+        .status-approved { background: var(--primary); }
+        .status-rejected { background: var(--accent); color: #fff; }
+
+        /* CARDS */
+        .pending-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 30px; margin-bottom: 60px; }
+        .pending-card { background: #fff; border: 3px solid var(--black); box-shadow: 8px 8px 0 var(--black); display: flex; flex-direction: column; }
+        .pending-card-header { padding: 20px; border-bottom: 2px solid var(--black); display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
+        .pending-card-body { padding: 25px; flex-grow: 1; }
+        .pending-actions { padding: 20px; background: #f0f0f0; border-top: 2px solid var(--black); display: flex; gap: 10px; }
+        
+        .btn { padding: 10px 20px; border: 2px solid var(--black); font-family: var(--font-mono); font-weight: 800; font-size: 12px; cursor: pointer; transition: 0.1s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--black); }
+        .btn-primary { background: var(--primary); }
+        .btn-danger { background: var(--accent); color: #fff; }
+        .btn-black { background: var(--black); color: #fff; }
+
+        #toast { position: fixed; bottom: 30px; right: 30px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; }
+        .toast-item { background: var(--black); color: #fff; padding: 15px 25px; border: 3px solid var(--primary); box-shadow: 6px 6px 0 rgba(0,0,0,0.2); font-family: var(--font-mono); font-weight: 700; font-size: 13px; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* FORM */
+        .admin-form { background: #fff; border: 3px solid var(--black); padding: 40px; box-shadow: 12px 12px 0 var(--black); max-width: 800px; }
+        .field { margin-bottom: 20px; }
+        .field label { display: block; font-family: var(--font-mono); font-size: 12px; font-weight: 800; margin-bottom: 8px; }
+        .field input, .field textarea, .field select { width: 100%; padding: 12px; border: 2px solid var(--black); font-family: inherit; font-size: 14px; outline: none; }
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        @media (max-width: 768px) {
+            .pending-grid { grid-template-columns: 1fr; }
+            .field-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="container nav-inner">
+        <a href="/" class="logo">
+            <img src="/logo.png" alt="Logo">
+            ADMIN TERMINAL
+        </a>
+        <div style="display:flex; gap:15px; align-items:center;">
+            <a href="/" class="btn btn-sm">EXIT TO SITE</a>
+            <button class="btn btn-danger" onclick="signOut()">LOGOUT</button>
+        </div>
+    </div>
+</nav>
+
+<header class="admin-header">
+    <div class="container">
+        <p>SYSTEM_STATUS: ONLINE // AUTHENTICATED: @ZENVICALPHA</p>
+        <h1>CONTROL <span class="outline">CENTER</span></h1>
+    </div>
+</header>
+
+<main class="container">
+    <div class="admin-tabs">
+        <div class="admin-tab active" onclick="switchTab('tab-pending')">PENDING REVIEW (<span id="pending-count">0</span>)</div>
+        <div class="admin-tab" onclick="switchTab('tab-all')">ALL LISTINGS</div>
+        <div class="admin-tab" onclick="switchTab('tab-add')">ADD / EDIT</div>
+    </div>
+
+    <!-- PENDING TAB -->
+    <div id="tab-pending" class="tab-content active">
+        <div class="pending-grid" id="pending-list">
+            <!-- Dynamic Content -->
+        </div>
+    </div>
+
+    <!-- ALL TAB -->
+    <div id="tab-all" class="tab-content">
+        <div id="admin-list">
+            <!-- Dynamic Table -->
+        </div>
+    </div>
+
+    <!-- ADD/EDIT TAB -->
+    <div id="tab-add" class="tab-content">
+        <form class="admin-form" id="listing-form">
+            <input type="hidden" id="f-id">
+            <div class="field-row">
+                <div class="field">
+                    <label>PROJECT_NAME</label>
+                    <input type="text" id="f-project" required>
+                </div>
+                <div class="field">
+                    <label>CATEGORY</label>
+                    <select id="f-section">
+                        <option value="ambassador">AMBASSADOR</option>
+                        <option value="discord">DISCORD</option>
+                        <option value="bounty">BOUNTY</option>
+                        <option value="developer">DEVELOPER</option>
+                        <option value="campaign">CAMPAIGN</option>
+                    </select>
+                </div>
+            </div>
+            <div class="field">
+                <label>ROLE_TITLE</label>
+                <input type="text" id="f-title" required>
+            </div>
+            <div class="field">
+                <label>REWARD_VALUE</label>
+                <input type="text" id="f-reward" placeholder="e.g. $500 USDC">
+            </div>
+            <div class="field">
+                <label>DESCRIPTION</label>
+                <textarea id="f-desc" rows="4"></textarea>
+            </div>
+            <div class="field">
+                <label>APPLY_URL</label>
+                <input type="url" id="f-url">
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label>DEADLINE</label>
+                    <input type="text" id="f-deadline" placeholder="YYYY-MM-DD">
+                </div>
+                <div class="field">
+                    <label>URGENCY</label>
+                    <select id="f-urgency">
+                        <option value="MEDIUM">MEDIUM</option>
+                        <option value="HIGH">HIGH</option>
+                        <option value="CRITICAL">CRITICAL</option>
+                    </select>
+                </div>
+            </div>
+            <div class="field">
+                <label>LOGO_URL</label>
+                <input type="text" id="f-logo">
+            </div>
+            <div style="margin-top:20px;">
+                <button type="submit" class="btn btn-primary" style="width:100%; height:50px;">SAVE LISTING & GO LIVE</button>
+                <button type="button" class="btn btn-white" style="width:100%; margin-top:10px;" onclick="document.getElementById('listing-form').reset(); document.getElementById('f-id').value=''">CLEAR FORM</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+    // SUPABASE CONFIG (REPLACE WITH YOUR KEYS IF NEEDED, BUT WE USE THE ONES FROM INDEX)
+    const SUPABASE_URL = 'https://ayemstxbtjphoxdnmwcl.supabase.co';
+    const SUPABASE_KEY = 'sb_live_MDDox9VP_6MW7JCnZ750TSB_CrpSywsNlZJa8jqRkC0';
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // AUTH GUARD
+    async function checkAdminAuth() {
+        const { data: { user } } = await db.auth.getUser();
+        
+        if (!user) {
+            window.location.href = '/';
+            return;
+        }
+
+        const handle = (user.user_metadata.user_name || '').toLowerCase();
+        
+        if (handle === 'zenvicalpha') {
+            document.body.style.display = 'block';
+            initAdmin();
+        } else {
+            alert('UNAUTHORIZED ACCESS: This terminal is restricted to administrators.');
+            window.location.href = '/';
+        }
+    }
+
+    async function signOut() {
+        await db.auth.signOut();
+        window.location.href = '/';
+    }
+
+    function switchTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        // Find tab by text content to set active
+        const tabMap = {'tab-pending':0, 'tab-all':1, 'tab-add':2};
+        document.querySelectorAll('.admin-tab')[tabMap[id]].classList.add('active');
+    }
+
+    function showToast(msg, type='success') {
+        const el = document.createElement('div');
+        el.className = `toast-item ${type==='error'?'error':''}`;
+        el.textContent = msg;
+        document.getElementById('toast').appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+    }
+
+    function timeAgo(date) {
+        if(!date) return '—';
+        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+        let interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + "y ago";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + "mo ago";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + "d ago";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + "h ago";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + "m ago";
+        return "Just now";
+    }
+
+    // ADMIN LOGIC
+    async function initAdmin() {
+        lucide.createIcons();
+        loadPendingListings();
+        loadAllListings();
+        subscribeRealtime();
+    }
+
+    async function loadPendingListings() {
+        const { data } = await db.from('listings').select('*').eq('approval_status','pending').order('submitted_at',{ascending:true});
+        const count = data ? data.length : 0;
+        document.getElementById('pending-count').textContent = count;
+        
+        const list = document.getElementById('pending-list');
+        if(!count) {
+            list.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:100px; border:3px dashed #ccc;"><h3>All Clear! No pending submissions.</h3></div>';
+            return;
+        }
+
+        list.innerHTML = data.map(l => `
+            <div class="pending-card" id="pc-${l.id}">
+                <div class="pending-card-header">
+                    <span class="status-badge status-pending">PENDING</span>
+                    <span class="mono" style="font-size:11px;">${timeAgo(l.submitted_at)}</span>
+                </div>
+                <div class="pending-card-body">
+                    <p class="mono" style="font-size:10px; color:var(--muted);">${l.section.toUpperCase()}</p>
+                    <h3 style="font-size:20px; margin-bottom:5px;">${l.project}</h3>
+                    <p style="font-weight:700; color:var(--black);">${l.title}</p>
+                    <p style="font-size:13px; color:#666; margin-top:10px;">${l.description || 'No description'}</p>
+                    <div style="margin-top:15px; font-weight:800; color:var(--accent);">${l.reward || 'TBA'}</div>
+                </div>
+                <div class="pending-actions">
+                    <button class="btn btn-primary" onclick="approveListing('${l.id}')">APPROVE</button>
+                    <button class="btn btn-danger" onclick="rejectListing('${l.id}')">REJECT</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function loadAllListings() {
+        const { data } = await db.from('listings').select('*').order('created_at',{ascending:false});
+        const list = document.getElementById('admin-list');
+        list.innerHTML = `
+            <table class="listings-table">
+                <thead>
+                    <tr>
+                        <th>PROJECT</th>
+                        <th>CATEGORY</th>
+                        <th>REWARD</th>
+                        <th>STATUS</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.map(l => `
+                        <tr>
+                            <td><strong>${l.project}</strong><br><small>${l.title}</small></td>
+                            <td><span class="mono">${l.section.toUpperCase()}</span></td>
+                            <td>${l.reward || 'TBA'}</td>
+                            <td><span class="status-badge status-${l.approval_status}">${l.approval_status.toUpperCase()}</span></td>
+                            <td>
+                                <button class="btn btn-sm" onclick="editItem('${l.id}')">EDIT</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteItem('${l.id}')">DEL</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    async function approveListing(id) {
+        await db.from('listings').update({ approval_status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', id);
+        showToast('✓ Listing Approved!');
+        initAdmin();
+    }
+
+    async function rejectListing(id) {
+        const reason = prompt('Rejection reason:');
+        if (reason === null) return;
+        await db.from('listings').update({ 
+            approval_status: 'rejected', 
+            rejection_reason: reason || 'Not specified',
+            reviewed_at: new Date().toISOString() 
+        }).eq('id', id);
+        showToast('❌ Listing Rejected', 'error');
+        initAdmin();
+    }
+
+    async function editItem(id) {
+        const { data } = await db.from('listings').select('*').eq('id',id).single();
+        if(data) {
+            document.getElementById('f-id').value = data.id;
+            document.getElementById('f-project').value = data.project;
+            document.getElementById('f-section').value = data.section;
+            document.getElementById('f-title').value = data.title;
+            document.getElementById('f-reward').value = data.reward || '';
+            document.getElementById('f-desc').value = data.description || '';
+            document.getElementById('f-url').value = data.apply_url || '';
+            document.getElementById('f-logo').value = data.logo || '';
+            document.getElementById('f-deadline').value = data.deadline || '';
+            document.getElementById('f-urgency').value = data.urgency || 'MEDIUM';
+            switchTab('tab-add');
+        }
+    }
+
+    async function deleteItem(id) {
+        if(confirm('Permanently DELETE this listing?')) {
+            await db.from('listings').delete().eq('id', id);
+            showToast('🗑 Deleted');
+            initAdmin();
+        }
+    }
+
+    document.getElementById('listing-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('f-id').value;
+        const item = {
+            project: document.getElementById('f-project').value,
+            section: document.getElementById('f-section').value,
+            title: document.getElementById('f-title').value,
+            reward: document.getElementById('f-reward').value,
+            description: document.getElementById('f-desc').value,
+            apply_url: document.getElementById('f-url').value,
+            logo: document.getElementById('f-logo').value,
+            deadline: document.getElementById('f-deadline').value,
+            urgency: document.getElementById('f-urgency').value,
+            approval_status: 'approved'
+        };
+
+        if(id) await db.from('listings').update(item).eq('id', id);
+        else await db.from('listings').insert([item]);
+
+        showToast('✓ Saved Successfully');
+        document.getElementById('listing-form').reset();
+        document.getElementById('f-id').value = '';
+        initAdmin();
+        switchTab('tab-all');
+    });
+
+    function subscribeRealtime() {
+        db.channel('admin-updates').on('postgres_changes', { event:'*', schema:'public', table:'listings' }, () => {
+            loadPendingListings();
+            loadAllListings();
+        }).subscribe();
+    }
+
+    checkAdminAuth();
+</script>
+
+</body>
+</html>

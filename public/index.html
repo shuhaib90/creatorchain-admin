@@ -1026,6 +1026,15 @@
         if (document.getElementById('auth-hero-box')) {
             document.getElementById('auth-hero-box').style.display = 'none';
         }
+        // Show Admin Terminal Link ONLY for @ZenvicAlpha
+        if (profile.user_name && profile.user_name.toLowerCase() === 'zenvicalpha') {
+            const menu = document.getElementById('userDropdownMenu');
+            const adminLink = document.createElement('a');
+            adminLink.href = '/admin.html';
+            adminLink.innerHTML = '<i data-lucide="shield-check" style="width:14px; height:14px; vertical-align:middle; margin-right:8px; color:var(--primary);"></i> ADMIN TERMINAL';
+            menu.insertBefore(adminLink, menu.querySelector('div[style*="height: 2px"]'));
+            lucide.createIcons();
+        }
     }
 
 
