@@ -462,10 +462,9 @@
                 } catch (emailErr) { console.error('Email Broadcast Error:', emailErr); }
             }
 
-            // 5. Send Telegram Broadcast
             if (tgRecipients.length > 0) {
                 try {
-                    await fetch('/api/send-telegram', {
+                    const tgResp = await fetch('/api/send-telegram', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -474,14 +473,17 @@
                                 chat_ids: tgRecipients,
                                 project_name: project.project,
                                 category: project.section,
-                                reward: project.reward || 'TBA'
+                                reward: project.reward || 'TBA',
+                                description: project.title
                             }
                         })
                     });
+                    const tgData = await tgResp.json();
+                    console.log('TG Broadcast Result:', tgData);
                 } catch (tgErr) { console.error('Telegram Broadcast Error:', tgErr); }
             }
 
-            showToast(`🚀 Broadcast sent! (${emailRecipients.length} Email, ${tgRecipients.length} Telegram)`);
+            showToast(`🚀 Broadcast sent! (Emails: ${emailRecipients.length}, Telegram: ${tgRecipients.length})`);
         } catch (err) {
             console.error('Broadcast Error:', err);
             showToast('Broadcast failed: ' + err.message, 'error');
