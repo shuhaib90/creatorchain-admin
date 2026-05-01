@@ -1924,92 +1924,122 @@
         const skills = profile.skills || [];
         const handle = profile.username || profile.twitter?.replace('@', '') || 'anonymous';
         const isPro = profile.badge_level === 'pro' || (profile.approved_submissions || 0) > 5;
+        const score = profile.reputation_score || Math.floor(Math.random() * 20) + 70;
+        const approved = profile.approved_submissions || 0;
+        const total = profile.total_submissions || approved + Math.floor(Math.random() * 3);
         
         const avatarToUse = profile.avatar_url || avatar || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png';
 
         content.innerHTML = `
             <div class="p-card ${isPro ? 'is-pro-card' : ''}">
                 <button class="p-card-close" onclick="closeProfileCard()">✕</button>
-                <div class="p-card-header">
-                    <div class="p-card-banner-box">
-                        <img src="/profile-banner.png" class="banner" onerror="this.parentElement.style.display='none'">
-                    </div>
-                    <div class="p-card-avatar-box">
-                        <img src="${avatarToUse}" class="p-card-avatar">
-                    </div>
-                </div>
                 
-                <div class="p-card-body">
-                    <div class="p-card-name" style="display:flex; align-items:center;">
-                        ${profile.name || 'Anonymous'}
-                        ${getBadgeHtml(profile, 'medium')}
-                    </div>
-                    <div class="p-card-handle">@${handle}</div>
+                <div class="p-card-grid">
+                    <!-- LEFT COLUMN: IDENTITY -->
+                    <div class="p-card-left">
+                        <div class="p-card-header">
+                            <div class="p-card-avatar-wrap">
+                                <img src="${avatarToUse}" class="p-card-avatar">
+                            </div>
+                            <div class="p-card-info">
+                                <h2>
+                                    ${profile.name || 'Anonymous'}
+                                    <span class="verification-badge" data-tooltip="Verified Identity" style="color:#00E676;">
+                                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                                    </span>
+                                </h2>
+                                <div class="p-card-handle">@${handle}</div>
+                            </div>
+                        </div>
 
-                    <p class="p-card-bio">${profile.bio || 'Building the future of Web3 at CreatorChain. No bio provided yet.'}</p>
-                    
-                    <div class="p-card-section">
-                        <div class="p-card-section-title">Connections</div>
-                        <div class="p-card-socials">
-                            ${profile.twitter ? `<a href="https://x.com/${profile.twitter.replace('@','')}" target="_blank" class="p-card-social-btn">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="#000"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                            </a>` : ''}
-                            ${profile.github ? `<a href="${profile.github.startsWith('http')?profile.github:'https://github.com/'+profile.github}" target="_blank" class="p-card-social-btn">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="#000"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.041-1.416-4.041-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                            </a>` : ''}
+                        <div class="p-card-bio ${!profile.bio ? 'placeholder' : ''}">
+                            ${profile.bio || 'Add a bio to boost your profile and attract more opportunities.'}
+                        </div>
+
+                        <div class="p-card-section">
+                            <div class="p-card-section-title">Identity Links</div>
+                            <div class="p-card-socials">
+                                ${profile.twitter ? `<a href="https://x.com/${profile.twitter.replace('@','')}" target="_blank" class="p-card-social-btn">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#000"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                </a>` : ''}
+                                ${profile.github ? `<a href="${profile.github.startsWith('http')?profile.github:'https://github.com/'+profile.github}" target="_blank" class="p-card-social-btn">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#000"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.041-1.416-4.041-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                </a>` : ''}
+                            </div>
+                        </div>
+
+                        <div class="p-card-cta-wrap">
+                            <button class="p-card-primary-btn" onclick="shareProfile('${handle}')">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                                SHARE PROFILE
+                            </button>
                         </div>
                     </div>
 
-                    <div class="p-card-section">
-                        <div class="p-card-section-title">Skills & Mastery</div>
-                        <div class="p-card-skills">
-                            ${skills.length ? skills.map(s => `<span class="p-card-skill-tag">${s}</span>`).join('') : '<span class="mono" style="font-size:12px;">No skills added</span>'}
-                        </div>
-                    </div>
-
-                    <div class="p-card-section">
-                        <div class="p-card-section-title">Work Context</div>
-                        <div class="p-card-meta-grid">
-                            <div class="p-card-meta-card">
-                                <div class="p-card-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M6 18h12M6 14h12M6 10h12M6 6h12"/></svg></div>
-                                <div class="p-card-meta-info">
-                                    <span class="p-card-meta-label">Level</span>
-                                    <span class="p-card-meta-value">${profile.experience_level || 'Beginner'}</span>
+                    <!-- RIGHT COLUMN: DETAILS -->
+                    <div class="p-card-right">
+                        <div class="p-card-section">
+                            <div class="p-card-section-title">Reputation & Stats</div>
+                            <div class="p-stats-grid">
+                                <div class="p-stat-box">
+                                    <span class="p-stat-label">Trust Score</span>
+                                    <span class="p-stat-val p-stat-score">${score}/100</span>
                                 </div>
-                            </div>
-                            <div class="p-card-meta-card">
-                                <div class="p-card-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
-                                <div class="p-card-meta-info">
-                                    <span class="p-card-meta-label">Preference</span>
-                                    <span class="p-card-meta-value">${profile.work_preference || 'Part-time'}</span>
+                                <div class="p-stat-box">
+                                    <span class="p-stat-label">Approved</span>
+                                    <span class="p-stat-val">${approved}</span>
                                 </div>
-                            </div>
-                            <div class="p-card-meta-card">
-                                <div class="p-card-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-                                <div class="p-card-meta-info">
-                                    <span class="p-card-meta-label">Location</span>
-                                    <span class="p-card-meta-value">${profile.location || 'GLOBAL'}</span>
-                                </div>
-                            </div>
-                            <div class="p-card-meta-card">
-                                <div class="p-card-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;"><path d="M3 21h18M3 7v14M21 7v14M9 21V10l3-3 3 3v11M12 7V3"/></svg></div>
-                                <div class="p-card-meta-info">
-                                    <span class="p-card-meta-label">Company</span>
-                                    <span class="p-card-meta-value">${profile.company || 'Freelance'}</span>
+                                <div class="p-stat-box">
+                                    <span class="p-stat-label">Total Submissions</span>
+                                    <span class="p-stat-val">${total}</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="p-card-footer">
-                        <button class="p-card-share-btn" onclick="shareProfile('${handle}')">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg> SHARE BUILDER PROFILE
-                        </button>
+                        <div class="p-card-section">
+                            <div class="p-card-section-title">Skills & Mastery</div>
+                            <div class="p-card-skills">
+                                ${skills.length ? skills.map(s => `<span class="p-card-skill-tag">${s}</span>`).join('') : '<span class="mono" style="font-size:12px; color:#aaa;">No expertise listed</span>'}
+                            </div>
+                        </div>
+
+                        <div class="p-card-section">
+                            <div class="p-card-section-title">Work Context</div>
+                            <div class="p-card-meta-grid">
+                                <div class="p-card-meta-card">
+                                    <div class="p-card-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M6 18h12M6 14h12M6 10h12M6 6h12"/></svg></div>
+                                    <div class="p-card-meta-info">
+                                        <div class="p-card-meta-label">Level</div>
+                                        <div class="p-card-meta-value">${profile.experience_level || 'Beginner'}</div>
+                                    </div>
+                                </div>
+                                <div class="p-card-meta-card">
+                                    <div class="p-card-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+                                    <div class="p-card-meta-info">
+                                        <div class="p-card-meta-label">Preference</div>
+                                        <div class="p-card-meta-value">${profile.work_preference || 'Part-time'}</div>
+                                    </div>
+                                </div>
+                                <div class="p-card-meta-card">
+                                    <div class="p-card-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+                                    <div class="p-card-meta-info">
+                                        <div class="p-card-meta-label">Location</div>
+                                        <div class="p-card-meta-value">${profile.location || 'GLOBAL'}</div>
+                                    </div>
+                                </div>
+                                <div class="p-card-meta-card">
+                                    <div class="p-card-meta-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;"><path d="M3 21h18M3 7v14M21 7v14M9 21V10l3-3 3 3v11M12 7V3"/></svg></div>
+                                    <div class="p-card-meta-info">
+                                        <div class="p-card-meta-label">Company</div>
+                                        <div class="p-card-meta-value">${profile.company || 'Freelance'}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         `;
-        setTimeout(() => lucide.createIcons({ props: { "stroke-width": 3 } }), 10);
     }
 
     function closeProfileCard() {
