@@ -290,16 +290,17 @@
             width: 100%; 
             max-width: 1000px; 
             position: relative; 
-            overflow: visible; 
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            max-height: 90vh;
+            overflow-x: hidden;
             overflow-y: auto;
+            max-height: 90vh;
+            /* REMOVE ALL ANIMATIONS */
+            animation: none !important;
+            transition: none !important;
         }
 
         .is-pro-card { 
             border-color: var(--secondary) !important; 
             box-shadow: 15px 15px 0 var(--black), 0 0 30px rgba(255, 230, 0, 0.3) !important; 
-            animation: none !important; 
         }
         .is-pro-card .p-card-left { background: #fffcf0; border-right: 4px solid var(--secondary); }
         .is-pro-card .p-card-header::after { 
@@ -319,7 +320,7 @@
         .is-pro-card .p-stat-score { color: var(--accent); }
         .is-pro-card .p-card-avatar { border-color: var(--secondary); }
 
-        .p-card-grid { display: grid; grid-template-columns: 0.4fr 0.6fr; min-height: 500px; }
+        .p-card-grid { display: grid; grid-template-columns: 0.4fr 0.6fr; width: 100%; }
         
         .p-card-left { padding: 40px; border-right: 4px solid var(--black); background: #fafafa; }
         .p-card-right { padding: 40px; background: #fff; }
