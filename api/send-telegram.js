@@ -64,12 +64,24 @@ module.exports = async (req, res) => {
     // Send messages in parallel
     const results = await Promise.all(targetChatIds.map(async (chatId) => {
       try {
-        const response = await axios.post(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-          chat_id: chatId,
-          text: message,
-          parse_mode: 'HTML',
-          disable_web_page_preview: false
-        });
+        let response;
+        if (payload.image_url) {
+          // Send as Photo
+          response = await axios.post(`https://api.telegram.org/bot${TG_TOKEN}/sendPhoto`, {
+            chat_id: chatId,
+            photo: payload.image_url,
+            caption: message,
+            parse_mode: 'HTML'
+          });
+        } else {
+          // Send as Text
+          response = await axios.post(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+            chat_id: chatId,
+            text: message,
+            parse_mode: 'HTML',
+            disable_web_page_preview: false
+          });
+        }
         return { chatId, success: true, messageId: response.data.result.message_id };
       } catch (err) {
         console.error(`Telegram Send Error to ${chatId}:`, err.response?.data || err.message);
