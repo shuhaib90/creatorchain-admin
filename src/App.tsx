@@ -7,12 +7,8 @@ import {
   Settings, 
   LogOut, 
   Search, 
-  Bell, 
   ShieldCheck,
-  TrendingUp,
-  Clock,
-  CheckCircle2,
-  XCircle
+  Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from './lib/supabase';
