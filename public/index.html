@@ -20,21 +20,22 @@
     <style>
         :root {
             --bg: #f5f0e8; --surface: #ffffff; --black: #0a0a0a;
-            --primary: #00e87a; --secondary: #ffe600; --accent: #ff3b00;
+            --primary: #00E676; --secondary: #ffe600; --accent: #ff3b00;
             --discord: #0057ff; --admin: #7000ff; --muted: #555555;
-            --border: 3px solid #0a0a0a; --shadow: 4px 4px 0px #0a0a0a;
+            --border: 2px solid #0a0a0a; --shadow: 4px 4px 0px #0a0a0a;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: var(--black); overflow-x: hidden; line-height: 1.3; }
-        h1,h2,h3 { font-weight: 900; letter-spacing: -2px; text-transform: uppercase; }
+        body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: var(--black); overflow-x: hidden; line-height: 1.6; }
+        h1,h2,h3 { font-weight: 900; letter-spacing: -2px; text-transform: uppercase; margin-bottom: 1.5rem; }
+        p { margin-bottom: 1.5rem; }
         .mono { font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 1px; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
         /* NAV */
-        nav { background: var(--surface); border-bottom: 3px solid var(--black); position: sticky; top: 0; z-index: 10000; padding: 15px 0; }
+        nav { background: var(--surface); border-bottom: 2px solid var(--black); position: sticky; top: 0; z-index: 10000; padding: 12px 0; }
         .nav-inner { display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 28px; font-weight: 900; color: var(--black); text-decoration: none; text-transform: uppercase; letter-spacing: -1px; animation: logoPulse 6s infinite; cursor: pointer; }
-        .logo span { -webkit-text-stroke: 1.5px var(--black); color: transparent; }
+        .logo { font-size: 26px; font-weight: 900; color: var(--black); text-decoration: none; text-transform: uppercase; letter-spacing: -1.5px; animation: logoPulse 6s infinite; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .logo span.outline { -webkit-text-stroke: 1px var(--black); color: transparent; margin-left: 2px; }
         @keyframes logoPulse {
             0% { color: var(--black); }
             25% { color: var(--primary); }
@@ -64,20 +65,21 @@
         .ticker span { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 13px; }
 
         /* HERO */
-        .hero { padding: 80px 0; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 60px; align-items: center; }
+        .hero { padding: 100px 0; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 60px; align-items: center; }
+        .hero-content { max-width: 520px; }
         .hero h1 { font-size: clamp(38px, 5vw, 84px); line-height: 0.9; margin-bottom: 30px; letter-spacing: -2.5px; }
         .hero h1 .outline { -webkit-text-stroke: 2px var(--black); color: transparent; }
         .hero h1 .green { color: var(--primary); text-shadow: 4px 4px 0 var(--black); }
         .hero-cta { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 30px; }
         .subscribe-group { display: flex; gap: 10px; width: 100%; max-width: 500px; margin-top: 40px; position: relative; }
-        .subscribe-input { flex: 1; padding: 16px 20px; border: 3px solid var(--black); font-family: 'Space Mono', monospace; font-size: 15px; background: #fff; box-shadow: 6px 6px 0 var(--black); outline: none; }
+        .subscribe-input { flex: 1; padding: 16px 20px; border: 2px solid var(--black); font-family: 'Space Mono', monospace; font-size: 15px; background: #fff; box-shadow: 4px 4px 0 var(--black); outline: none; }
         .subscribe-input:focus { border-color: var(--primary); }
-        .subscribe-btn { background: var(--primary); color: #000; border: 3px solid var(--black); padding: 0 30px; font-weight: 900; cursor: pointer; box-shadow: 6px 6px 0 var(--black); font-size: 14px; transition: all 0.2s; white-space: nowrap; }
-        .subscribe-btn:active { box-shadow: 0 0 0 var(--black); transform: translate(6px, 6px); }
-        .hero-stats-card { background: #fff; border: var(--border); box-shadow: 8px 8px 0 var(--black); padding: 36px; }
-        .stat-item { padding: 12px 0; border-bottom: 2px solid var(--black); }
+        .subscribe-btn { background: var(--primary); color: #000; border: 2px solid var(--black); padding: 0 30px; font-weight: 900; cursor: pointer; box-shadow: 4px 4px 0 var(--black); font-size: 14px; transition: all 0.2s; white-space: nowrap; }
+        .subscribe-btn:active { box-shadow: 0 0 0 var(--black); transform: translate(4px, 4px); }
+        .hero-stats-card { background: #fff; border: var(--border); box-shadow: 6px 6px 0 var(--black); padding: 40px; width: 105%; }
+        .stat-item { padding: 16px 0; border-bottom: 2px solid var(--black); }
         .stat-item:last-child { border-bottom: none; }
-        .stat-num { font-size: 52px; font-family: 'Space Mono', monospace; font-weight: 700; line-height: 1; display: block; }
+        .stat-num { font-size: 52px; font-family: 'Space Mono', monospace; font-weight: 700; line-height: 1; display: block; margin-bottom: 8px; }
         .stat-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
 
         /* SECTIONS */
@@ -380,8 +382,8 @@
 <nav>
     <div class="container nav-inner">
         <div style="display:flex; align-items:center;">
-            <a href="/" class="logo" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:10px;">
-                <img src="/logo.png" alt="CreatorChain Logo" style="height:48px; width:auto; object-fit:contain;">
+            <a href="/" class="logo" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:8px;">
+                <img src="/logo.png" alt="CreatorChain Logo" style="height:32px; width:auto; object-fit:contain;">
                 CREATOR<span class="outline">CHAIN</span>
             </a>
         </div>
@@ -412,36 +414,37 @@
 </div>
 
 <!-- HERO -->
-<section style="padding: 80px 0; background: var(--bg);">
+<section style="background: var(--bg); border-bottom: 2px solid var(--black); padding: 100px 0;">
     <div class="container hero">
-        <div>
-            <h1>EARN FROM <span class="outline">WEB3</span>:<br><span class="green" style="font-size: 0.8em; display:inline-block; margin-top:8px;">FIND BOUNTIES, JOBS & PAID CAMPAIGNS</span></h1>
-            <p style="font-size:16px; color:var(--muted); max-width:440px;">The unfiltered aggregator for the best roles in the decentralized economy. Built for creators, community leads, and devs.</p>
+        <div class="hero-content">
+            <p class="mono" style="font-size:14px; color:var(--muted); margin-bottom:20px;">◆ WEB3 OPPORTUNITY AGGREGATOR</p>
+            <h1>EARN FROM <span class="outline">WEB3:</span> <br><span class="green">FIND BOUNTIES, JOBS & PAID CAMPAIGNS</span></h1>
+            <p style="font-size:18px; color:var(--muted); margin-bottom:40px; max-width: 500px;">The unfiltered aggregator for the best roles in the decentralized economy. Built for creators, community leads, and devs.</p>
+            
             <div class="subscribe-group">
                 <input type="email" id="sub-email" class="subscribe-input" placeholder="Enter your email for updates...">
                 <button class="subscribe-btn" id="sub-btn" onclick="handleSubscribe()">GET UPDATES</button>
             </div>
-            <div style="margin-top:25px; display:flex; gap:15px; align-items:center;">
-                <button class="btn btn-secondary" style="font-size:14px; padding:12px 24px;" onclick="openSubmitModal()">Submit Your Project &rarr;</button>
+            
+            <div class="hero-cta" style="margin-top: 30px; display: flex; gap: 15px; align-items: center;">
+                <button class="btn btn-secondary" onclick="openSubmitModal()">SUBMIT YOUR PROJECT &rarr;</button>
                 <div id="auth-hero-box">
-                    <button class="btn btn-x" style="font-size:14px; padding:12px 24px;" onclick="signInWithX()"><i>𝕏</i> SIGN IN WITH X</button>
+                    <button class="btn btn-black" onclick="signInWithX()"><i>𝕏</i> SIGN IN WITH X</button>
                 </div>
             </div>
         </div>
         <div class="hero-stats-card">
             <div class="stat-item">
                 <span class="stat-num" id="hero-count">00</span>
-                <span class="stat-label">LIVE_ENTRIES</span>
+                <span class="stat-label">LIVE OPPORTUNITIES</span>
             </div>
             <div class="stat-item">
-                <span class="stat-num" id="hero-rewards">$0K</span>
-                <span class="stat-label">TOTAL_REWARD_POOL</span>
+                <span class="stat-num" id="hero-rewards">$0</span>
+                <span class="stat-label">TOTAL REWARDS POOL</span>
             </div>
-            <div class="stat-item" style="border:none">
-                <a href="https://x.com/Zenvicalpha" target="_blank" style="text-decoration:none; color:inherit; display:block;">
-                    <span class="stat-num" style="font-size:24px;">@ZenvicAlpha</span>
-                    <span class="stat-label">FOLLOW_ON_X</span>
-                </a>
+            <div class="stat-item" style="border-bottom:none;">
+                <span class="stat-num" style="font-size:24px; letter-spacing:0;">@ZenvicAlpha</span>
+                <span class="stat-label">FOLLOW FOR UPDATES</span>
             </div>
         </div>
     </div>
@@ -466,9 +469,9 @@
     <div class="container">
         <div class="footer-inner">
             <div>
-                <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
-                    <a href="/" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; font-weight:900; font-size:20px;">
-                        <img src="/logo.png" alt="Logo" style="height:44px; width:auto; object-fit:contain;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:20px;">
+                    <a href="/" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit; font-weight:900; font-size:20px;">
+                        <img src="/logo.png" alt="Logo" style="height:32px; width:auto; object-fit:contain;">
                         CREATOR<span class="outline" style="-webkit-text-stroke: 1px var(--black);">CHAIN</span>
                     </a>
                 </div>
