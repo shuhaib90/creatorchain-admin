@@ -57,12 +57,36 @@ module.exports = async (req, res) => {
     // Send messages in parallel
     const results = await Promise.all(targetChatIds.map(async (chatId) => {
       try {
-        const response = await axios.post(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-          chat_id: chatId,
-          text: message,
-          parse_mode: 'HTML',
-          disable_web_page_preview: false
-        });
+        let response;
+        if (type === 'custom' && payload.image_url) {
+          try {
+            // Attempt to Send as Photo (Manual Broadcasts)
+            response = await axios.post(`https://api.telegram.org/bot${TG_TOKEN}/sendPhoto`, {
+              chat_id: chatId,
+              photo: payload.image_url,
+              caption: message,
+              parse_mode: 'HTML'
+            });
+          } catch (photoErr) {
+            console.error(`Photo Send Failed to ${chatId}, falling back to text:`, photoErr.response?.data || photoErr.message);
+            // Fallback to text message with image link
+            const fallbackMessage = `${message}\n\n🖼️ <a href="${payload.image_url}">View Image</a>`;
+            response = await axios.post(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+              chat_id: chatId,
+              text: fallbackMessage,
+              parse_mode: 'HTML',
+              disable_web_page_preview: false
+            });
+          }
+        } else {
+          // Send as Text (Automated Alerts or Text Broadcasts)
+          response = await axios.post(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+            chat_id: chatId,
+            text: message,
+            parse_mode: 'HTML',
+            disable_web_page_preview: false
+          });
+        }
         return { chatId, success: true, messageId: response.data.result.message_id };
       } catch (err) {
         console.error(`Telegram Send Error to ${chatId}:`, err.response?.data || err.message);
