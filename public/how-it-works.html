@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How It Works | CreatorChain Ecosystem</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <link rel="apple-touch-icon" href="/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #00f5a0;
+            --accent: #ff3e00;
+            --secondary: #ffee00;
+            --black: #000000;
+            --white: #ffffff;
+            --muted: #666666;
+            --bg: #f8f8f8;
+            --border: 3px solid #000;
+            --shadow: 6px 6px 0 #000;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-main); background: var(--bg); color: var(--black); line-height: 1.6; overflow-x: hidden; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .outline { -webkit-text-stroke: 1.5px var(--black); color: transparent; }
+
+        /* NAV */
+        nav {
+            padding: 20px 0;
+            background: #fff;
+            border-bottom: 4px solid var(--black);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .logo { font-size: 24px; font-weight: 800; text-decoration: none; color: var(--black); display: flex; align-items: center; text-transform: uppercase; letter-spacing: -1px; }
+        .logo img { height: 56px; margin-right: 4px; }
+        
+        .nav-links { display: flex; gap: 30px; align-items: center; }
+        .nav-link { text-decoration: none; color: var(--black); font-weight: 800; font-size: 14px; text-transform: uppercase; font-family: var(--font-mono); }
+        .nav-link:hover { color: var(--primary); }
+
+        /* HERO */
+        .hero-section {
+            padding: 100px 0 60px;
+            background: var(--white);
+            border-bottom: 4px solid var(--black);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-section::after {
+            content: ''; position: absolute; inset: 0; opacity: 0.05;
+            background-image: radial-gradient(var(--black) 1.5px, transparent 0);
+            background-size: 10px 10px;
+        }
+        .hero-section h1 { font-size: 72px; font-weight: 900; letter-spacing: -3px; margin-bottom: 20px; position: relative; z-index: 2; }
+        .hero-section p { font-size: 20px; color: var(--muted); font-weight: 500; max-width: 600px; margin: 0 auto; position: relative; z-index: 2; }
+
+        /* STEPS */
+        .steps-container { padding: 100px 0; }
+        .step-row { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; margin-bottom: 120px; }
+        .step-row:nth-child(even) { direction: rtl; }
+        .step-row:nth-child(even) .step-content { direction: ltr; }
+        
+        .step-visual {
+            background: var(--white);
+            border: 4px solid var(--black);
+            box-shadow: 20px 20px 0 var(--secondary);
+            padding: 40px;
+            position: relative;
+        }
+        .step-visual img { width: 100%; height: auto; border: 3px solid var(--black); }
+        .step-num {
+            position: absolute;
+            top: -40px;
+            left: -40px;
+            width: 80px;
+            height: 80px;
+            background: var(--black);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 900;
+            font-family: var(--font-mono);
+            border: 4px solid var(--white);
+            box-shadow: 6px 6px 0 var(--black);
+        }
+
+        .step-content h2 { font-size: 48px; font-weight: 900; margin-bottom: 25px; line-height: 1; letter-spacing: -1.5px; }
+        .step-content p { font-size: 18px; color: var(--muted); margin-bottom: 30px; }
+        
+        .feature-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff;
+            border: 2px solid var(--black);
+            padding: 8px 16px;
+            font-weight: 800;
+            font-size: 13px;
+            font-family: var(--font-mono);
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .feature-pill i { color: var(--primary); }
+
+        /* CTA */
+        .cta-section {
+            padding: 100px 0;
+            background: var(--black);
+            color: #fff;
+            text-align: center;
+            border-top: 4px solid var(--primary);
+        }
+        .cta-section h2 { font-size: 56px; font-weight: 900; margin-bottom: 40px; color: var(--primary); }
+        .btn {
+            background: var(--primary);
+            color: var(--black);
+            padding: 20px 40px;
+            font-size: 18px;
+            font-weight: 900;
+            text-decoration: none;
+            border: 4px solid var(--white);
+            box-shadow: 8px 8px 0 var(--white);
+            display: inline-block;
+            transition: 0.1s;
+            text-transform: uppercase;
+        }
+        .btn:hover { transform: translate(-4px, -4px); box-shadow: 12px 12px 0 var(--white); }
+
+        footer {
+            background: #fff;
+            padding: 60px 0;
+            border-top: 4px solid var(--black);
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .step-row { grid-template-columns: 1fr; gap: 40px; margin-bottom: 80px; }
+            .hero-section h1 { font-size: 48px; }
+            .step-content h2 { font-size: 32px; }
+            .step-visual { box-shadow: 10px 10px 0 var(--secondary); }
+            .step-num { width: 60px; height: 60px; font-size: 24px; top: -20px; left: -20px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="container" style="display:flex; justify-content:space-between; align-items:center;">
+        <a href="/" class="logo">
+            <img src="/logo.png" alt="CreatorChain Logo">
+            CREATOR<span class="outline">CHAIN</span>
+        </a>
+        <div class="nav-links">
+            <a href="/" class="nav-link">HOME</a>
+            <a href="/talent.html" class="nav-link">TALENT</a>
+            <a href="/how-it-works.html" class="nav-link" style="color:var(--primary);">HOW IT WORKS</a>
+            <a href="https://x.com/Zenvicalpha" target="_blank" class="nav-link">SUPPORT</a>
+        </div>
+    </div>
+</nav>
+
+<header class="hero-section">
+    <div class="container">
+        <h1>HOW IT <span class="outline">WORKS</span></h1>
+        <p>A step-by-step guide to navigating the decentralized economy and building your legacy on CreatorChain.</p>
+    </div>
+</header>
+
+<section class="steps-container">
+    <div class="container">
+        
+        <!-- STEP 1 -->
+        <div class="step-row">
+            <div class="step-visual">
+                <div class="step-num">01</div>
+                <div style="background: #eee; height: 250px; display:flex; align-items:center; justify-content:center; border: 2px solid #000;">
+                    <i data-lucide="shield-check" style="width:100px; height:100px; color:var(--primary);"></i>
+                </div>
+            </div>
+            <div class="step-content">
+                <h2>CONNECT YOUR <span class="outline">IDENTITY</span></h2>
+                <p>Start by verifying your Web3 presence. Sign in with X (Twitter) to instantly create your authenticated builder identity. We use your social graph to jumpstart your reputation within our ecosystem.</p>
+                <div>
+                    <span class="feature-pill"><i data-lucide="check"></i> INSTANT AUTH</span>
+                    <span class="feature-pill"><i data-lucide="check"></i> SOCIAL SYNC</span>
+                    <span class="feature-pill"><i data-lucide="check"></i> ZERO FRICTION</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="step-row">
+            <div class="step-visual" style="box-shadow: 20px 20px 0 var(--primary);">
+                <div class="step-num" style="color:var(--secondary);">02</div>
+                <div style="background: #eee; height: 250px; display:flex; align-items:center; justify-content:center; border: 2px solid #000;">
+                    <i data-lucide="user-plus" style="width:100px; height:100px; color:var(--black);"></i>
+                </div>
+            </div>
+            <div class="step-content">
+                <h2>BUILD YOUR <span class="outline">LEGACY</span></h2>
+                <p>Define who you are. Add your skills, portfolio, and experience level. Your CreatorChain profile is your digital resume in the decentralized world, visible to hundreds of project leads looking for top talent.</p>
+                <div>
+                    <span class="feature-pill"><i data-lucide="check"></i> SKILL TAGGING</span>
+                    <span class="feature-pill"><i data-lucide="check"></i> PORTFOLIO LINKS</span>
+                    <span class="feature-pill"><i data-lucide="check"></i> HIRE STATUS</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="step-row">
+            <div class="step-visual" style="box-shadow: 20px 20px 0 var(--black);">
+                <div class="step-num">03</div>
+                <div style="background: #eee; height: 250px; display:flex; align-items:center; justify-content:center; border: 2px solid #000;">
+                    <i data-lucide="search" style="width:100px; height:100px; color:var(--accent);"></i>
+                </div>
+            </div>
+            <div class="step-content">
+                <h2>DISCOVER <span class="outline">GLOBAL</span> ROLES</h2>
+                <p>Browse the largest unfiltered aggregator of Web3 opportunities. From high-stakes bounties to full-time roles in leading protocols, find the path that matches your ambition.</p>
+                <div>
+                    <span class="feature-pill"><i data-lucide="check"></i> LIVE AGGREGATOR</span>
+                    <span class="feature-pill"><i data-lucide="check"></i> MULTI-CHAIN JOBS</span>
+                    <span class="feature-pill"><i data-lucide="check"></i> PAID CAMPAIGNS</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="step-row">
+            <div class="step-visual" style="box-shadow: 20px 20px 0 var(--accent);">
+                <div class="step-num" style="color:var(--primary);">04</div>
+                <div style="background: #eee; height: 250px; display:flex; align-items:center; justify-content:center; border: 2px solid #000;">
+                    <i data-lucide="zap" style="width:100px; height:100px; color:var(--secondary);"></i>
+                </div>
+            </div>
+            <div class="step-content">
+                <h2>SUBMIT & <span class="outline">GET PAID</span></h2>
+                <p>Apply directly or submit your work. Use our tracking system to manage your submissions and get notified when you're selected. Build your on-chain reputation with every successful collaboration.</p>
+                <div>
+                    <span class="feature-pill"><i data-lucide="check"></i> EASY SUBMISSION</span>
+                    <span class="feature-pill"><i data-lucide="check"></i> REAL-TIME TRACKING</span>
+                    <span class="feature-pill"><i data-lucide="check"></i> BUILDER REWARDS</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <h2>READY TO <span class="outline">START?</span></h2>
+        <a href="/" class="btn">ENTER THE ECOSYSTEM</a>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <p class="nav-link" style="font-size:12px;">© 2026 CREATORCHAIN. BUILT FOR THE FUTURE OF WORK.</p>
+    </div>
+</footer>
+
+<script>
+    lucide.createIcons();
+</script>
+
+</body>
+</html>
