@@ -434,24 +434,18 @@
                     </div>
                 </div>
 
-                <div style="display:flex; flex-direction:column; gap:20px;">
+                <div style="display:flex; flex-direction:column; gap:25px;">
                     <div class="field">
                         <label>Experience Level</label>
-                        <select id="tm-exp-level">
-                            <option value="any">Any Experience</option>
-                            <option value="beginner">Beginner</option>
-                            <option value="intermediate">Intermediate</option>
-                            <option value="advanced">Advanced</option>
-                        </select>
+                        <div class="skills-suggestions" id="tm-exp-chips" style="margin-top:10px;">
+                            <!-- Populated by JS -->
+                        </div>
                     </div>
                     <div class="field">
                         <label>Work Type</label>
-                        <select id="tm-work-type">
-                            <option value="any">Any Work Type</option>
-                            <option value="part-time">Part-Time</option>
-                            <option value="full-time">Full-Time</option>
-                            <option value="freelance">Freelance</option>
-                        </select>
+                        <div class="skills-suggestions" id="tm-work-chips" style="margin-top:10px;">
+                            <!-- Populated by JS -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -566,10 +560,6 @@
                 checkUser();
                 initUnifiedSkills();
                 lucide.createIcons();
-                
-                // Add reactive listeners to filters
-                document.getElementById('tm-exp-level').addEventListener('change', runTalentMatch);
-                document.getElementById('tm-work-type').addEventListener('change', runTalentMatch);
                 
                 // Load talent pool immediately
                 runTalentMatch();
@@ -714,9 +704,14 @@
         ];
 
         let selectedTMSkills = [];
+        let selectedTMExp = []; // Array for multi-select
+        let selectedTMWork = []; // Array for multi-select
         let talentResults = [];
         let talentCurrentPage = 1;
         const talentPageSize = 5;
+
+        const EXP_LEVELS = ['Beginner', 'Intermediate', 'Advanced'];
+        const WORK_TYPES = ['Part-Time', 'Full-Time', 'Freelance'];
 
         function initUnifiedSkills() {
             const talentBox = document.getElementById('tm-suggested-skills');
@@ -725,7 +720,57 @@
                     `<span class="skill-suggest-chip" onclick="addTMSkill('${s}')">${s} +</span>`
                 ).join('');
             }
+            renderFilterChips();
         }
+
+        function renderFilterChips() {
+            const expBox = document.getElementById('tm-exp-chips');
+            const workBox = document.getElementById('tm-work-chips');
+
+            // Render Exp
+            let expHtml = `<span class="skill-suggest-chip ${selectedTMExp.length===0?'active':''}" onclick="toggleTMExp('any')" style="background:${selectedTMExp.length===0?'var(--primary)':'#fff'}; border-color:${selectedTMExp.length===0?'#000':'#ddd'}">ANY ◈</span>`;
+            expHtml += EXP_LEVELS.map(val => {
+                const active = selectedTMExp.includes(val.toLowerCase());
+                return `<span class="skill-suggest-chip ${active?'active':''}" onclick="toggleTMExp('${val.toLowerCase()}')" style="background:${active?'var(--primary)':'#fff'}; border-color:${active?'#000':'#ddd'}">${val.toUpperCase()} +</span>`;
+            }).join('');
+            expBox.innerHTML = expHtml;
+
+            // Render Work
+            let workHtml = `<span class="skill-suggest-chip ${selectedTMWork.length===0?'active':''}" onclick="toggleTMWork('any')" style="background:${selectedTMWork.length===0?'var(--primary)':'#fff'}; border-color:${selectedTMWork.length===0?'#000':'#ddd'}">ANY ◈</span>`;
+            workHtml += WORK_TYPES.map(val => {
+                const active = selectedTMWork.includes(val.toLowerCase());
+                return `<span class="skill-suggest-chip ${active?'active':''}" onclick="toggleTMWork('${val.toLowerCase()}')" style="background:${active?'var(--primary)':'#fff'}; border-color:${active?'#000':'#ddd'}">${val.toUpperCase()} +</span>`;
+            }).join('');
+            workBox.innerHTML = workHtml;
+        }
+
+        window.toggleTMExp = function(val) {
+            if (val === 'any') {
+                selectedTMExp = [];
+            } else {
+                if (selectedTMExp.includes(val)) {
+                    selectedTMExp = selectedTMExp.filter(x => x !== val);
+                } else {
+                    selectedTMExp.push(val);
+                }
+            }
+            renderFilterChips();
+            runTalentMatch();
+        };
+
+        window.toggleTMWork = function(val) {
+            if (val === 'any') {
+                selectedTMWork = [];
+            } else {
+                if (selectedTMWork.includes(val)) {
+                    selectedTMWork = selectedTMWork.filter(x => x !== val);
+                } else {
+                    selectedTMWork.push(val);
+                }
+            }
+            renderFilterChips();
+            runTalentMatch();
+        };
 
         window.addTMSkill = function(skill) {
             if (!selectedTMSkills.includes(skill)) {
@@ -756,8 +801,6 @@
             const btn = document.getElementById('tm-match-btn');
             const grid = document.getElementById('tm-match-grid');
             const countEl = document.getElementById('tm-match-count');
-            const reqExp = document.getElementById('tm-exp-level').value;
-            const reqWork = document.getElementById('tm-work-type').value;
 
             btn.textContent = 'SCANNING NETWORK...';
             btn.disabled = true;
@@ -778,8 +821,8 @@
                         matchedSkills = selectedTMSkills.filter(s => userSkills.includes(s));
                         if (matchedSkills.length === 0) return false;
                     }
-                    if (reqExp !== 'any' && user.experience_level !== reqExp) return false;
-                    if (reqWork !== 'any' && user.work_preference !== reqWork) return false;
+                    if (selectedTMExp.length > 0 && !selectedTMExp.includes(user.experience_level?.toLowerCase())) return false;
+                    if (selectedTMWork.length > 0 && !selectedTMWork.includes(user.work_preference?.toLowerCase())) return false;
                     user._matchedSkills = matchedSkills;
                     return true;
                 });
