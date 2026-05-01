@@ -65,8 +65,8 @@ module.exports = async (req, res) => {
     const results = await Promise.all(targetChatIds.map(async (chatId) => {
       try {
         let response;
-        if (type === 'custom' && payload.image_url) {
-          // Send as Photo (Manual Broadcasts)
+        if (payload.image_url) {
+          // Send as Photo
           response = await axios.post(`https://api.telegram.org/bot${TG_TOKEN}/sendPhoto`, {
             chat_id: chatId,
             photo: payload.image_url,
@@ -74,7 +74,7 @@ module.exports = async (req, res) => {
             parse_mode: 'HTML'
           });
         } else {
-          // Send as Text (Automated Alerts or Text Broadcasts)
+          // Send as Text
           response = await axios.post(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
             chat_id: chatId,
             text: message,
