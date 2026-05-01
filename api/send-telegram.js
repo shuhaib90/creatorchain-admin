@@ -42,13 +42,6 @@ module.exports = async (req, res) => {
                 `💰 <b>Reward:</b> ${payload.budget || 'TBA'}\n` +
                 `📂 <b>Category:</b> ${payload.category || 'General'}\n\n` +
                 `🚀 <a href="https://creatorchain-web3-jobs.vercel.app/">View on CreatorChain</a>`;
-    } else if (type === 'hire_request') {
-      message = `💼 <b>NEW HIRE REQUEST!</b>\n\n` +
-                `<b>From:</b> ${payload.sender_name}\n` +
-                `<b>Email:</b> ${payload.sender_email}\n` +
-                `<b>Telegram:</b> ${payload.telegram || 'Not provided'}\n\n` +
-                `<b>Message:</b>\n"${payload.message}"\n\n` +
-                `<i>Reply to the sender directly to discuss the opportunity!</i>`;
     } else if (type === 'custom') {
       message = payload.message;
     } else {
