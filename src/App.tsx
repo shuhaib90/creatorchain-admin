@@ -5,10 +5,10 @@ import {
   ListTodo, 
   Users, 
   Settings, 
-  LogOut, 
-  Search, 
   ShieldCheck,
-  Clock
+  Clock,
+  Radio,
+  LogOut
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from './lib/supabase';
@@ -458,6 +458,96 @@ const UsersPage = () => {
   );
 };
 
+const Broadcast = () => {
+  const [message, setMessage] = useState('');
+  const [sending, setSending] = useState(false);
+
+  const handleBroadcast = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim()) return;
+    if (!confirm('GLOBAL_BROADCAST: Are you sure you want to send this to ALL bot subscribers?')) return;
+
+    setSending(true);
+    try {
+      const [{ data: profiles }, { data: subscribers }] = await Promise.all([
+        supabase.from('user_profiles').select('telegram_id, telegram_notifications'),
+        supabase.from('telegram_subscribers').select('chat_id')
+      ]);
+
+      const profileTgIds = (profiles || []).filter(p => p.telegram_notifications && p.telegram_id).map(p => p.telegram_id);
+      const globalTgIds = (subscribers || []).map(s => s.chat_id);
+      const tgRecipients = Array.from(new Set([...profileTgIds, ...globalTgIds]));
+
+      if (tgRecipients.length > 0) {
+        const response = await fetch('https://creatorchain-web3-jobs.vercel.app/api/send-telegram', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'custom',
+            payload: {
+              chat_ids: tgRecipients,
+              message: message
+            }
+          })
+        });
+
+        if (!response.ok) throw new Error(await response.text());
+        alert(`🚀 Broadcast sent to ${tgRecipients.length} users!`);
+        setMessage('');
+      } else {
+        alert('No subscribers found.');
+      }
+    } catch (err: any) {
+      alert('Broadcast Failed: ' + err.message);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="fade-in">
+      <header style={{ marginBottom: '40px' }}>
+        <h1 style={{ fontSize: '36px' }}>Global <span className="text-gradient">Broadcast</span></h1>
+        <p style={{ color: 'var(--text-muted)' }}>Send a priority message to all Telegram bot subscribers.</p>
+      </header>
+
+      <div className="card" style={{ maxWidth: '800px' }}>
+        <form onSubmit={handleBroadcast}>
+          <div className="form-group">
+            <label>MESSAGE_CONTENT (HTML Supported)</label>
+            <textarea 
+              className="form-input" 
+              rows={8} 
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="📢 Enter your update or announcement here..."
+              style={{ width: '100%', resize: 'vertical' }}
+              required
+            />
+          </div>
+          <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+            <button type="submit" className="btn btn-primary" disabled={sending} style={{ flex: 1, padding: '20px', fontSize: '16px' }}>
+              {sending ? 'COMMUNICATING...' : '🚀 DISPATCH BROADCAST'}
+            </button>
+            <div className="mono" style={{ fontSize: '11px', color: 'var(--accent)', maxWidth: '200px' }}>
+              ⚠️ WARNING: This will immediately notify all subscribers.
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div className="card" style={{ marginTop: '30px', maxWidth: '800px', background: 'rgba(0,245,160,0.02)' }}>
+        <h4 className="mono" style={{ fontSize: '12px', color: 'var(--primary)', marginBottom: '15px' }}>TIPS_FOR_BROADCASTS</h4>
+        <ul className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '8px', paddingLeft: '20px' }}>
+          <li>Use HTML tags like &lt;b&gt;bold&lt;/b&gt; or &lt;i&gt;italic&lt;/i&gt;.</li>
+          <li>Include links using &lt;a href="..."&gt;text&lt;/a&gt;.</li>
+          <li>Keep messages concise to ensure readability on mobile.</li>
+        </ul>
+      </div>
+    </div>
+  );
+};
+
 // Main Layout Wrapper
 const Layout = ({ children, onLogout }: { children: React.ReactNode, onLogout: () => void }) => {
   const location = useLocation();
@@ -502,7 +592,10 @@ const Layout = ({ children, onLogout }: { children: React.ReactNode, onLogout: (
             {pendingCount > 0 && <span style={{ marginLeft: 'auto', background: 'var(--accent)', color: 'white', padding: '2px 6px', fontSize: '10px', border: '1px solid var(--black)' }}>{pendingCount}</span>}
           </Link>
           <Link to="/users" className={`nav-item ${isActive('/users') ? 'active' : ''}`}>
-            <Users size={18} /> USERS
+            <Users size={18} /> COMMUNITY
+          </Link>
+          <Link to="/broadcast" className={`nav-item ${isActive('/broadcast') ? 'active' : ''}`}>
+            <Radio size={18} /> BROADCAST
           </Link>
           <Link to="/settings" className={`nav-item ${isActive('/settings') ? 'active' : ''}`}>
             <Settings size={18} /> SETTINGS
@@ -618,6 +711,7 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/listings" element={<Listings />} />
           <Route path="/users" element={<UsersPage />} />
+          <Route path="/broadcast" element={<Broadcast />} />
           <Route path="/settings" element={
             <div className="fade-in">
               <header style={{ marginBottom: '40px' }}>
