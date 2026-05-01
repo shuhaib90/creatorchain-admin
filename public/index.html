@@ -833,22 +833,6 @@
 </div>
 
 
-<!-- ADMIN PANEL below -->
-
-<!-- ======================== ADMIN PANEL ======================== -->
-<div id="admin-panel" onclick="if(event.target === this) hideAdmin()" style="cursor:pointer;">
-    <div class="admin-inner" onclick="event.stopPropagation()" style="cursor:default;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-            <div>
-                <h2 class="mono" style="font-size:48px; color:var(--primary); letter-spacing:-1px;">ADMIN_DASHBOARD</h2>
-                <p style="color:#888; font-family:'Space Mono',monospace; font-size:12px;">CreatorChain Management Console</p>
-            </div>
-            <button class="btn btn-secondary" onclick="hideAdmin()">EXIT</button>
-        </div>
-
-        <!-- Admin Tabs -->
-        <div class="admin-tabs">
-            <button class="admin-tab active" onclick="switchTab('tab-add')"><i data-lucide="plus" style="width:14px; height:14px;"></i> Add Listing</button>
             <button class="admin-tab" onclick="switchTab('tab-pending')" id="pending-tab-btn">
                 <i data-lucide="mail" style="width:14px; height:14px;"></i> Pending Review
                 <span class="pending-badge" id="pending-badge" style="display:none">0</span>
@@ -1042,9 +1026,14 @@
         if (document.getElementById('auth-hero-box')) {
             document.getElementById('auth-hero-box').style.display = 'none';
         }
-        // Show Admin Access ONLY for @ZenvicAlpha
+        // Show Admin Terminal Link ONLY for @ZenvicAlpha
         if (profile.user_name && profile.user_name.toLowerCase() === 'zenvicalpha') {
-            document.getElementById('admin-link-wrapper').style.display = 'block';
+            const menu = document.getElementById('userDropdownMenu');
+            const adminLink = document.createElement('a');
+            adminLink.href = '/admin.html';
+            adminLink.innerHTML = '<i data-lucide="shield-check" style="width:14px; height:14px; vertical-align:middle; margin-right:8px; color:var(--primary);"></i> ADMIN TERMINAL';
+            menu.insertBefore(adminLink, menu.querySelector('div[style*="height: 2px"]'));
+            lucide.createIcons();
         }
     }
 
@@ -1528,29 +1517,6 @@
 
 
     // ─── Admin Auth & Dashboard Access ─────────────────────
-    async function showLogin() {
-        const { data: { user } } = await db.auth.getUser();
-        
-        if (!user) {
-            showToast('Please SIGN IN WITH X first to access the dashboard.', 'error');
-            signInWithX();
-            return;
-        }
-
-        const handle = (user.user_metadata.user_name || '').toLowerCase();
-        
-        if (handle === 'zenvicalpha') {
-            if (window.va) window.va('track', 'Admin_Dashboard_Opened');
-            document.getElementById('admin-panel').style.display='block';
-            document.body.style.overflow='hidden';
-            loadPendingListings();
-            loadAllAdminListings();
-            subscribeAdminRealtime();
-        } else {
-            showToast(`Access Denied: @${handle} is not authorized for the Admin Panel.`, 'error');
-        }
-    }
-
     async function openStatusModal() {
         const { data: { user } } = await db.auth.getUser();
         if (!user) {
@@ -1563,283 +1529,11 @@
     }
 
     function checkPass() {
-        // Obsolete function, but kept for compatibility.
-        showLogin();
+        // Redirect to new admin page
+        window.location.href = '/admin.html';
     }
-    function hideAdmin() { document.getElementById('admin-panel').style.display='none'; document.body.style.overflow='auto'; }
 
     // ─── Inbox Functions ──────────────────────────────
-    async function openInbox() {
-        const modal = document.getElementById('inbox-modal');
-        const content = document.getElementById('inbox-content');
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-        content.innerHTML = '<div style="padding:60px; text-align:center;"><p class="mono">🔍 SCANNING INBOX...</p></div>';
-
-        const { data: { user } } = await db.auth.getUser();
-        if (!user) return;
-
-        try {
-            const { data, error } = await db.from('hire_requests')
-                .select('*')
-                .eq('receiver_id', user.id)
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-
-            if (!data || data.length === 0) {
-                content.innerHTML = `
-                    <div style="text-align:center; padding:80px 20px;">
-                        <div style="font-size:64px; margin-bottom:20px;">Empty</div>
-                        <h3 class="mono" style="font-size:18px; color:var(--black); text-transform:uppercase;">No requests yet</h3>
-                        <p class="mono" style="font-size:12px; color:#666; margin-top:10px;">Optimize your profile and share it to get discovered by teams.</p>
-                        <button class="btn btn-black btn-sm" style="margin-top:25px;" onclick="closeInbox(); openProfileModal();">✏️ EDIT PROFILE</button>
-                    </div>
-                `;
-            } else {
-                content.innerHTML = data.map(req => `
-                    <div class="inbox-item" style="background:#fff; border:3px solid var(--black); padding:25px; margin-bottom:20px; box-shadow:8px 8px 0 var(--black); position:relative;">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px;">
-                            <div>
-                                <span class="mono" style="font-size:10px; background:var(--black); color:var(--primary); padding:3px 8px; font-weight:700; display:inline-block; margin-bottom:8px;">NEW_HIRE_REQUEST</span>
-                                <h3 style="margin:0; font-size:20px; text-transform:uppercase; letter-spacing:-0.5px;">${req.sender_name}</h3>
-                                <p class="mono" style="font-size:11px; color:#888; margin:5px 0;">SENT: ${timeAgo(req.created_at)}</p>
-                            </div>
-                            <div style="font-family:'Space Mono',monospace; font-size:11px; font-weight:900; background:var(--accent); color:#fff; border:2px solid var(--black); padding:4px 12px; box-shadow:4px 4px 0 var(--black);">${req.status.toUpperCase()}</div>
-                        </div>
-                        <div style="background:#fdfdfd; padding:20px; border:2px dashed #ddd; border-left:5px solid var(--black); margin-bottom:20px; font-size:14px; line-height:1.6; color:#333;">
-                            "${req.message}"
-                        </div>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                            <a href="mailto:${req.sender_email}" class="btn btn-white btn-sm" style="text-align:center; padding:12px;">📧 EMAIL SENDER</a>
-                            ${req.telegram ? `<a href="${req.telegram}" target="_blank" class="btn btn-white btn-sm" style="text-align:center; padding:12px;">🐦 TELEGRAM DM</a>` : ''}
-                            ${req.form_url ? `<a href="${req.form_url}" target="_blank" class="btn btn-black btn-sm" style="grid-column: span 2; text-align:center; padding:15px; margin-top:5px;">📋 VIEW FULL APPLICATION / FORM &rarr;</a>` : ''}
-                        </div>
-                    </div>
-                `).join('');
-            }
-        } catch (err) {
-            console.error(err);
-            content.innerHTML = '<div style="padding:60px; text-align:center; color:red;"><p class="mono">ERROR LOADING INBOX. PLEASE RETRY.</p></div>';
-        }
-    }
-
-    function closeInbox() {
-        document.getElementById('inbox-modal').style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-
-    function toggleMobileMenu() { document.getElementById('nav-links').classList.toggle('active'); }
-
-    function switchTab(id) {
-        document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-        document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        const idx = ['tab-add','tab-pending','tab-all'].indexOf(id);
-        document.querySelectorAll('.admin-tab')[idx].classList.add('active');
-    }
-
-    // ─── Admin: Pending Review ─────────────────────────────
-    async function loadPendingListings() {
-        const { data } = await db.from('listings').select('*').eq('approval_status','pending').order('submitted_at',{ascending:true});
-        renderPendingCards(data||[]);
-        updatePendingBadge((data||[]).length);
-    }
-
-    function updatePendingBadge(count) {
-        const b = document.getElementById('pending-badge');
-        b.textContent = count;
-        b.style.display = count>0 ? 'inline-flex':'none';
-    }
-
-    function renderPendingCards(listings) {
-        const c = document.getElementById('pending-list');
-        if(!listings.length) { c.innerHTML='<p class="mono" style="color:#555;text-align:center;padding:60px 0;">No pending submissions. All clear! ✅</p>'; return; }
-        c.innerHTML = listings.map(l => `
-            <div class="pending-card" id="pc-${l.id}">
-                <div class="pending-card-header">
-                    <div>
-                        <span style="font-size:16px;font-weight:900;">${l.logo||'⚡'} ${l.project}</span>
-                        <span style="font-size:11px;background:var(--secondary);border:1px solid var(--black);padding:2px 8px;margin-left:10px;font-family:'Space Mono',monospace;">PENDING</span>
-                    </div>
-                    <div class="mono" style="font-size:11px;color:#888;">${timeAgo(l.submitted_at||l.created_at)}</div>
-                </div>
-                <div class="pending-card-body">
-                    <div class="pending-meta">Section: ${l.section} | Submitted by: ${l.submitted_by||'Anonymous'} | Email: ${l.submitter_email||'—'}</div>
-                    <div style="margin:12px 0;">
-                        <strong style="font-size:18px;">${l.title}</strong>
-                        <div style="margin-top:4px;"><span style="background:var(--primary);color:#000;padding:3px 10px;font-family:'Space Mono',monospace;font-size:13px;">${l.reward||'TBA'}</span>
-                        <span class="mono" style="font-size:11px;color:#888;margin-left:10px;">DEADLINE: ${l.deadline||'TBA'}</span></div>
-                    </div>
-                    <p style="color:#aaa;font-size:14px;margin-bottom:12px;">${l.description||'—'}</p>
-                    ${l.apply_url ? `<p class="pending-meta">Apply URL: <a href="${l.apply_url}" target="_blank" style="color:var(--primary);">${l.apply_url.substring(0,60)}...</a></p>` : ''}
-                    ${l.tags ? `<p class="pending-meta">Tags: ${l.tags}</p>` : ''}
-                    ${l.pro_tip ? `<p class="pending-meta">💡 ${l.pro_tip}</p>` : ''}
-                    ${l.submitter_twitter ? `<p class="pending-meta">Submitter Twitter: ${l.submitter_twitter}</p>` : ''}
-                </div>
-                <div class="pending-actions">
-                    <input class="pending-note-input" placeholder="Admin note (optional)..." id="note-${l.id}">
-                    <button class="btn btn-primary btn-sm" onclick="approveListing('${l.id}')">✅ APPROVE</button>
-                    <button class="btn btn-danger btn-sm" onclick="rejectListing('${l.id}')">❌ REJECT</button>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    async function approveListing(id) {
-        await db.from('listings').update({ 
-            approval_status: 'approved',
-            reviewed_at: new Date().toISOString() 
-        }).eq('id', id);
-        showToast('✅ Listing approved & live!');
-        document.getElementById(`pc-${id}`)?.remove();
-        loadPendingListings();
-        loadListings();
-    }
-
-    async function rejectListing(id) {
-        const reason = prompt(
-            'Rejection reason (shown to submitter):\n\n' +
-            'Examples:\n' +
-            '• Reward amount not specified\n' +
-            '• Apply link is broken\n' +
-            '• Duplicate listing already exists\n' +
-            '• Not relevant to Web3 creators\n\n' +
-            'Enter reason:'
-        );
-        if (reason === null) return;
-        
-        await db.from('listings').update({ 
-            approval_status: 'rejected',
-            rejection_reason: reason || 'Does not meet our guidelines.',
-            reviewed_at: new Date().toISOString()
-        }).eq('id', id);
-        
-        showToast('❌ Submission rejected with reason.', 'error');
-        document.getElementById(`pc-${id}`)?.remove();
-        loadPendingListings();
-    }
-
-    // ─── Admin: All listings table ─────────────────────────
-    async function loadAllAdminListings() {
-        const { data } = await db.from('listings').select('*').order('created_at',{ascending:false});
-        const c = document.getElementById('admin-list');
-        c.innerHTML = `
-            <table class="listings-table">
-                <thead><tr><th>PROJECT</th><th>SECTION</th><th>REWARD</th><th>STATUS</th><th>ACTIONS</th></tr></thead>
-                <tbody>${data.map(l => `
-                    <tr id="ar-${l.id}">
-                        <td data-label="Project"><strong style="color:var(--primary)">${l.project}</strong><br><span style="font-size:11px;color:#666;">${l.title}</span></td>
-                        <td data-label="Section"><span class="mono">${l.section.toUpperCase()}</span></td>
-                        <td data-label="Reward">${l.reward||'TBA'}</td>
-                        <td data-label="Status"><span class="status-badge status-${l.approval_status}">${l.approval_status.toUpperCase()}</span></td>
-                        <td data-label="Actions">
-                            <button class="btn btn-white btn-sm" onclick="editItem('${l.id}');switchTab('tab-add')">✏️</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteItem('${l.id}')">🗑️</button>
-                        </td>
-                    </tr>
-                `).join('')}</tbody>
-            </table>
-        `;
-    }
-
-    // ─── Admin: Add listing form ───────────────────────────
-    document.getElementById('listing-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = e.target.querySelector('button[type="submit"]');
-        btn.disabled = true; btn.textContent = 'SAVING...';
-
-        let logoVal = document.getElementById('f-logo').value;
-        const fileInput = document.getElementById('f-logo-file');
-        
-        if (fileInput && fileInput.files && fileInput.files.length > 0) {
-            const file = fileInput.files[0];
-            btn.textContent = 'UPLOADING...';
-            const fileName = `${Date.now()}_admin.${file.name.split('.').pop()}`;
-            const { data: uploadData, error: uploadError } = await db.storage.from('logos').upload(`public/${fileName}`, file);
-            
-            if (uploadError) {
-                console.error('Upload Error:', uploadError);
-                alert('Failed to upload logo image');
-                btn.disabled = false; btn.textContent = 'SAVE';
-                return;
-            }
-            const { data: urlData } = db.storage.from('logos').getPublicUrl(`public/${fileName}`);
-            logoVal = urlData.publicUrl;
-            btn.textContent = 'SAVING...';
-        }
-
-        const adminId = document.getElementById('f-id').value;
-        const item = {
-            section: document.getElementById('f-section').value,
-            project: document.getElementById('f-project').value,
-            title: document.getElementById('f-title').value,
-            reward: document.getElementById('f-reward').value,
-            description: document.getElementById('f-desc').value,
-            apply_url: document.getElementById('f-url').value,
-            logo: logoVal,
-            deadline: document.getElementById('f-deadline').value,
-            twitter_url: document.getElementById('f-twitter')?.value || '',
-            urgency: document.getElementById('f-urgency').value || 'MEDIUM',
-            featured: document.getElementById('s-featured')?.value === 'true' || document.getElementById('f-featured').value === 'true',
-            share_image: document.getElementById('f-detected-thumb')?.value || '',
-            approval_status: 'approved',
-            created_at: new Date().toISOString()
-        };
-
-        try {
-            if (adminId) await db.from('listings').update(item).eq('id', adminId);
-            else await db.from('listings').insert([item]);
-            
-            document.getElementById('listing-form').reset();
-            document.getElementById('f-id').value = '';
-            document.getElementById('f-logo-filename').style.display = 'none';
-            showToast('✅ Listing saved & live!');
-            
-            // Refresh lists in background
-            loadListings();
-            loadAllAdminListings();
-        } catch (err) {
-            console.error(err);
-            showToast('Failed to save listing', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'SAVE (GOES LIVE IMMEDIATELY)';
-        }
-    });
-
-    async function editItem(id) {
-        const { data } = await db.from('listings').select('*').eq('id',id).single();
-        if(data) {
-            document.getElementById('f-id').value=data.id;
-            document.getElementById('f-section').value=data.section;
-            document.getElementById('f-project').value=data.project||'';
-            document.getElementById('f-title').value=data.title||'';
-            document.getElementById('f-reward').value=data.reward||'';
-            document.getElementById('f-desc').value=data.description||'';
-            document.getElementById('f-url').value=data.apply_url||'';
-            document.getElementById('f-logo').value=data.logo||'';
-            document.getElementById('f-deadline').value=data.deadline||'';
-            document.getElementById('f-twitter').value=data.twitter_url||'';
-            document.getElementById('f-urgency').value=data.urgency||'';
-            document.getElementById('f-featured').value=(data.featured||false).toString();
-        }
-    }
-    async function deleteItem(id) { if(confirm('DELETE?')) { await db.from('listings').delete().eq('id',id); loadListings(); loadAllAdminListings(); showToast('Deleted','error'); } }
-
-    // ─── Admin Realtime (pending notifications) ────────────
-    function subscribeAdminRealtime() {
-        db.channel('admin-pending')
-            .on('postgres_changes', { event:'INSERT', schema:'public', table:'listings' }, (payload) => {
-                if(payload.new?.approval_status==='pending') {
-                    showToast('📬 New submission received!');
-                    loadPendingListings();
-                    loadAllAdminListings();
-                }
-            }).subscribe();
-    }
-
-    // ─── Profile Logic ─────────────────────────────────────
     let currentUserProfileId = null;
     let selectedProfileSkills = [];
 
