@@ -1032,8 +1032,14 @@
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                                chatId: profile.telegram_id,
-                                message: `💼 <b>NEW HIRE REQUEST!</b>\n\n<b>From:</b> ${senderName}\n<b>Email:</b> ${senderEmail}\n<b>Telegram:</b> ${telegram || 'Not provided'}\n\n<b>Message:</b>\n"${message}"\n\n<i>Reply to the sender directly to discuss the opportunity!</i>`
+                                type: 'hire_request',
+                                payload: {
+                                    chat_ids: profile.telegram_id,
+                                    sender_name: senderName,
+                                    sender_email: senderEmail,
+                                    telegram: telegram,
+                                    message: message
+                                }
                             })
                         });
                     } catch (tgErr) {
