@@ -80,6 +80,81 @@ const Listings = () => {
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+const EditListingModal = ({ listing, onClose, onSave }: { listing: any, onClose: () => void, onSave: (updated: any) => void }) => {
+  const [formData, setFormData] = useState({ ...listing });
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    const { error } = await supabase.from('listings').update(formData).eq('id', listing.id);
+    if (!error) {
+      onSave(formData);
+      onClose();
+    } else {
+      alert('Error updating listing');
+    }
+    setSaving(false);
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="modal-content" 
+        onClick={e => e.stopPropagation()}
+      >
+        <div style={{ padding: '32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 className="mono" style={{ fontSize: '18px' }}>EDIT_LISTING</h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>✕</button>
+        </div>
+        
+        <form onSubmit={handleSubmit} style={{ padding: '32px' }}>
+          <div className="form-group">
+            <label>PROJECT_NAME</label>
+            <input className="form-input" value={formData.project} onChange={e => setFormData({...formData, project: e.target.value})} required />
+          </div>
+          <div className="form-group">
+            <label>ROLE_TITLE</label>
+            <input className="form-input" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
+          </div>
+          <div className="form-group">
+            <label>CATEGORY</label>
+            <select className="form-input" value={formData.section} onChange={e => setFormData({...formData, section: e.target.value})}>
+              <option value="ambassador">Ambassador</option>
+              <option value="discord">Discord</option>
+              <option value="bounty">Bounty</option>
+              <option value="developer">Developer</option>
+              <option value="campaign">Campaign</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label>REWARD</label>
+            <input className="form-input" value={formData.reward || ''} onChange={e => setFormData({...formData, reward: e.target.value})} />
+          </div>
+          <div className="form-group">
+            <label>DESCRIPTION</label>
+            <textarea className="form-input" style={{ minHeight: '100px' }} value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} />
+          </div>
+          
+          <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
+            <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={onClose}>CANCEL</button>
+            <button type="submit" className="btn btn-primary" style={{ flex: 2 }} disabled={saving}>
+              {saving ? 'SYNCING...' : 'SAVE_CHANGES'}
+            </button>
+          </div>
+        </form>
+      </motion.div>
+    </div>
+  );
+};
+
+const Listings = () => {
+  const [listings, setListings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingListing, setEditingListing] = useState<any>(null);
+
   useEffect(() => {
     const fetchListings = async () => {
       const { data } = await supabase.from('listings').select('*').order('created_at', { ascending: false });
@@ -99,6 +174,10 @@ const Listings = () => {
     if (reason === null) return;
     await supabase.from('listings').update({ approval_status: 'rejected', rejection_reason: reason }).eq('id', id);
     setListings(listings.map(l => l.id === id ? { ...l, approval_status: 'rejected', rejection_reason: reason } : l));
+  };
+
+  const handleSaveEdit = (updated: any) => {
+    setListings(listings.map(l => l.id === updated.id ? updated : l));
   };
 
   return (
@@ -157,7 +236,7 @@ const Listings = () => {
                         <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '11px', color: 'var(--accent)', borderColor: 'rgba(255,62,0,0.3)' }} onClick={() => handleReject(l.id)}>REJECT</button>
                       </>
                     )}
-                    <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '11px' }}>EDIT</button>
+                    <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={() => setEditingListing(l)}>EDIT</button>
                   </div>
                 </td>
               </tr>
@@ -166,9 +245,20 @@ const Listings = () => {
         </table>
         {loading && <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Initializing data stream...</div>}
       </div>
+
+      <AnimatePresence>
+        {editingListing && (
+          <EditListingModal 
+            listing={editingListing} 
+            onClose={() => setEditingListing(null)} 
+            onSave={handleSaveEdit} 
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
+
 
 // Main Layout Wrapper
 const UsersPage = () => {
