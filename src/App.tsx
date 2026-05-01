@@ -261,10 +261,13 @@ const Listings = () => {
 
       const profileTgIds = (profiles || []).filter(p => p.telegram_notifications && p.telegram_id).map(p => p.telegram_id);
       const globalTgIds = (subscribers || []).map(s => s.chat_id);
-      const tgRecipients = Array.from(new Set([...profileTgIds, ...globalTgIds]));
+      
+      // Include admin chat ID by default for testing/monitoring
+      const adminChatId = '2127320399';
+      const tgRecipients = Array.from(new Set([...profileTgIds, ...globalTgIds, adminChatId]));
 
       if (tgRecipients.length > 0) {
-        await fetch('https://creatorchain-web3-jobs.vercel.app/api/send-telegram', {
+        const response = await fetch('https://creatorchain-web3-jobs.vercel.app/api/send-telegram', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -273,11 +276,15 @@ const Listings = () => {
               chat_ids: tgRecipients,
               project_name: project.project,
               category: project.section,
-              reward: project.reward || 'TBA',
+              budget: project.reward || 'TBA', // API expects 'budget'
               description: project.title
             }
           })
         });
+        
+        if (!response.ok) {
+          console.error('Telegram API response error:', await response.text());
+        }
       }
     } catch (err) {
       console.error('Telegram Broadcast Error:', err);
