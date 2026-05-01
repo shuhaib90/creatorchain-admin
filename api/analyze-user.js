@@ -2,10 +2,10 @@ import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Config
-const X_BEARER_TOKEN = 'AAAAAAAAAAAAAAAAAAAAAHER8wEAAAAAdhTJoHQk1CFvxfJ6h1H%2BUzVDTD0%3Dz37Ujrc424aMXi6TohjAI7RuYMtOWvtkyONHggR54jdKnExnu1';
-const GEMINI_API_KEY = 'AIzaSyCE2Rn0TsMqd5vvJu41yF9XW8YBc1YtH1k';
-const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
+const X_BEARER_TOKEN = process.env.X_BEARER_TOKEN;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://mwefmtmcljdsptcgowmb.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 

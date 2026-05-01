@@ -8,7 +8,7 @@ export default async (req, res) => {
   }
 
   const SUPABASE_URL = process.env.SUPABASE_URL || 'https://mwefmtmcljdsptcgowmb.supabase.co';
-  const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
+  const SUPABASE_KEY = process.env.SUPABASE_KEY;
 
   try {
     const response = await axios.get(`${SUPABASE_URL}/rest/v1/listings?id=eq.${id}&select=*`, {

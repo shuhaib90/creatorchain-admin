@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Initialize with provided token
-const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8299168473:AAFEH6t0sKDE0ZlFfQnfsU-v1p2ayg12QV4';
+const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
 export default async (req, res) => {
   // Enable CORS

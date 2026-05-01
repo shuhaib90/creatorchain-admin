@@ -1,9 +1,9 @@
 import axios from 'axios';
 
 // Config
-const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
-const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8299168473:AAFEH6t0sKDE0ZlFfQnfsU-v1p2ayg12QV4';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://mwefmtmcljdsptcgowmb.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
+const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
 export default async (req, res) => {
   // Handle incoming Telegram Webhook
