@@ -397,12 +397,14 @@
 <body>
 
     <nav>
-        <a href="/" class="logo" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:10px;">
-            <img src="/logo.png" alt="CreatorChain Logo" style="height:48px; width:auto; object-fit:contain;">
-            CREATOR<span class="outline">CHAIN</span>
-        </a>
-        <div id="auth-nav-box">
-             <button class="btn btn-black" onclick="signInWithX()">LOGIN WITH X</button>
+        <div class="container" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            <a href="/" class="logo" style="text-decoration:none; color:inherit; display:flex; align-items:center;">
+                <img src="/logo.png" alt="CreatorChain Logo" style="height:48px; width:auto; object-fit:contain; margin-right:10px;">
+                <span>CREATOR<span class="outline">CHAIN</span></span>
+            </a>
+            <div id="auth-nav-box">
+                 <button class="btn btn-black" onclick="signInWithX()">LOGIN WITH X</button>
+            </div>
         </div>
     </nav>
 
@@ -1017,9 +1019,9 @@
             footer.style.cssText = "padding: 60px 0; border-top: 4px solid var(--black); background: #fff; margin-top: 80px;";
             footer.innerHTML = `
                 <div class="container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:30px;">
-                    <a href="/" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; font-weight:900; font-size:20px;">
-                        <img src="/logo.png" alt="Logo" style="height:44px; width:auto; object-fit:contain;">
-                        CREATOR<span class="outline" style="-webkit-text-stroke: 1px var(--black);">CHAIN</span>
+                    <a href="/" style="display:flex; align-items:center; text-decoration:none; color:inherit; font-weight:900; font-size:20px;">
+                        <img src="/logo.png" alt="Logo" style="height:44px; width:auto; object-fit:contain; margin-right:10px;">
+                        <span>CREATOR<span class="outline">CHAIN</span></span>
                     </a>
                     <div class="mono" style="font-size:12px; color:#666; font-weight:700;">© 2026 CREATORCHAIN.NETWORK — ALL RIGHTS RESERVED.</div>
                 </div>
