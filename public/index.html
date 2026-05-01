@@ -280,7 +280,7 @@
         .pass-toggle { position: absolute; right: 12px; top: 12px; background: none; border: none; cursor: pointer; font-size: 18px; z-index: 10; color: var(--black); }
 
         .user-dropdown-menu a:hover { background: #f8fafc; color: #0f172a; }        /* PROFILE CARD REFACTOR - V2 PREMIUM WEB3 IDENTITY */
-        #profile-card-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10005; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px; cursor: pointer; }
+        #profile-card-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10005; display: none; align-items: flex-start; justify-content: center; backdrop-filter: blur(4px); padding: 40px 20px; cursor: pointer; overflow-y: auto; }
         #profile-card-modal > div { cursor: default; }
         
         .p-card { 
@@ -290,10 +290,8 @@
             width: 100%; 
             max-width: 1000px; 
             position: relative; 
-            overflow-x: hidden;
-            overflow-y: auto;
-            max-height: 90vh;
-            /* REMOVE ALL ANIMATIONS */
+            overflow: visible;
+            /* NO INTERNAL SCROLL */
             animation: none !important;
             transition: none !important;
         }
@@ -1982,7 +1980,7 @@
                             <div class="p-card-info">
                                 <h2>
                                     ${profile.name || 'Anonymous'}
-                                    ${profile.is_verified ? `
+                                    ${profile.is_verified === true ? `
                                     <span class="verification-badge" data-tooltip="Verified Identity" style="color:var(--secondary);">
                                         <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
                                     </span>` : ''}
