@@ -422,24 +422,22 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
         showToast('📣 Initializing broadcast...', 'info');
 
         try {
-            // 2. Fetch builders who opted-in for notifications
-            const { data: profiles, error } = await db.from('user_profiles')
-                .select('email, skills, email_notifications, telegram_id, telegram_notifications')
-                .or('email_notifications.eq.true,telegram_notifications.eq.true');
+            // 2. Fetch profiles AND global subscribers
+            const [{ data: profiles }, { data: subscribers }] = await Promise.all([
+                db.from('user_profiles').select('email, email_notifications, telegram_id, telegram_notifications'),
+                db.from('telegram_subscribers').select('chat_id')
+            ]);
 
-            if (error) throw error;
-
-            if (!profiles || profiles.length === 0) {
-                showToast('No builders opted-in for notifications.', 'error');
-                return;
-            }
-
-            // 3. Collect ALL recipients who opted-in (No skill filtering as requested)
-            const emailRecipients = profiles.filter(p => p.email_notifications && p.email && p.email.includes('@')).map(p => p.email);
-            const tgRecipients = profiles.filter(p => p.telegram_notifications && p.telegram_id).map(p => p.telegram_id);
+            // 3. Collect ALL recipients who opted-in
+            const emailRecipients = (profiles || []).filter(p => p.email_notifications && p.email && p.email.includes('@')).map(p => p.email);
+            
+            // Collect Telegram IDs from profiles AND global subscribers (unique set)
+            const profileTgIds = (profiles || []).filter(p => p.telegram_notifications && p.telegram_id).map(p => p.telegram_id);
+            const globalTgIds = (subscribers || []).map(s => s.chat_id);
+            const tgRecipients = Array.from(new Set([...profileTgIds, ...globalTgIds]));
 
             if (emailRecipients.length === 0 && tgRecipients.length === 0) {
-                showToast('No builders opted-in for notifications.', 'error');
+                showToast('No subscribers found.', 'error');
                 return;
             }
 

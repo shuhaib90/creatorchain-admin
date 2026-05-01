@@ -18,35 +18,40 @@ module.exports = async (req, res) => {
   const tgHandle = message.from.username; // Note: may be undefined if user has no handle
 
   if (text.startsWith('/start')) {
-    if (!tgHandle) {
-        await sendSimpleMessage(chatId, "⚠️ <b>Action Required</b>\n\nYou don't have a Telegram username set. Please set a username in Telegram settings and add it to your CreatorChain profile first.");
-        return res.status(200).send('OK');
-    }
-
     try {
         const headers = { 
             'apikey': SUPABASE_KEY, 
             'Authorization': `Bearer ${SUPABASE_KEY}`, 
-            'Content-Type': 'application/json' 
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
         };
 
-        // 1. Find user by telegram handle (stored in 'telegram' field)
-        const searchResp = await axios.get(`${SUPABASE_URL}/rest/v1/user_profiles?telegram=ilike.*${tgHandle}*`, { headers });
-        const profiles = searchResp.data;
+        // 1. Register user as a global subscriber (upsert)
+        await axios.post(`${SUPABASE_URL}/rest/v1/telegram_subscribers`, {
+            chat_id: chatId.toString(),
+            username: tgHandle || 'anonymous'
+        }, { headers });
 
-        if (profiles && profiles.length > 0) {
-            const profile = profiles[0];
-            
-            // 2. Update their profile with the actual chat_id
-            await axios.patch(`${SUPABASE_URL}/rest/v1/user_profiles?user_id=eq.${profile.user_id}`, {
-                telegram_id: chatId.toString(),
-                telegram_notifications: true
-            }, { headers });
+        // 2. Try to link to a profile if handle exists
+        if (tgHandle) {
+            const searchResp = await axios.get(`${SUPABASE_URL}/rest/v1/user_profiles?telegram=ilike.*${tgHandle}*`, { headers });
+            const profiles = searchResp.data;
 
-            await sendSimpleMessage(chatId, `✅ <b>Connection Active!</b>\n\nHi ${profile.name || tgHandle}, your account is now linked. You'll receive real-time notifications for opportunities matching your skills.`);
-        } else {
-            await sendSimpleMessage(chatId, `🔍 <b>Profile Not Found</b>\n\nWe couldn't find a CreatorChain profile matching <b>@${tgHandle}</b>.\n\n<b>How to fix:</b>\n1. Go to <a href="https://creatorchain-web3-jobs.vercel.app/">CreatorChain</a>\n2. Open "Edit Profile"\n3. Add <b>@${tgHandle}</b> in the Telegram field\n4. Save and send /start here again!`);
+            if (profiles && profiles.length > 0) {
+                const profile = profiles[0];
+                await axios.patch(`${SUPABASE_URL}/rest/v1/user_profiles?user_id=eq.${profile.user_id}`, {
+                    telegram_id: chatId.toString(),
+                    telegram_notifications: true
+                }, { headers });
+                
+                await sendSimpleMessage(chatId, `✅ <b>Connection Active!</b>\n\nHi ${profile.name || tgHandle}, your account is linked. You'll receive real-time notifications for ALL new listings!`);
+                return res.status(200).send('OK');
+            }
         }
+
+        // Default response for non-profile users
+        await sendSimpleMessage(chatId, `🚀 <b>Welcome to CreatorChain!</b>\n\nYou're now subscribed to all new Web3 opportunities. Alerts will be sent here the moment they go live!`);
+        
     } catch (err) {
         console.error('Webhook processing error:', err.response?.data || err.message);
     }
