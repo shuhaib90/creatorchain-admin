@@ -850,34 +850,58 @@
             card.style.cursor = 'pointer';
             const avatar = p.avatar_url || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png';
             const userSkills = p.skills || [];
-            const matched = selectedTMSkills.filter(s => userSkills.includes(s));
             const handle = p.username || 'builder';
+            
+            const skillHtml = userSkills.length > 0 
+                ? userSkills.map(s => {
+                    const isMatch = selectedTMSkills.includes(s);
+                    const style = isMatch 
+                        ? "background:var(--primary); color:var(--black); border-color:var(--black); box-shadow: 2px 2px 0 var(--black);" 
+                        : "background:rgba(0,0,0,0.05); color:#888; border-color:#eee;";
+                    return `<span style="font-size:9px; padding:2px 6px; border:1px solid; font-weight:800; text-transform:uppercase; transition:0.2s; ${style}">${s}</span>`;
+                }).join('')
+                : '<span style="font-size:10px; color:#999; font-style:italic;">No skills listed</span>';
 
             card.innerHTML = `
                 <div class="card-header">
                     <img src="${avatar}" class="avatar">
                     <div>
-                        <h3 style="margin:0; font-size:18px;">${p.name || 'Anonymous Builder'}</h3>
-                        <p class="mono" style="font-size:12px; color:var(--muted); margin:0;">@${handle}</p>
+                        <h3 style="margin:0; font-size:18px; letter-spacing:-0.5px;">${p.name || 'Anonymous Builder'}</h3>
+                        <p class="mono" style="font-size:11px; color:var(--muted); margin:0;">@${handle}</p>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div style="font-size:10px; font-weight:900; text-transform:uppercase; color:var(--primary); margin-bottom:8px;">Matching Expertise</div>
-                    <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:15px;">
-                        ${matched.map(s => `<span style="font-size:10px; padding:2px 8px; border:1px solid var(--black); background:rgba(0,245,160,0.1); font-weight:700;">${s}</span>`).join('')}
+                    <div style="font-size:9px; font-weight:900; text-transform:uppercase; color:var(--black); margin-bottom:8px; opacity:0.6;">Skills & Expertise</div>
+                    <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:15px; min-height:40px; align-content: flex-start;">
+                        ${skillHtml}
                     </div>
-                    <p style="font-size:13px; color:#444; line-height:1.4; height:3em; overflow:hidden;">${p.bio || 'Building in Web3...'}</p>
                     
-                    <div style="display:flex; gap:10px; margin-top:15px;">
-                        <button class="btn btn-white btn-sm" style="flex:1; font-size:10px; padding:10px;" onclick="event.stopPropagation(); openPublicProfile('${p.username}')">VIEW PROFILE</button>
-                        <button class="btn btn-accent btn-sm" style="flex:1; font-size:10px; padding:10px;" onclick="event.stopPropagation(); openHireModal('${p.user_id}', '${p.name.replace(/'/g, "\\'")}')">HIRE BUILDER</button>
+                    <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:15px; padding:10px; background:#f9f9f9; border-left:3px solid var(--black);">
+                        <div style="display:flex; align-items:center; gap:8px; font-size:11px; color:#444;">
+                            <i data-lucide="map-pin" style="width:12px; height:12px;"></i>
+                            <span>${p.location || 'GLOBAL / REMOTE'}</span>
+                        </div>
+                        ${p.company ? `
+                        <div style="display:flex; align-items:center; gap:8px; font-size:11px; color:#444;">
+                            <i data-lucide="building-2" style="width:12px; height:12px;"></i>
+                            <span>${p.company}</span>
+                        </div>` : ''}
+                    </div>
+
+                    <p style="font-size:13px; color:#555; line-height:1.5; height:3em; overflow:hidden; margin-bottom:15px;">${p.bio || 'Building the future of Web3. Open to new opportunities and collaborations.'}</p>
+                    
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-white btn-sm" style="flex:1; font-size:10px; padding:12px; border-width:2px;" onclick="event.stopPropagation(); openPublicProfile('${p.username}')">VIEW FULL PROFILE</button>
+                        <button class="btn btn-accent btn-sm" style="flex:1; font-size:10px; padding:12px; border-width:2px;" onclick="event.stopPropagation(); openHireModal('${p.user_id}', '${(p.name || 'Anonymous').replace(/'/g, "\\'")}')">HIRE BUILDER</button>
                     </div>
                 </div>
-                <div class="card-footer">
-                    <span class="mono" style="font-size:10px; font-weight:700;">${p.experience_level?.toUpperCase() || 'BUILDER'}</span>
-                    <span class="mono" style="font-size:10px; font-weight:700; color:var(--primary);">${p.work_preference?.toUpperCase() || 'FLEXIBLE'}</span>
+                <div class="card-footer" style="background:#f0f0f0; border-top:1px solid #ddd; padding:10px 20px;">
+                    <span class="mono" style="font-size:10px; font-weight:800; color:#555;">${p.experience_level?.toUpperCase() || 'BUILDER'}</span>
+                    <span class="mono" style="font-size:10px; font-weight:800; color:var(--primary);">${p.work_preference?.toUpperCase() || 'FLEXIBLE'}</span>
                 </div>
             `;
+            // Re-run lucide icons for the new card
+            setTimeout(() => lucide.createIcons({ props: { "stroke-width": 3 } }), 10);
             return card;
         }
 
