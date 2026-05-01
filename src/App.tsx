@@ -484,7 +484,7 @@ const Layout = ({ children, onLogout }: { children: React.ReactNode, onLogout: (
             <LayoutDashboard size={18} /> DASHBOARD
           </Link>
           <Link to="/listings" className={`nav-item ${isActive('/listings') ? 'active' : ''}`}>
-            <List size={18} /> LISTINGS 
+            <ListTodo size={18} /> LISTINGS 
             {pendingCount > 0 && <span style={{ marginLeft: 'auto', background: 'var(--accent)', color: 'white', padding: '2px 6px', fontSize: '10px', border: '1px solid var(--black)' }}>{pendingCount}</span>}
           </Link>
           <Link to="/users" className={`nav-item ${isActive('/users') ? 'active' : ''}`}>
@@ -497,7 +497,7 @@ const Layout = ({ children, onLogout }: { children: React.ReactNode, onLogout: (
 
         <div style={{ padding: '32px', borderTop: '4px solid var(--black)' }}>
           <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={onLogout}>
-            TERMINATE_SESSION
+            <LogOut size={16} /> TERMINATE_SESSION
           </button>
         </div>
       </aside>
