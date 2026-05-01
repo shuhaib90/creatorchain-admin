@@ -566,6 +566,11 @@
                 checkUser();
                 initUnifiedSkills();
                 lucide.createIcons();
+                
+                // Add reactive listeners to filters
+                document.getElementById('tm-exp-level').addEventListener('change', runTalentMatch);
+                document.getElementById('tm-work-type').addEventListener('change', runTalentMatch);
+                
                 // Load talent pool immediately
                 runTalentMatch();
             } catch (e) {
@@ -726,12 +731,14 @@
             if (!selectedTMSkills.includes(skill)) {
                 selectedTMSkills.push(skill);
                 renderTMSkills();
+                runTalentMatch();
             }
         };
 
         window.removeTMSkill = function(skill) {
             selectedTMSkills = selectedTMSkills.filter(s => s !== skill);
             renderTMSkills();
+            runTalentMatch();
         };
 
         function renderTMSkills() {
