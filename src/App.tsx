@@ -172,6 +172,17 @@ const Listings = () => {
     setListings(listings.map(l => l.id === id ? { ...l, approval_status: 'rejected', rejection_reason: reason } : l));
   };
 
+  const handleDelete = async (id: string) => {
+    if (confirm('PERMANENT_DELETE: Are you sure you want to remove this listing?')) {
+      const { error } = await supabase.from('listings').delete().eq('id', id);
+      if (!error) {
+        setListings(listings.filter(l => l.id !== id));
+      } else {
+        alert('Error deleting listing');
+      }
+    }
+  };
+
   const handleSaveEdit = (updated: any) => {
     setListings(listings.map(l => l.id === updated.id ? updated : l));
   };
@@ -199,7 +210,7 @@ const Listings = () => {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border)' }}>
-              <th className="mono" style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: 'var(--text-muted)' }}>PROJECT</th>
+              <th className="mono" style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: 'var(--text-muted)' }}>PROJECT / SUBMITTER</th>
               <th className="mono" style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: 'var(--text-muted)' }}>CATEGORY</th>
               <th className="mono" style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: 'var(--text-muted)' }}>REWARD</th>
               <th className="mono" style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: 'var(--text-muted)' }}>STATUS</th>
@@ -211,7 +222,12 @@ const Listings = () => {
               <tr key={l.id} style={{ borderBottom: '1px solid var(--border)' }}>
                 <td style={{ padding: '20px 24px' }}>
                   <div style={{ fontWeight: '600' }}>{l.project}</div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{l.title}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--primary)', marginBottom: '4px' }}>{l.title}</div>
+                  {l.submitted_by && (
+                    <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Users size={10} /> {l.submitted_by} {l.submitter_email ? `(${l.submitter_email})` : ''}
+                    </div>
+                  )}
                 </td>
                 <td style={{ padding: '20px 24px' }}>
                   <span className="mono" style={{ fontSize: '12px' }}>{l.section.toUpperCase()}</span>
@@ -233,6 +249,7 @@ const Listings = () => {
                       </>
                     )}
                     <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={() => setEditingListing(l)}>EDIT</button>
+                    <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '11px', color: 'var(--accent)', borderColor: 'rgba(255,62,0,0.2)' }} onClick={() => handleDelete(l.id)}>DELETE</button>
                   </div>
                 </td>
               </tr>
