@@ -469,19 +469,25 @@ const Broadcast = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > 5 * 1024 * 1024) {
+      alert('FILE_TOO_LARGE: Please upload an image under 5MB.');
+      return;
+    }
+
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `public/broadcasts/${fileName}`;
+      const filePath = `public/bc_${fileName}`; // Simplified path
 
       const { error: uploadError } = await supabase.storage
-        .from('logos') // Reusing the same bucket
-        .upload(filePath, file);
+        .from('logos')
+        .upload(filePath, file, { cacheControl: '3600', upsert: false });
 
       if (uploadError) throw uploadError;
 
       const { data } = supabase.storage.from('logos').getPublicUrl(filePath);
+      console.log('UPLOAD_SUCCESS: Image public URL ->', data.publicUrl);
       setImageUrl(data.publicUrl);
     } catch (err: any) {
       alert('Upload Failed: ' + err.message);
