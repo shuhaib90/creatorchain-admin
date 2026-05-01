@@ -214,7 +214,7 @@ const UsersPage = () => {
 };
 
 // Main Layout Wrapper
-const Layout = ({ children }: { children: React.ReactNode }) => {
+const Layout = ({ children, onLogout }: { children: React.ReactNode, onLogout: () => void }) => {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 
@@ -254,7 +254,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>System Level 4</div>
             </div>
           </div>
-          <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', color: 'var(--accent)' }} onClick={() => supabase.auth.signOut()}>
+          <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', color: 'var(--accent)' }} onClick={onLogout}>
             <LogOut size={16} /> LOGOUT
           </button>
         </div>
@@ -280,72 +280,84 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App() {
-  const [session, setSession] = useState<any>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem('admin_auth') === 'true';
+  });
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      checkAdmin(session);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      checkAdmin(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const checkAdmin = (session: any) => {
-    if (!session) {
-      setIsAdmin(false);
-      return;
-    }
-    const handle = (session.user.user_metadata.user_name || '').toLowerCase();
-    // In production, you would fetch the admin list from Supabase
-    // For now, we use the specified admin handle
-    if (handle === 'zenvicalpha' || handle === 'shuhaib90') {
-      setIsAdmin(true);
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === '6282') {
+      setIsAuthenticated(true);
+      localStorage.setItem('admin_auth', 'true');
+      setError('');
     } else {
-      setIsAdmin(false);
+      setError('INVALID_ACCESS_KEY');
     }
   };
 
-  if (isAdmin === null) {
-    return (
-      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', color: 'var(--primary)' }} className="mono">
-        INITIALIZING_SYSTEM_RESOURCES...
-      </div>
-    );
-  }
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('admin_auth');
+  };
 
-  if (!session || !isAdmin) {
+  if (!isAuthenticated) {
     return (
       <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
-        <div className="card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center', border: '1px solid var(--accent)' }}>
-          <ShieldCheck size={48} color="var(--accent)" style={{ margin: '0 auto 24px' }} />
-          <h2 style={{ marginBottom: '8px' }}>Security Breach</h2>
-          <p style={{ color: 'var(--text-muted)', marginBottom: '32px', fontSize: '14px' }}>
-            {!session ? 'Authentication required.' : 'Unauthorized access. Your credentials do not have administrator privileges.'}
-          </p>
-          {!session ? (
-            <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => supabase.auth.signInWithOAuth({ provider: 'x' })}>
-              AUTHENTICATE VIA X
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card" 
+          style={{ maxWidth: '400px', width: '100%', textAlign: 'center', border: '1px solid var(--border)' }}
+        >
+          <div style={{ marginBottom: '32px' }}>
+            <ShieldCheck size={48} color="var(--primary)" style={{ margin: '0 auto 16px' }} />
+            <h2 style={{ fontSize: '24px', fontWeight: '800' }}>Terminal <span className="text-gradient">Access</span></h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '8px' }}>ENTER_ADMIN_CREDENTIALS_TO_PROCEED</p>
+          </div>
+
+          <form onSubmit={handleLogin}>
+            <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+              <label className="mono" style={{ fontSize: '11px', color: 'var(--primary)', display: 'block', marginBottom: '8px' }}>ACCESS_KEY</label>
+              <input 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••"
+                style={{ 
+                  width: '100%', 
+                  background: 'rgba(255,255,255,0.03)', 
+                  border: `1px solid ${error ? 'var(--accent)' : 'var(--border)'}`, 
+                  padding: '14px', 
+                  color: 'white', 
+                  borderRadius: '8px',
+                  fontSize: '18px',
+                  letterSpacing: '4px',
+                  textAlign: 'center',
+                  outline: 'none',
+                  fontFamily: 'var(--font-mono)'
+                }}
+                autoFocus
+              />
+              {error && <p className="mono" style={{ color: 'var(--accent)', fontSize: '10px', marginTop: '8px', textAlign: 'center' }}>{error}</p>}
+            </div>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '16px' }}>
+              DECRYPT & ENTER
             </button>
-          ) : (
-            <button className="btn btn-outline" style={{ width: '100%' }} onClick={() => supabase.auth.signOut()}>
-              RETURN TO SAFETY
-            </button>
-          )}
-        </div>
+          </form>
+          
+          <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--border)' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '10px' }} className="mono">AUTHORIZED_PERSONNEL_ONLY</p>
+          </div>
+        </motion.div>
       </div>
     );
   }
 
   return (
     <Router>
-      <Layout>
+      <Layout onLogout={handleLogout}>
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/listings" element={<Listings />} />
@@ -368,3 +380,4 @@ function App() {
 }
 
 export default App;
+
