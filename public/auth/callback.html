@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authenticating... | CreatorChain</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f8f8;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: #000;
+        }
+        .loader-container {
+            text-align: center;
+            padding: 40px;
+            background: #fff;
+            border: 4px solid #000;
+            box-shadow: 15px 15px 0 #00f5a0;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #000;
+            border-top: 4px solid #00f5a0;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader-container">
+        <div class="spinner"></div>
+        <div class="status">Initialising Session...</div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function handleCallback() {
+            try {
+                // Supabase JS library handles the OAuth hash fragment automatically on initialization
+                // but we call getSession to be sure and trigger any logic needed
+                const { data, error } = await supabaseClient.auth.getSession();
+                
+                if (error) throw error;
+
+                // Success! Redirect home
+                // The main pages (index.html, talent.html) will pick up the session via their checkUser() functions
+                window.location.href = '/';
+            } catch (err) {
+                console.error('Callback Error:', err);
+                document.querySelector('.status').textContent = 'AUTH_ERROR: ' + err.message;
+                document.querySelector('.loader-container').style.boxShadow = '15px 15px 0 #ff3e00';
+                
+                // Redirect home anyway after a delay so they aren't stuck
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 3000);
+            }
+        }
+
+        handleCallback();
+    </script>
+</body>
+</html>
