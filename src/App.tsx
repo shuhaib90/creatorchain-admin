@@ -76,10 +76,6 @@ const Dashboard = () => {
   );
 };
 
-const Listings = () => {
-  const [listings, setListings] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
 const EditListingModal = ({ listing, onClose, onSave }: { listing: any, onClose: () => void, onSave: (updated: any) => void }) => {
   const [formData, setFormData] = useState({ ...listing });
   const [saving, setSaving] = useState(false);
