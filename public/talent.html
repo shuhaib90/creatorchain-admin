@@ -978,27 +978,59 @@
             btn.disabled = true;
             btn.textContent = 'SENDING...';
 
+            const receiverId = document.getElementById('hire-target-id').value;
+            const senderName = document.getElementById('hire-sender-name').value;
+            const senderEmail = document.getElementById('hire-email').value;
+            const telegram = document.getElementById('hire-telegram').value;
+            const message = document.getElementById('hire-message').value;
+
             const payload = {
-                receiver_id: document.getElementById('hire-target-id').value,
-                sender_name: document.getElementById('hire-sender-name').value,
-                sender_email: document.getElementById('hire-email').value,
-                telegram: document.getElementById('hire-telegram').value,
+                receiver_id: receiverId,
+                sender_name: senderName,
+                sender_email: senderEmail,
+                telegram: telegram,
                 form_url: document.getElementById('hire-form-url').value,
-                message: document.getElementById('hire-message').value,
+                message: message,
                 status: 'pending',
                 created_at: new Date().toISOString()
             };
 
             try {
+                // 1. Log request in database
                 const { error } = await db.from('hire_requests').insert([payload]);
                 if (error) throw error;
+                
+                // 2. Fetch builder profile to get their email
+                const { data: profile } = await db.from('user_profiles').select('email, email_notifications').eq('user_id', receiverId).single();
+                
+                // 3. Trigger email if builder has an email and notifications enabled
+                if (profile && profile.email && profile.email_notifications !== false) {
+                    try {
+                        await fetch('/api/send-email', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                type: 'hire_request',
+                                payload: {
+                                    receiver_email: profile.email,
+                                    sender_name: senderName,
+                                    sender_email: senderEmail,
+                                    message: message,
+                                    telegram: telegram
+                                }
+                            })
+                        });
+                    } catch (emailErr) {
+                        console.warn('Email notification failed but request was logged:', emailErr);
+                    }
+                }
                 
                 showToast('🚀 Hire request sent! Builder will be notified.');
                 closeHireModal();
                 document.getElementById('hire-form').reset();
             } catch (err) {
                 console.error(err);
-                showToast('Failed to send request. Database sync pending.', true);
+                showToast('Failed to send request.', true);
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'SEND REQUEST →';

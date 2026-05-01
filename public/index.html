@@ -728,6 +728,10 @@
                     <label>LOCATION</label>
                     <input type="text" id="p-location" placeholder="City, Country or Remote">
                 </div>
+                <div class="field">
+                    <label>EMAIL ADDRESS <span class="req">*</span></label>
+                    <input type="email" id="p-email" placeholder="Where should we send notifications?" required>
+                </div>
 
                 <div class="form-section-title">04 // AVAILABILITY & NOTIFICATIONS</div>
                 <div class="field">
@@ -1536,6 +1540,7 @@
                 renderProfileSkills();
                 document.getElementById('p-employer').value = data.current_employer || '';
                 document.getElementById('p-location').value = data.location || '';
+                document.getElementById('p-email').value = data.email || user.email || '';
                 document.getElementById('p-available').checked = data.available_for_work !== false;
                 document.getElementById('p-email-notif').checked = data.email_notifications || false;
             }
@@ -1618,6 +1623,7 @@
             skills: selectedProfileSkills,
             current_employer: document.getElementById('p-employer').value,
             location: document.getElementById('p-location').value,
+            email: document.getElementById('p-email').value,
             available_for_work: document.getElementById('p-available').checked,
             email_notifications: document.getElementById('p-email-notif').checked,
             source: 'login'
