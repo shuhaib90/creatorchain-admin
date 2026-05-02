@@ -88,7 +88,30 @@ export default async (req, res) => {
 
         const opportunities = oppsResp.data || [];
         const listings = listingsResp.data || [];
-        const allItems = [...opportunities.map(o => ({...o, type: 'opp'})), ...listings.map(l => ({...l, type: 'list'}))];
+        
+        // Combine and add metadata
+        let allItems = [
+            ...opportunities.map(o => ({...o, item_type: 'opp', is_exclusive: (o.project_name || '').toLowerCase().includes('creatorchain')})), 
+            ...listings.map(l => ({...l, item_type: 'list', is_exclusive: (l.project || '').toLowerCase().includes('creatorchain')}))
+        ];
+
+        // Sort: Exclusive first, then Featured, then Newest
+        allItems.sort((a, b) => {
+            // 1. Exclusive (CreatorChain projects)
+            if (a.is_exclusive && !b.is_exclusive) return -1;
+            if (!a.is_exclusive && b.is_exclusive) return 1;
+
+            // 2. Featured
+            const aFeatured = a.featured === true;
+            const bFeatured = b.featured === true;
+            if (aFeatured && !bFeatured) return -1;
+            if (!aFeatured && bFeatured) return 1;
+
+            // 3. Date (Newest first)
+            const aDate = new Date(a.created_at || 0);
+            const bDate = new Date(b.created_at || 0);
+            return bDate - aDate;
+        });
 
         if (allItems.length === 0) {
             await sendSimpleMessage(chatId, `📭 <b>No active opportunities found at the moment.</b>\n\nCheck back later or visit <a href="https://creatorchain-web3-jobs.vercel.app/">CreatorChain</a>.`);
@@ -106,8 +129,9 @@ export default async (req, res) => {
             const reward = item.reward || 'TBA';
             const id = item.id;
             const url = `https://creatorchain-web3-jobs.vercel.app/opportunity.html?id=${id}`;
+            const exclusiveTag = item.is_exclusive ? '⭐️ <b>EXCLUSIVE</b>\n' : '';
             
-            responseText += `${index + 1}. <b>${project}</b>\n`;
+            responseText += `${index + 1}. ${exclusiveTag}<b>${project}</b>\n`;
             responseText += `🔹 ${title}\n`;
             responseText += `💰 <b>Reward:</b> ${reward}\n`;
             responseText += `🔗 <a href="${url}">VIEW_DETAILS & APPLY</a>\n\n`;
