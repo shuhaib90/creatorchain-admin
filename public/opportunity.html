@@ -283,7 +283,6 @@
 
         const prizeNumeric = parseReward(item.reward);
         const prizeTotal = item.reward || 'TBA';
-        const hasTiers = item.prize_breakdown && (item.prize_breakdown.first || item.prize_breakdown.second || item.prize_breakdown.third);
         
         const isClosed = item.status === 'closed';
         const isEnded = item.status === 'ended' || isClosed || (item.deadline && new Date(item.deadline) < new Date());
