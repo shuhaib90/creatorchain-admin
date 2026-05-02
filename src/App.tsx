@@ -581,6 +581,44 @@ const EditOpportunityModal = ({ opportunity, onClose, onSave }: { opportunity: a
           </div>
 
           <div className="form-group">
+            <label>DESCRIPTION (REWARD SUMMARY)</label>
+            <input className="form-input" value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} />
+          </div>
+
+          <div className="form-group">
+            <label>MISSION</label>
+            <textarea className="form-input" rows={2} value={formData.mission || ''} onChange={e => setFormData({...formData, mission: e.target.value})} style={{ resize: 'vertical' }} />
+          </div>
+
+          <div className="form-group">
+            <label>ABOUT_PROJECT</label>
+            <textarea className="form-input" rows={3} value={formData.about_project || ''} onChange={e => setFormData({...formData, about_project: e.target.value})} style={{ resize: 'vertical' }} />
+          </div>
+
+          <div className="form-group">
+            <label>SCOPE_&_REQUIREMENTS (BULLET POINTS)</label>
+            <textarea className="form-input" rows={4} value={formData.scope_requirements || ''} onChange={e => setFormData({...formData, scope_requirements: e.target.value})} style={{ resize: 'vertical' }} />
+          </div>
+
+          <div className="form-group">
+            <label>PRIZE_BREAKDOWN</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+              <div>
+                <label style={{ fontSize: '9px' }}>1ST_PLACE</label>
+                <input className="form-input" value={formData.prize_breakdown?.first || ''} onChange={e => setFormData({...formData, prize_breakdown: {...formData.prize_breakdown, first: e.target.value}})} />
+              </div>
+              <div>
+                <label style={{ fontSize: '9px' }}>2ND_PLACE</label>
+                <input className="form-input" value={formData.prize_breakdown?.second || ''} onChange={e => setFormData({...formData, prize_breakdown: {...formData.prize_breakdown, second: e.target.value}})} />
+              </div>
+              <div>
+                <label style={{ fontSize: '9px' }}>3RD_PLACE</label>
+                <input className="form-input" value={formData.prize_breakdown?.third || ''} onChange={e => setFormData({...formData, prize_breakdown: {...formData.prize_breakdown, third: e.target.value}})} />
+              </div>
+            </div>
+          </div>
+
+          <div className="form-group">
             <label>TEAM_CONTACT</label>
             <input className="form-input" value={formData.team_contact || ''} onChange={e => setFormData({...formData, team_contact: e.target.value})} placeholder="@username or email" />
           </div>
