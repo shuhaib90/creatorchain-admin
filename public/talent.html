@@ -273,78 +273,103 @@
         /* OPTIMIZED HYPER-BRUTALIST PROFILE CARD */
         .p-card-close:hover { background: #333; transform: scale(1.1); }
         
-        /* 2-COLUMN MODAL GRID */
-        .p-card-grid { display: grid; grid-template-columns: 0.42fr 0.58fr; width: 100%; min-height: 550px; }
-        .p-card-left { padding: 40px; border-right: 4px solid var(--black); background: #fff; position: relative; display: flex; flex-direction: column; }
-        .p-card-right { padding: 40px; background: #fff; }
-        
+        /* GRID AREAS FOR PRECISION LAYOUT */
+        .p-card-grid { 
+            display: grid; 
+            grid-template-columns: 0.4fr 0.6fr; 
+            grid-template-areas: 
+                "header stats"
+                "header skills"
+                "header work"
+                "footer footer";
+            width: 100%;
+        }
+        .p-area-header { grid-area: header; padding: 40px; border-right: 4px solid var(--black); background: #fff; }
+        .p-area-stats { grid-area: stats; padding: 40px 40px 20px 40px; }
+        .p-area-skills { grid-area: skills; padding: 0 40px 20px 40px; }
+        .p-area-work { grid-area: work; padding: 0 40px 40px 40px; }
+        .p-area-footer { grid-area: footer; padding: 30px 40px; border-top: 4px solid var(--black); background: #fafafa; display: flex; justify-content: space-between; align-items: center; gap: 30px; }
+
         .p-card { 
             background: #fff; 
             border: 4px solid var(--black); 
-            box-shadow: 20px 20px 0 rgba(0,0,0,0.15); 
+            box-shadow: 20px 20px 0 rgba(0,0,0,0.1); 
             width: 100%; 
-            max-width: 1000px; 
+            max-width: 1050px; 
             position: relative; 
             overflow: hidden; 
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         }
 
-        .p-card-header { display: flex; flex-direction: column; gap: 20px; margin-bottom: 25px; }
-        .p-card-avatar { width: 140px !important; height: 140px !important; border: 4px solid var(--black); box-shadow: 8px 8px 0 var(--black); object-fit: cover; background: #fff; display: block; }
-        
-        .p-card-info h2 { font-size: 36px; margin: 0; line-height: 1.1; font-weight: 900; text-transform: uppercase; }
-        .p-card-handle { font-family: var(--font-mono); font-size: 14px; color: #666; margin-top: 5px; font-weight: 700; }
-        
-        .p-card-bio { font-size: 14px; color: #888; line-height: 1.6; margin: 25px 0; font-style: italic; }
-        
-        .p-card-section-title { font-size: 10px; font-weight: 900; text-transform: uppercase; color: #888; margin-bottom: 15px; letter-spacing: 1px; font-family: var(--font-mono); display: flex; align-items: center; gap: 10px; }
-        .p-card-section-title::after { content: ''; height: 1px; flex: 1; background: #eee; }
+        /* HEADER SECTION */
+        .p-card-avatar { width: 80px !important; height: 80px !important; border: 3px solid var(--black); box-shadow: 5px 5px 0 var(--black); object-fit: cover; background: #fff; margin-bottom: 20px; }
+        .p-card-info h2 { font-size: 28px; margin: 0; line-height: 1.1; font-weight: 900; text-transform: uppercase; display: flex; align-items: center; gap: 8px; color: #000; }
+        .p-card-handle { font-family: var(--font-mono); font-size: 13px; color: #888; margin-top: 4px; font-weight: 700; }
+        .p-card-bio { font-size: 14px; color: #111; line-height: 1.6; margin-top: 20px; font-weight: 500; }
+        .p-card-bio.placeholder { color: #888; font-style: italic; }
 
-        .p-card-stats-grid { display: grid; grid-template-columns: 1fr 1.2fr 1.2fr; gap: 12px; margin-bottom: 30px; }
-        .p-stat-box { border: 2px solid var(--black); padding: 15px 10px; text-align: center; background: #fff; display: flex; flex-direction: column; justify-content: center; min-height: 80px; }
-        .p-stat-val { display: block; font-family: var(--font-mono); font-size: 20px; font-weight: 900; }
-        .p-stat-label { font-size: 9px; text-transform: uppercase; color: #000; font-weight: 800; margin-bottom: 5px; letter-spacing: 0.5px; }
-        .p-stat-score { color: #00E676; }
+        /* LABELS & SECTION TITLES */
+        .p-card-label { font-size: 10px; font-weight: 900; text-transform: uppercase; color: #CCCCCC; margin-bottom: 8px; letter-spacing: 1px; font-family: var(--font-mono); display: block; }
+        .p-section-title { font-size: 11px; font-weight: 900; text-transform: uppercase; color: #000; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .p-section-title::after { content: ''; height: 1px; flex: 1; background: #eee; }
 
-        .p-card-skills { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; }
-        .p-card-skill-tag { background: #fff; border: 2px solid var(--black); padding: 8px 16px; font-size: 13px; font-weight: 900; box-shadow: 4px 4px 0 var(--black); font-family: var(--font-mono); }
+        /* STATS GRID */
+        .p-stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .p-stat-card { border: 2px solid var(--black); padding: 16px; background: #fff; }
+        .p-stat-val { font-family: var(--font-mono); font-size: 22px; font-weight: 900; color: #000; display: block; }
+        .p-stat-val.score { color: #00E676; }
 
-        .p-card-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .p-card-meta-card { border: 2px solid var(--black); padding: 15px; display: flex; align-items: center; gap: 15px; background: #fff; min-height: 70px; }
-        .p-card-meta-icon { width: 34px; height: 34px; border: 2px solid var(--black); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .p-card-meta-info { display: flex; flex-direction: column; }
-        .p-card-meta-label { font-size: 8px; text-transform: uppercase; color: #888; font-weight: 800; margin-bottom: 2px; }
-        .p-card-meta-val { font-size: 13px; font-weight: 900; text-transform: capitalize; }
+        /* SKILLS */
+        .p-skills-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+        .p-skill-tag { border: 2px solid var(--black); padding: 6px 12px; font-size: 12px; font-weight: 900; font-family: var(--font-mono); background: #fff; }
 
-        /* ORANGE SHARE BUTTON */
-        .p-share-btn {
+        /* WORK CONTEXT GRID */
+        .p-work-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .p-work-card { border: 2px solid #f0f0f0; padding: 16px; display: flex; align-items: center; gap: 12px; }
+        .p-work-icon { width: 32px; height: 32px; border: 2px solid var(--black); display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #fff; }
+        .p-work-info { display: flex; flex-direction: column; }
+        .p-work-val { font-size: 13px; font-weight: 900; color: #111; text-transform: uppercase; }
+
+        /* CONNECTIONS & CTA */
+        .p-socials-row { display: flex; gap: 12px; }
+        .p-social-box { width: 44px; height: 44px; border: 2px solid var(--black); display: flex; align-items: center; justify-content: center; background: #fff; color: #000; transition: 0.2s; box-shadow: 4px 4px 0 var(--black); }
+        .p-social-box:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--black); }
+
+        .p-primary-cta {
             background: #FF4D00;
             color: #fff;
             border: 3px solid var(--black);
-            padding: 18px;
+            padding: 20px;
             width: 100%;
             font-weight: 900;
-            font-size: 14px;
+            font-size: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
             cursor: pointer;
             box-shadow: 6px 6px 0 var(--black);
             transition: 0.1s;
-            margin-top: auto;
             text-transform: uppercase;
         }
-        .p-share-btn:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--black); }
-
-        .p-card-socials { display: flex; gap: 15px; margin-bottom: 30px; }
-        .p-card-social-box { width: 50px; height: 50px; border: 3px solid var(--black); display: flex; align-items: center; justify-content: center; box-shadow: 5px 5px 0 var(--black); background: #fff; color: var(--black); }
+        .p-primary-cta:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--black); }
 
         @media (max-width: 950px) {
-            .p-card-grid { grid-template-columns: 1fr; }
-            .p-card-left { border-right: none; border-bottom: 4px solid var(--black); padding: 30px; }
-            .p-card-right { padding: 30px; }
-            .p-card { max-width: 500px; max-height: 90vh; overflow-y: auto; }
+            .p-card-grid { 
+                display: flex; 
+                flex-direction: column; 
+            }
+            .p-area-header, .p-area-stats, .p-area-skills, .p-area-work, .p-area-footer { 
+                padding: 24px; 
+                border-right: none; 
+                border-bottom: 4px solid #f5f5f5; 
+            }
+            .p-area-footer { 
+                flex-direction: column; 
+                align-items: stretch; 
+                border-top: none; 
+                border-bottom: none;
+            }
         }
 
         /* PRO CARD PREMIUM STYLING */
@@ -1316,7 +1341,7 @@
             const avatarToUse = profile.avatar_url || avatar || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png';
             const isPro = profile.badge_level === 'pro' || (profile.approved_submissions || 0) > 5;
             
-            const icon = (path) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+            const icon = (path) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18">${path}</svg>`;
             const icons = {
                 level: icon('<path d="M6 18h12M6 14h12M6 10h12M6 6h12"/>'),
                 work: icon('<rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>'),
@@ -1329,99 +1354,103 @@
                     <button class="p-card-close" onclick="closeProfileCard()">✕</button>
                     
                     <div class="p-card-grid">
-                        <!-- LEFT PANEL -->
-                        <div class="p-card-left">
-                            ${isPro ? '<div class="p-card-seal">TRUSTED BUILDER</div>' : ''}
-                            <div class="p-card-header">
-                                <img src="${avatarToUse}" class="p-card-avatar">
-                                <div class="p-card-info">
-                                    <h2>${(profile.name || 'Anonymous').toUpperCase()} ${getBadgeHtml(profile, 'medium')}</h2>
-                                    <div class="p-card-handle">@${handle}</div>
-                                </div>
+                        <!-- 1. HEADER BLOCK -->
+                        <div class="p-area-header">
+                            <img src="${avatarToUse}" class="p-card-avatar">
+                            <div class="p-card-info">
+                                <h2 style="font-size: 24px; margin-bottom: 4px;">
+                                    ${(profile.name || 'Anonymous Builder').toUpperCase()}
+                                    <span style="transform: scale(0.8); display: inline-block;">${getBadgeHtml(profile, 'medium')}</span>
+                                </h2>
+                                <div class="p-card-handle">@${handle}</div>
                             </div>
-                    
-                            <p class="p-card-bio">${profile.bio || 'Add a bio to boost your profile and attract more opportunities.'}</p>
-
-                            <div class="p-card-section-title">IDENTITY LINKS</div>
-                            <div class="p-card-socials">
-                                ${profile.twitter ? `
-                                <a href="https://x.com/${profile.twitter.replace('@','')}" target="_blank" class="p-card-social-box" title="Twitter/X">
-                                    <svg viewBox="0 0 24 24" fill="currentColor" width="22"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                                </a>` : ''}
-                                ${profile.github ? `
-                                <a href="${profile.github.startsWith('http') ? profile.github : 'https://github.com/' + profile.github}" target="_blank" class="p-card-social-box" title="GitHub">
-                                    <svg viewBox="0 0 24 24" fill="currentColor" width="22"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-                                </a>` : ''}
-                                ${(!profile.twitter && !profile.github) ? '<span class="mono" style="font-size:12px; color:#aaa;">No links connected</span>' : ''}
+                            <div class="p-card-bio ${!profile.bio ? 'placeholder' : ''}" style="margin-bottom: 24px;">
+                                ${profile.bio || 'Add a bio to boost your profile and attract more opportunities.'}
                             </div>
 
-                            <button class="p-share-btn" onclick="shareProfile('${handle}')">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="20"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
-                                SHARE PROFILE
+                            <button class="p-primary-cta" style="background:#fff; color:#000; padding:12px; font-size:12px; box-shadow: 4px 4px 0 #000;" onclick="shareProfile('${handle}')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="16" style="margin-right:8px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                                SHARE BUILDER PROFILE
                             </button>
                         </div>
 
-                        <!-- RIGHT PANEL -->
-                        <div class="p-card-right">
-                            ${(profile.score > 0 || profile.approved_submissions > 0 || profile.total_submissions > 0) ? `
-                            <div class="p-card-section-title">REPUTATION & STATS</div>
-                            <div class="p-card-stats-grid">
-                                <div class="p-stat-box">
-                                    <span class="p-stat-label">TRUST SCORE</span>
-                                    <span class="p-stat-val p-stat-score">${profile.score || 0}/100</span>
+                        <!-- 2. REPUTATION BLOCK -->
+                        <div class="p-area-stats">
+                            <span class="p-card-label">REPUTATION & TRUST</span>
+                            <div class="p-stats-row">
+                                <div class="p-stat-card">
+                                    <span class="p-card-label">TRUST SCORE</span>
+                                    <span class="p-stat-val score">${profile.score || 0}/100</span>
                                 </div>
-                                <div class="p-stat-box">
-                                    <span class="p-stat-label">APPROVED</span>
+                                <div class="p-stat-card">
+                                    <span class="p-card-label">APPROVED</span>
                                     <span class="p-stat-val">${profile.approved_submissions || 0}</span>
                                 </div>
-                                <div class="p-stat-box">
-                                    <span class="p-stat-label">TOTAL SUBMISSIONS</span>
+                                <div class="p-stat-card">
+                                    <span class="p-card-label">SUBMISSIONS</span>
                                     <span class="p-stat-val">${profile.total_submissions || 0}</span>
                                 </div>
-                            </div>` : ''}
+                            </div>
+                        </div>
 
-                            <div class="p-card-section-title">SKILLS & MASTERY</div>
-                            <div class="p-card-skills">
-                                ${skills.length ? skills.map(s => `<span class="p-card-skill-tag">${s}</span>`).join('') : '<span class="mono" style="font-size:12px;">NO SKILLS ADDED</span>'}
+                        <!-- 3. SKILLS BLOCK -->
+                        <div class="p-area-skills">
+                            <span class="p-card-label">TECHNICAL MASTERY</span>
+                            <div class="p-skills-wrap">
+                                ${skills.length ? skills.map(s => `<span class="p-skill-tag">${s}</span>`).join('') : '<span class="mono" style="font-size:12px; color:#ccc;">NO SKILLS CONNECTED</span>'}
                             </div>
+                        </div>
 
-                            <div class="p-card-section-title">WORK CONTEXT</div>
-                            <div class="p-card-meta-grid">
-                                <div class="p-card-meta-card">
-                                    <div class="p-card-meta-icon">${icons.level}</div>
-                                    <div class="p-card-meta-info">
-                                        <span class="p-card-meta-label">LEVEL</span>
-                                        <span class="p-card-meta-val">${profile.experience_level || 'beginner'}</span>
+                        <!-- 4. WORK CONTEXT BLOCK -->
+                        <div class="p-area-work">
+                            <span class="p-card-label">WORK CONTEXT</span>
+                            <div class="p-work-grid">
+                                <div class="p-work-card">
+                                    <div class="p-work-icon">${icons.level}</div>
+                                    <div class="p-work-info">
+                                        <span class="p-card-label" style="margin:0">LEVEL</span>
+                                        <span class="p-work-val">${profile.experience_level || 'beginner'}</span>
                                     </div>
                                 </div>
-                                <div class="p-card-meta-card">
-                                    <div class="p-card-meta-icon">${icons.work}</div>
-                                    <div class="p-card-meta-info">
-                                        <span class="p-card-meta-label">PREFERENCE</span>
-                                        <span class="p-card-meta-val">${profile.work_preference || 'Part-time'}</span>
+                                <div class="p-work-card">
+                                    <div class="p-work-icon">${icons.work}</div>
+                                    <div class="p-work-info">
+                                        <span class="p-card-label" style="margin:0">PREFERENCE</span>
+                                        <span class="p-work-val">${profile.work_preference || 'Part-time'}</span>
                                     </div>
                                 </div>
-                                <div class="p-card-meta-card">
-                                    <div class="p-card-meta-icon">${icons.location}</div>
-                                    <div class="p-card-meta-info">
-                                        <span class="p-card-meta-label">LOCATION</span>
-                                        <span class="p-card-meta-val">${profile.location || 'GLOBAL'}</span>
+                                <div class="p-work-card">
+                                    <div class="p-work-icon">${icons.location}</div>
+                                    <div class="p-work-info">
+                                        <span class="p-card-label" style="margin:0">LOCATION</span>
+                                        <span class="p-work-val">${profile.location || 'GLOBAL'}</span>
                                     </div>
                                 </div>
-                                <div class="p-card-meta-card">
-                                    <div class="p-card-meta-icon">${icons.company}</div>
-                                    <div class="p-card-meta-info">
-                                        <span class="p-card-meta-label">COMPANY</span>
-                                        <span class="p-card-meta-val">${profile.company || 'Freelance'}</span>
+                                <div class="p-work-card">
+                                    <div class="p-work-icon">${icons.company}</div>
+                                    <div class="p-work-info">
+                                        <span class="p-card-label" style="margin:0">COMPANY</span>
+                                        <span class="p-work-val">${profile.company || 'Freelance'}</span>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div style="margin-top:40px; display:flex; gap:15px;">
-                                <button class="btn btn-primary" style="flex:1; padding:20px; font-size:16px;" onclick="openHireModal('${profile.user_id}', '${(profile.name || 'Anonymous').replace(/'/g, "\\'")}')">
-                                    SEND HIRE REQUEST &rarr;
-                                </button>
+                        </div>
+
+                        <!-- 5. FOOTER BLOCK -->
+                        <div class="p-area-footer">
+                            <div class="p-socials-row">
+                                ${profile.twitter ? `
+                                <a href="https://x.com/${profile.twitter.replace('@','')}" target="_blank" class="p-social-box" title="Twitter/X">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="20"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                </a>` : ''}
+                                ${profile.github ? `
+                                <a href="${profile.github.startsWith('http') ? profile.github : 'https://github.com/' + profile.github}" target="_blank" class="p-social-box" title="GitHub">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="20"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                                </a>` : ''}
                             </div>
+                            <button class="p-primary-cta" onclick="openHireModal('${profile.user_id}', '${(profile.name || 'Anonymous').replace(/'/g, "\\'")}')">
+                                SEND HIRE REQUEST &rarr;
+                            </button>
                         </div>
                     </div>
                 </div>
