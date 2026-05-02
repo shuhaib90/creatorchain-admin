@@ -80,10 +80,10 @@ export default async (req, res) => {
             'Authorization': `Bearer ${SUPABASE_KEY}`
         };
 
-        // Fetch active opportunities and listings
+        // Fetch active opportunities and listings (filter for open/approved status)
         const [oppsResp, listingsResp] = await Promise.all([
             axios.get(`${SUPABASE_URL}/rest/v1/opportunities?status=eq.open&select=*`, { headers }),
-            axios.get(`${SUPABASE_URL}/rest/v1/listings?approval_status=eq.approved&select=*`, { headers })
+            axios.get(`${SUPABASE_URL}/rest/v1/listings?approval_status=eq.approved&status=eq.Open&select=*`, { headers })
         ]);
 
         const opportunities = oppsResp.data || [];
