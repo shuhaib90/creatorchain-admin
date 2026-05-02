@@ -302,16 +302,51 @@ const Listings = () => {
   };
 
   const handleApprove = async (id: string) => {
-    await supabase.from('listings').update({ approval_status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', id);
+    const { data: item } = await supabase.from('listings').update({ approval_status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', id).select().single();
     setListings(listings.map(l => l.id === id ? { ...l, approval_status: 'approved' } : l));
     notifyMatchingBuilders(id);
+    if (item) notifySubmitterOfStatus('listing', item, 'approved');
   };
 
   const handleReject = async (id: string) => {
     const reason = prompt('Rejection reason:');
     if (reason === null) return;
+    const { data: item } = await supabase.from('listings').select('*').eq('id', id).single();
     await supabase.from('listings').update({ approval_status: 'rejected', rejection_reason: reason, reviewed_at: new Date().toISOString() }).eq('id', id);
     setListings(listings.map(l => l.id === id ? { ...l, approval_status: 'rejected', rejection_reason: reason } : l));
+    if (item) notifySubmitterOfStatus('listing', item, 'rejected', reason);
+  };
+
+  const notifySubmitterOfStatus = async (type: 'opportunity' | 'listing', item: any, status: string, reason?: string) => {
+    const contactInfo = type === 'opportunity' ? item.team_contact : item.submitted_by;
+    if (!contactInfo) return;
+
+    const cleanHandle = contactInfo.replace('@', '');
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('telegram_id')
+      .or(`username.ilike.${cleanHandle},telegram.ilike.%${cleanHandle}%`)
+      .limit(1)
+      .maybeSingle();
+
+    if (!profile?.telegram_id) return;
+
+    let message = '';
+    const projectName = type === 'opportunity' ? item.project_name : item.project;
+    
+    if (status === 'approved' || status === 'live') {
+      message = `🎉 <b>GOOD NEWS!</b>\n\nYour submission for <b>${projectName}</b> has been <b>APPROVED</b>! 🚀\n\nIt is now live on CreatorChain. Good luck!`;
+    } else if (status === 'rejected') {
+      message = `⚠️ <b>SUBMISSION UPDATE</b>\n\nYour project <b>${projectName}</b> has been reviewed.\n\n<b>Status:</b> Rejected\n${reason ? `<b>Reason:</b> ${reason}` : ''}`;
+    }
+
+    if (message) {
+      await fetch('https://creatorchain-web3-jobs.vercel.app/api/send-telegram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'custom', payload: { chat_ids: [profile.telegram_id], message } })
+      }).catch(e => console.error('Notify error:', e));
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -878,14 +913,56 @@ const Opportunities = () => {
   };
 
   const updateStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from('opportunities').update({ status }).eq('id', id);
-    if (!error) {
+    let reason = '';
+    if (status === 'rejected') {
+      const r = prompt('REJECTION_REASON:');
+      if (r === null) return;
+      reason = r;
+    }
+
+    const { data: item, error } = await supabase.from('opportunities').update({ status }).eq('id', id).select().single();
+    if (!error && item) {
       setOpps(opps.map(o => o.id === id ? { ...o, status } : o));
       if (status === 'live') {
         broadcastExclusive(id);
+        notifySubmitterOfStatus('opportunity', item, 'live');
+      } else if (status === 'rejected') {
+        notifySubmitterOfStatus('opportunity', item, 'rejected', reason);
       }
     } else {
       alert('Status update failed');
+    }
+  };
+
+  const notifySubmitterOfStatus = async (type: 'opportunity' | 'listing', item: any, status: string, reason?: string) => {
+    const contactInfo = type === 'opportunity' ? item.team_contact : item.submitted_by;
+    if (!contactInfo) return;
+
+    const cleanHandle = contactInfo.replace('@', '');
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('telegram_id')
+      .or(`username.ilike.${cleanHandle},telegram.ilike.%${cleanHandle}%`)
+      .limit(1)
+      .maybeSingle();
+
+    if (!profile?.telegram_id) return;
+
+    let message = '';
+    const projectName = type === 'opportunity' ? item.project_name : item.project;
+    
+    if (status === 'approved' || status === 'live') {
+      message = `🎉 <b>GOOD NEWS!</b>\n\nYour project <b>${projectName}</b> has been <b>APPROVED</b>! 🚀\n\nIt is now live on CreatorChain. Get ready for applicants!`;
+    } else if (status === 'rejected') {
+      message = `⚠️ <b>SUBMISSION UPDATE</b>\n\nYour project <b>${projectName}</b> has been reviewed.\n\n<b>Status:</b> Rejected\n${reason ? `<b>Reason:</b> ${reason}` : ''}`;
+    }
+
+    if (message) {
+      await fetch('https://creatorchain-web3-jobs.vercel.app/api/send-telegram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'custom', payload: { chat_ids: [profile.telegram_id], message } })
+      }).catch(e => console.error('Notify error:', e));
     }
   };
 
