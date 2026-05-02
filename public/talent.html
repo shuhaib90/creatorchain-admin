@@ -273,22 +273,15 @@
         /* OPTIMIZED HYPER-BRUTALIST PROFILE CARD */
         .p-card-close:hover { background: #333; transform: scale(1.1); }
         
-        /* GRID AREAS FOR PRECISION LAYOUT */
+        /* DYNAMIC 2-COLUMN MODAL LAYOUT */
         .p-card-grid { 
             display: grid; 
             grid-template-columns: 0.4fr 0.6fr; 
-            grid-template-areas: 
-                "header stats"
-                "header skills"
-                "header work"
-                "footer footer";
             width: 100%;
         }
-        .p-area-header { grid-area: header; padding: 40px; border-right: 4px solid var(--black); background: #fff; }
-        .p-area-stats { grid-area: stats; padding: 40px 40px 20px 40px; }
-        .p-area-skills { grid-area: skills; padding: 0 40px 20px 40px; }
-        .p-area-work { grid-area: work; padding: 0 40px 40px 40px; }
-        .p-area-footer { grid-area: footer; padding: 30px 40px; border-top: 4px solid var(--black); background: #fafafa; display: flex; justify-content: space-between; align-items: center; gap: 30px; }
+        .p-area-left { padding: 40px; border-right: 4px solid var(--black); background: #fff; display: flex; flex-direction: column; gap: 24px; }
+        .p-area-right { padding: 40px; background: #fff; display: flex; flex-direction: column; gap: 32px; }
+        .p-area-footer { grid-column: 1 / span 2; padding: 30px 40px; border-top: 4px solid var(--black); background: #fafafa; display: flex; justify-content: space-between; align-items: center; gap: 30px; }
 
         .p-card { 
             background: #fff; 
@@ -359,7 +352,7 @@
                 display: flex; 
                 flex-direction: column; 
             }
-            .p-area-header, .p-area-stats, .p-area-skills, .p-area-work, .p-area-footer { 
+            .p-area-left, .p-area-right, .p-area-footer { 
                 padding: 24px; 
                 border-right: none; 
                 border-bottom: 4px solid #f5f5f5; 
@@ -1354,8 +1347,8 @@
                     <button class="p-card-close" onclick="closeProfileCard()">✕</button>
                     
                     <div class="p-card-grid">
-                        <!-- 1. HEADER BLOCK -->
-                        <div class="p-area-header">
+                        <!-- LEFT COLUMN -->
+                        <div class="p-area-left">
                             <img src="${avatarToUse}" class="p-card-avatar">
                             <div class="p-card-info">
                                 <h2 style="font-size: 24px; margin-bottom: 4px;">
@@ -1368,76 +1361,79 @@
                                 ${profile.bio || 'Add a bio to boost your profile and attract more opportunities.'}
                             </div>
 
-                            <button class="p-primary-cta" style="background:#fff; color:#000; padding:12px; font-size:12px; box-shadow: 4px 4px 0 #000;" onclick="shareProfile('${handle}')">
+                            <button class="p-primary-cta" style="background:#fff; color:#000; padding:12px; font-size:12px; box-shadow: 4px 4px 0 #000; margin-top: auto;" onclick="shareProfile('${handle}')">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="16" style="margin-right:8px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
                                 SHARE BUILDER PROFILE
                             </button>
                         </div>
 
-                        <!-- 2. REPUTATION BLOCK (CONDITIONAL) -->
-                        ${(profile.score > 0 || profile.approved_submissions > 0 || profile.total_submissions > 0) ? `
-                        <div class="p-area-stats">
-                            <span class="p-card-label">REPUTATION & TRUST</span>
-                            <div class="p-stats-row">
-                                <div class="p-stat-card">
-                                    <span class="p-card-label">TRUST SCORE</span>
-                                    <span class="p-stat-val score">${profile.score || 0}/100</span>
+                        <!-- RIGHT COLUMN -->
+                        <div class="p-area-right">
+                            <!-- 2. REPUTATION (CONDITIONAL) -->
+                            ${(profile.score > 0 || profile.approved_submissions > 0 || profile.total_submissions > 0) ? `
+                            <div class="p-rep-section">
+                                <span class="p-card-label">REPUTATION & TRUST</span>
+                                <div class="p-stats-row">
+                                    <div class="p-stat-card">
+                                        <span class="p-card-label">TRUST SCORE</span>
+                                        <span class="p-stat-val score">${profile.score || 0}/100</span>
+                                    </div>
+                                    <div class="p-stat-card">
+                                        <span class="p-card-label">APPROVED</span>
+                                        <span class="p-stat-val">${profile.approved_submissions || 0}</span>
+                                    </div>
+                                    <div class="p-stat-card">
+                                        <span class="p-card-label">SUBMISSIONS</span>
+                                        <span class="p-stat-val">${profile.total_submissions || 0}</span>
+                                    </div>
                                 </div>
-                                <div class="p-stat-card">
-                                    <span class="p-card-label">APPROVED</span>
-                                    <span class="p-stat-val">${profile.approved_submissions || 0}</span>
-                                </div>
-                                <div class="p-stat-card">
-                                    <span class="p-card-label">SUBMISSIONS</span>
-                                    <span class="p-stat-val">${profile.total_submissions || 0}</span>
+                            </div>` : ''}
+
+                            <!-- 3. SKILLS -->
+                            <div class="p-skills-section">
+                                <span class="p-card-label">TECHNICAL MASTERY</span>
+                                <div class="p-skills-wrap">
+                                    ${skills.length ? skills.map(s => `<span class="p-skill-tag">${s}</span>`).join('') : '<span class="mono" style="font-size:12px; color:#ccc;">NO SKILLS CONNECTED</span>'}
                                 </div>
                             </div>
-                        </div>` : ''}
 
-                        <!-- 3. SKILLS BLOCK -->
-                        <div class="p-area-skills">
-                            <span class="p-card-label">TECHNICAL MASTERY</span>
-                            <div class="p-skills-wrap">
-                                ${skills.length ? skills.map(s => `<span class="p-skill-tag">${s}</span>`).join('') : '<span class="mono" style="font-size:12px; color:#ccc;">NO SKILLS CONNECTED</span>'}
+                            <!-- 4. WORK CONTEXT -->
+                            <div class="p-work-section">
+                                <span class="p-card-label">WORK CONTEXT</span>
+                                <div class="p-work-grid">
+                                    <div class="p-work-card">
+                                        <div class="p-work-icon">${icons.level}</div>
+                                        <div class="p-work-info">
+                                            <span class="p-card-label" style="margin:0">LEVEL</span>
+                                            <span class="p-work-val">${profile.experience_level || 'beginner'}</span>
+                                        </div>
+                                    </div>
+                                    <div class="p-work-card">
+                                        <div class="p-work-icon">${icons.work}</div>
+                                        <div class="p-work-info">
+                                            <span class="p-card-label" style="margin:0">PREFERENCE</span>
+                                            <span class="p-work-val">${profile.work_preference || 'Part-time'}</span>
+                                        </div>
+                                    </div>
+                                    <div class="p-work-card">
+                                        <div class="p-work-icon">${icons.location}</div>
+                                        <div class="p-work-info">
+                                            <span class="p-card-label" style="margin:0">LOCATION</span>
+                                            <span class="p-work-val">${profile.location || 'GLOBAL'}</span>
+                                        </div>
+                                    </div>
+                                    <div class="p-work-card">
+                                        <div class="p-work-icon">${icons.company}</div>
+                                        <div class="p-work-info">
+                                            <span class="p-card-label" style="margin:0">COMPANY</span>
+                                            <span class="p-work-val">${profile.company || 'Freelance'}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- 4. WORK CONTEXT BLOCK -->
-                        <div class="p-area-work">
-                            <span class="p-card-label">WORK CONTEXT</span>
-                            <div class="p-work-grid">
-                                <div class="p-work-card">
-                                    <div class="p-work-icon">${icons.level}</div>
-                                    <div class="p-work-info">
-                                        <span class="p-card-label" style="margin:0">LEVEL</span>
-                                        <span class="p-work-val">${profile.experience_level || 'beginner'}</span>
-                                    </div>
-                                </div>
-                                <div class="p-work-card">
-                                    <div class="p-work-icon">${icons.work}</div>
-                                    <div class="p-work-info">
-                                        <span class="p-card-label" style="margin:0">PREFERENCE</span>
-                                        <span class="p-work-val">${profile.work_preference || 'Part-time'}</span>
-                                    </div>
-                                </div>
-                                <div class="p-work-card">
-                                    <div class="p-work-icon">${icons.location}</div>
-                                    <div class="p-work-info">
-                                        <span class="p-card-label" style="margin:0">LOCATION</span>
-                                        <span class="p-work-val">${profile.location || 'GLOBAL'}</span>
-                                    </div>
-                                </div>
-                                <div class="p-work-card">
-                                    <div class="p-work-icon">${icons.company}</div>
-                                    <div class="p-work-info">
-                                        <span class="p-card-label" style="margin:0">COMPANY</span>
-                                        <span class="p-work-val">${profile.company || 'Freelance'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 5. FOOTER BLOCK -->
+                        <!-- FOOTER -->
                         <div class="p-area-footer">
                             <div class="p-socials-row">
                                 ${profile.twitter ? `
