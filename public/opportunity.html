@@ -205,6 +205,8 @@
 
         const prizeNumeric = parseReward(item.reward);
         const prizeTotal = item.reward || 'TBA';
+        const hasTiers = item.prize_breakdown && (item.prize_breakdown.first || item.prize_breakdown.second || item.prize_breakdown.third);
+        
         const isEnded = item.status === 'ended' || (item.deadline && new Date(item.deadline) < new Date());
         const logoHtml = item.logo ? `<img src="${item.logo}" onerror="this.src='/logo.png'">` : `<img src="/logo.png" style="opacity:0.5; object-fit:contain;">`;
 
@@ -219,18 +221,26 @@
 
         const content = `
             <div class="project-detail-header">
-                <div style="display:flex; gap:20px; align-items:center;">
-                    <div class="detail-logo">${logoHtml}</div>
-                    <div>
-                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
-                            <span class="mono" style="font-size:12px; color:var(--muted)">${item.project.toUpperCase()}</span>
-                            <div class="status-indicator">
-                                <div class="status-dot ${isEnded?'ended':'active'}"></div>
-                                <span class="mono" style="font-size:10px;">${isEnded?'SUBMISSIONS_CLOSED':'SUBMISSIONS_OPEN'}</span>
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div style="display:flex; gap:20px; align-items:center;">
+                        <div class="detail-logo">${logoHtml}</div>
+                        <div>
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
+                                <span class="mono" style="font-size:12px; color:var(--muted)">${item.project.toUpperCase()}</span>
+                                <div class="status-indicator">
+                                    <div class="status-dot ${isEnded?'ended':'active'}"></div>
+                                    <span class="mono" style="font-size:10px;">${isEnded?'SUBMISSIONS_CLOSED':'SUBMISSIONS_OPEN'}</span>
+                                </div>
                             </div>
+                            <h2 style="font-size:32px; letter-spacing:-1px; margin:0;">${item.title}</h2>
                         </div>
-                        <h2 style="font-size:32px; letter-spacing:-1px; margin:0;">${item.title}</h2>
                     </div>
+                    ${item.twitter_url ? `
+                        <a href="${item.twitter_url}" target="_blank" class="btn btn-black" style="display:flex; align-items:center; gap:10px; padding:12px 20px; text-decoration:none;">
+                            <span class="mono" style="font-size:12px;">FOLLOW_ON</span>
+                            <span style="font-size:20px; line-height:1;">𝕏</span>
+                        </a>
+                    ` : ''}
                 </div>
             </div>
 
@@ -238,9 +248,14 @@
                 <div class="project-detail-sidebar">
                     <div>
                         <span class="sidebar-section-label">REWARDS_POOL</span>
-                        <div class="prize-pool-box">
-                            <div class="prize-total">${prizeTotal} <span>Total</span></div>
-                            <div class="prize-list">
+                        <div class="prize-pool-box" style="${!hasTiers ? 'padding:35px 25px;' : ''}">
+                            <div class="prize-total" style="${!hasTiers ? 'border-bottom:none; margin-bottom:0; padding-bottom:0;' : ''}">
+                                ${prizeTotal} 
+                                <span>${hasTiers ? 'Total Pool' : 'Reward Details'}</span>
+                            </div>
+                            
+                            ${hasTiers ? `
+                            <div class="prize-list" style="margin-top:20px;">
                                 <div class="prize-item highlight">
                                     <span class="prize-rank">1st Prize</span>
                                     <span class="prize-value">${prize1}</span>
@@ -254,6 +269,7 @@
                                     <span class="prize-value">${prize3}</span>
                                 </div>
                             </div>
+                            ` : ''}
                         </div>
                     </div>
 
@@ -286,7 +302,7 @@
                     <div style="margin-top:auto;">
                         <span class="sidebar-section-label">CONTACT</span>
                         <p style="font-size:12px; color:var(--muted);">Have questions? Reach out to the team via X.</p>
-                        ${item.twitter_url ? `<a href="${item.twitter_url}" target="_blank" class="mono" style="font-size:10px; color:var(--primary); text-decoration:none;">FOLLOW ON X &rarr;</a>` : ''}
+                        ${item.twitter_url ? `<a href="${item.twitter_url}" target="_blank" class="mono" style="font-size:10px; color:var(--primary); text-decoration:none;">MESSAGE TEAM ON X &rarr;</a>` : ''}
                     </div>
                 </div>
 
