@@ -46,9 +46,18 @@ export default async (req, res) => {
       message = `${header}\n\n` +
                 `<b>${payload.project_name}</b>\n` +
                 `${payload.description}\n\n` +
-                `💰 <b>Reward:</b> ${reward}\n` +
-                `📂 <b>Category:</b> ${payload.category || 'General'}\n\n` +
-                `🚀 <a href="${url}">VIEW_DETAILS & APPLY</a>`;
+                `💰 <b>Reward:</b> ${reward}\n`;
+      
+      if (payload.prize_breakdown) {
+        const tiers = Object.entries(payload.prize_breakdown)
+          .filter(([k, v]) => v)
+          .map(([k, v]) => `• ${k}: ${v}`)
+          .join('\n');
+        if (tiers) message += `\n🏆 <b>Breakdown:</b>\n${tiers}\n`;
+      }
+
+      message += `📂 <b>Category:</b> ${payload.category || 'General'}\n\n` +
+                 `🚀 <a href="${url}">VIEW_DETAILS & APPLY</a>`;
     } else if (type === 'hire_request') {
       message = `💼 <b>NEW HIRE REQUEST</b>\n\n` +
                 `<b>From Team:</b> ${payload.sender_name}\n` +

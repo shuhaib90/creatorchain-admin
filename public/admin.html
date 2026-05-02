@@ -196,6 +196,16 @@
                 <label>LOGO_URL</label>
                 <input type="text" id="f-logo">
             </div>
+            <div class="field">
+                <label>PRIZE_BREAKDOWN (Optional)</label>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <input type="text" id="f-prize-1" placeholder="1st Place">
+                    <input type="text" id="f-prize-2" placeholder="2nd Place">
+                    <input type="text" id="f-prize-3" placeholder="3rd Place">
+                    <input type="text" id="f-prize-4" placeholder="4th Place">
+                    <input type="text" id="f-prize-5" placeholder="5th Place">
+                </div>
+            </div>
             <div style="margin-top:20px;">
                 <button type="submit" class="btn btn-primary" style="width:100%; height:50px;">SAVE LISTING & GO LIVE</button>
                 <button type="button" class="btn btn-white" style="width:100%; margin-top:10px;" onclick="document.getElementById('listing-form').reset(); document.getElementById('f-id').value=''">CLEAR FORM</button>
@@ -303,6 +313,12 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
                     <p style="font-weight:700; color:var(--black);">${l.title}</p>
                     <p style="font-size:13px; color:#666; margin-top:10px;">${l.description || 'No description'}</p>
                     <div style="margin-top:15px; font-weight:800; color:var(--accent);">${l.reward || 'TBA'}</div>
+                    ${l.prize_breakdown && (l.prize_breakdown.first || l.prize_breakdown.second) ? `
+                        <div style="margin-top:10px; font-size:11px; background:#f5f5f5; padding:10px; border:1px solid #eee;">
+                            <div style="font-weight:800; text-transform:uppercase; margin-bottom:5px;">Prize Breakdown:</div>
+                            ${Object.entries(l.prize_breakdown).filter(([k,v])=>v).map(([k,v])=>`<div>• ${k}: ${v}</div>`).join('')}
+                        </div>
+                    ` : ''}
                 </div>
                 <div class="pending-actions">
                     <button class="btn btn-primary" onclick="approveListing('${l.id}')">APPROVE</button>
@@ -413,6 +429,7 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
                         project_name: item.project_name,
                         category: item.type,
                         reward: item.reward || 'TBA',
+                        prize_breakdown: item.prize_breakdown,
                         description: item.title
                     }
                 })
@@ -507,6 +524,16 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
             document.getElementById('f-logo').value = data.logo || '';
             document.getElementById('f-deadline').value = data.deadline || '';
             document.getElementById('f-urgency').value = data.urgency || 'MEDIUM';
+            
+            // Prize Breakdown
+            if (data.prize_breakdown) {
+                document.getElementById('f-prize-1').value = data.prize_breakdown.first || '';
+                document.getElementById('f-prize-2').value = data.prize_breakdown.second || '';
+                document.getElementById('f-prize-3').value = data.prize_breakdown.third || '';
+                document.getElementById('f-prize-4').value = data.prize_breakdown.fourth || '';
+                document.getElementById('f-prize-5').value = data.prize_breakdown.fifth || '';
+            }
+            
             switchTab('tab-add');
         }
     }
@@ -532,6 +559,13 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
             logo: document.getElementById('f-logo').value,
             deadline: document.getElementById('f-deadline').value,
             urgency: document.getElementById('f-urgency').value,
+            prize_breakdown: {
+                first: document.getElementById('f-prize-1').value,
+                second: document.getElementById('f-prize-2').value,
+                third: document.getElementById('f-prize-3').value,
+                fourth: document.getElementById('f-prize-4').value,
+                fifth: document.getElementById('f-prize-5').value
+            },
             approval_status: 'approved'
         };
 
@@ -603,6 +637,7 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
                                 project_name: project.project,
                                 category: project.section,
                                 reward: project.reward || 'TBA',
+                                prize_breakdown: project.prize_breakdown,
                                 description: project.title
                             }
                         })
