@@ -8,11 +8,13 @@ const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 export default async (req, res) => {
   // Handle incoming Telegram Webhook
   console.log('--- TELEGRAM WEBHOOK RECEIVED ---');
-  const { message } = req.body;
   
-  if (!message) {
-    console.log('No message in body:', req.body);
-    return res.status(200).send('OK');
+  const body = req.body || {};
+  const { message } = body;
+  
+  if (!message || !message.chat) {
+    console.log('No valid message in body:', body);
+    return res.status(200).send('OK (ping)');
   }
 
   const chatId = message.chat.id;
