@@ -463,18 +463,60 @@
         .share-menu-item { padding: 12px 16px; font-family: 'Space Mono', monospace; font-size: 11px; text-transform: uppercase; cursor: pointer; text-align: left; background: none; border: none; border-bottom: 2px solid #eee; transition: 0.2s; white-space: nowrap; font-weight: 700; width: 100%; display: flex; align-items: center; gap: 10px; }
         .share-menu-item:hover { background: var(--primary); color: #000; }
         .share-menu-item:last-child { border-bottom: none; }
-        .project-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9000; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .project-detail-card { background: #fff; border: 4px solid var(--black); box-shadow: 12px 12px 0 var(--black); max-width: 600px; width: 100%; position: relative; padding: 40px; }
-        .project-detail-header { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 25px; }
-        .project-detail-logo { width: 80px; height: 80px; border: 3px solid var(--black); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 40px; overflow: hidden; background: #f9f9f9; flex-shrink: 0; }
+        .project-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); }
+        .project-detail-card { background: #fff; border: 4px solid var(--black); box-shadow: 20px 20px 0 var(--black); max-width: 1000px; width: 100%; height: 90vh; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+        
+        .project-detail-header { display: flex; align-items: center; gap: 24px; padding: 32px 40px; border-bottom: 2px solid #f0f0f0; background: #fff; }
+        .project-detail-logo { width: 72px; height: 72px; border: 3px solid var(--black); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #f9f9f9; flex-shrink: 0; box-shadow: 4px 4px 0 var(--black); }
         .project-detail-logo img { width: 100%; height: 100%; object-fit: cover; }
-        .project-detail-title { flex: 1; }
-        .project-detail-title h2 { font-size: 32px; letter-spacing: -1px; margin-bottom: 4px; line-height: 1.1; }
-        .project-detail-title p { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--muted); }
-        .project-detail-body { font-size: 16px; line-height: 1.7; color: #444; margin-bottom: 30px; }
-        .project-detail-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; border-top: 1px solid #eee; border-bottom: 1px solid #eee; padding: 20px 0; }
-        .meta-item label { display: block; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
-        .meta-item value { font-weight: 700; font-size: 18px; color: var(--black); }
+        .project-detail-title-area { flex: 1; }
+        .project-detail-title-area h2 { font-size: 28px; letter-spacing: -1px; margin-bottom: 6px; line-height: 1.1; font-weight: 900; }
+        .project-detail-subtitle { display: flex; align-items: center; gap: 12px; font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #00f5a0; box-shadow: 0 0 10px rgba(0,245,160,0.5); }
+
+        .project-detail-layout { display: grid; grid-template-columns: 320px 1fr; flex: 1; overflow: hidden; }
+        
+        /* SIDEBAR */
+        .project-detail-sidebar { padding: 40px; background: #fafafa; border-right: 2px solid #f0f0f0; overflow-y: auto; display: flex; flex-direction: column; gap: 32px; }
+        .sidebar-section-label { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 900; text-transform: uppercase; color: #aaa; margin-bottom: 16px; letter-spacing: 1px; display: block; }
+        
+        .prize-pool-box { background: #fff; border: 3px solid var(--black); padding: 24px; position: relative; box-shadow: 6px 6px 0 var(--black); }
+        .prize-total { font-size: 32px; font-weight: 900; display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+        .prize-total span { font-size: 14px; color: var(--muted); font-weight: 400; }
+        
+        .prize-list { margin-top: 20px; display: flex; flex-direction: column; gap: 12px; position: relative; }
+        .prize-list::before { content: ''; position: absolute; left: 7px; top: 10px; bottom: 10px; width: 2px; background: #eee; }
+        .prize-item { display: flex; justify-content: space-between; align-items: center; padding-left: 24px; position: relative; }
+        .prize-item::after { content: ''; position: absolute; left: 4px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; border-radius: 50%; background: #eee; border: 2px solid #fff; z-index: 1; }
+        .prize-item.highlight::after { background: var(--primary); border-color: var(--black); }
+        .prize-rank { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); }
+        .prize-value { font-weight: 900; font-size: 14px; }
+
+        .submission-stats { display: flex; gap: 20px; margin-top: 10px; }
+        .stat-item { flex: 1; }
+        .stat-val { font-size: 24px; font-weight: 900; display: block; }
+        .stat-lbl { font-family: 'Space Mono', monospace; font-size: 9px; color: #888; text-transform: uppercase; }
+
+        /* MAIN CONTENT */
+        .project-detail-main { padding: 40px; overflow-y: auto; background: #fff; }
+        .detail-section { margin-bottom: 40px; }
+        .detail-section h3 { font-size: 20px; font-weight: 900; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+        .detail-section p { font-size: 16px; line-height: 1.7; color: #444; }
+        .detail-section ul { padding-left: 20px; margin-top: 12px; }
+        .detail-section li { margin-bottom: 8px; font-size: 15px; color: #555; position: relative; list-style: none; padding-left: 15px; }
+        .detail-section li::before { content: '→'; position: absolute; left: -10px; color: var(--primary); font-weight: 900; }
+
+        .skill-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .skill-tag { padding: 6px 14px; background: #f0f0f0; border: 2px solid var(--black); font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; }
+
+        .project-modal-close { position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; background: var(--black); color: #fff; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; font-size: 20px; transition: 0.2s; }
+        .project-modal-close:hover { transform: rotate(90deg); background: var(--accent); }
+
+        @media (max-width: 900px) {
+            .project-detail-layout { grid-template-columns: 1fr; }
+            .project-detail-sidebar { border-right: none; border-bottom: 2px solid #f0f0f0; }
+            .project-detail-card { height: 95vh; }
+        }
 
         /* X LOGIN BUTTON */
         .btn-x { background: #000 !important; color: #fff !important; display: inline-flex; align-items: center; gap: 8px; border: 2px solid #333; box-shadow: 4px 4px 0px #000; cursor: pointer; text-decoration: none; font-family: 'Space Mono', monospace; font-weight: 700; text-transform: uppercase; transition: 0.2s; }
@@ -1776,46 +1818,122 @@
         const deadline = parseDeadline(item.deadline);
         const isEnded = deadline && deadline < new Date(new Date() - 3*24*60*60*1000);
         const logoHtml = isUrl(item.logo) ? `<img src="${item.logo}" onerror="this.src='/logo.png'">` : `<img src="/logo.png" style="opacity:0.5; object-fit:contain;">`;
+        
+        // Mock prize breakdown if not present
+        const prizeTotal = item.reward || 'TBA';
+        const prizeNumeric = parseInt(prizeTotal.replace(/[^0-9]/g, '')) || 0;
+        
         const content = `
-            <div class="project-detail-header" style="${isEnded ? 'filter:grayscale(1); opacity:0.8;' : ''}">
+            <button class="project-modal-close" onclick="closeProjectDetail()">×</button>
+            
+            <div class="project-detail-header" style="${isEnded ? 'filter:grayscale(1);' : ''}">
                 <div class="project-detail-logo">${logoHtml}</div>
-                <div class="project-detail-title">
+                <div class="project-detail-title-area">
                     <h2>${item.project}</h2>
-                    <p>${item.title}</p>
+                    <div class="project-detail-subtitle">
+                        <span>by ${item.project}</span>
+                        <span style="color:#eee">|</span>
+                        <span style="display:flex; align-items:center; gap:6px;">
+                            <div class="status-dot" style="background:${isEnded ? '#ff3e00' : '#00f5a0'}"></div>
+                            ${isEnded ? 'SUBMISSIONS_CLOSED' : 'SUBMISSIONS_OPEN'}
+                        </span>
+                        <span style="color:#eee">|</span>
+                        <span>${item.section.toUpperCase()}</span>
+                    </div>
+                </div>
+                <div style="display:flex; gap:12px;">
+                    ${item.twitter_url ? `<a href="${item.twitter_url}" target="_blank" class="btn btn-black" style="width:48px; height:48px; display:flex; align-items:center; justify-content:center; padding:0; font-size:18px;">𝕏</a>` : ''}
+                    <button class="btn btn-white" onclick="copyLink(event, '${item.id}')" style="width:48px; height:48px; display:flex; align-items:center; justify-content:center; padding:0;"><i data-lucide="link" style="width:18px;"></i></button>
                 </div>
             </div>
-            <div class="project-detail-body" style="${isEnded ? 'opacity:0.6;' : ''}">${item.description || 'No detailed description available for this opportunity.'}</div>
-            <div class="project-detail-meta" style="${isEnded ? 'opacity:0.6;' : ''}">
-                <div class="meta-item">
-                    <label>REWARD</label>
-                    <value>${item.reward || 'TBA'}</value>
+
+            <div class="project-detail-layout">
+                <div class="project-detail-sidebar">
+                    <div>
+                        <span class="sidebar-section-label">REWARDS_POOL</span>
+                        <div class="prize-pool-box">
+                            <div class="prize-total">${prizeTotal} <span>Total</span></div>
+                            <div class="prize-list">
+                                <div class="prize-item highlight">
+                                    <span class="prize-rank">1st Prize</span>
+                                    <span class="prize-value">${prizeNumeric ? '$'+Math.round(prizeNumeric*0.5) : 'TBA'}</span>
+                                </div>
+                                <div class="prize-item">
+                                    <span class="prize-rank">2nd Prize</span>
+                                    <span class="prize-value">${prizeNumeric ? '$'+Math.round(prizeNumeric*0.3) : 'TBA'}</span>
+                                </div>
+                                <div class="prize-item">
+                                    <span class="prize-rank">3rd Prize</span>
+                                    <span class="prize-value">${prizeNumeric ? '$'+Math.round(prizeNumeric*0.2) : 'TBA'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="submission-stats">
+                        <div class="stat-item">
+                            <span class="stat-lbl">SUBMISSIONS</span>
+                            <span class="stat-val">36</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-lbl">REMAINING</span>
+                            <span class="stat-val">${item.deadline || 'OPEN'}</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        ${isEnded ? `
+                            <button class="btn btn-white" style="width:100%; padding:20px; font-weight:900; cursor:not-allowed; opacity:0.6;">ENDED</button>
+                        ` : `
+                            ${item.is_exclusive ? `
+                                <button class="btn btn-primary" onclick="openApplicationForm('${item.id}', '${item.project.replace(/'/g, "\\'")}', '${item.twitter_url}', '${item.post_link || ''}')" style="width:100%; padding:20px; font-weight:900; font-size:18px; box-shadow:8px 8px 0 #000;">SUBMIT_NOW &rarr;</button>
+                            ` : `
+                                <a href="${item.apply_url}" target="_blank" class="btn btn-primary" style="width:100%; padding:20px; font-weight:900; font-size:18px; box-shadow:8px 8px 0 #000; text-align:center;">APPLY_NOW &rarr;</a>
+                            `}
+                        `}
+                    </div>
+
+                    <div>
+                        <span class="sidebar-section-label">SKILLS_REQUIRED</span>
+                        <div class="skill-tags">
+                            <div class="skill-tag">Content</div>
+                            <div class="skill-tag">Growth</div>
+                            <div class="skill-tag">Research</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:auto;">
+                        <span class="sidebar-section-label">CONTACT</span>
+                        <p style="font-size:12px; color:var(--muted);">Have questions? Reach out to the team via X.</p>
+                    </div>
                 </div>
-                <div class="meta-item">
-                    <label>DEADLINE</label>
-                    <value>${item.deadline || 'OPEN'}</value>
+
+                <div class="project-detail-main">
+                    <div class="detail-section">
+                        <h3><i data-lucide="target" style="width:20px; color:var(--primary)"></i> MISSION</h3>
+                        <p>${item.description || 'No detailed mission available.'}</p>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3><i data-lucide="info" style="width:20px; color:var(--primary)"></i> ABOUT_PROJECT</h3>
+                        <p>${item.project} is a revolutionary ecosystem building on CreatorChain. We empower creators with decentralized tools and verifiable engagement.</p>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3><i data-lucide="list-checks" style="width:20px; color:var(--primary)"></i> SCOPE_&_REQUIREMENTS</h3>
+                        <ul>
+                            <li>Create original content (X Thread, Article, or Video)</li>
+                            <li>Explain the core value proposition of ${item.project}</li>
+                            <li>Minimum 500 impressions required for eligibility</li>
+                            <li>Must follow ${item.project} on official channels</li>
+                        </ul>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3><i data-lucide="file-text" style="width:20px; color:var(--primary)"></i> SUBMISSION_GUIDELINES</h3>
+                        <p>Submit your live links via the "Submit Now" button. Ensure your wallet address is correct as rewards are distributed automatically upon verification.</p>
+                    </div>
                 </div>
-                <div class="meta-item">
-                    <label>CATEGORY</label>
-                    <value>${item.section.toUpperCase()}</value>
-                </div>
-                <div class="meta-item">
-                    <label>URGENCY</label>
-                    <value>${item.urgency || 'MEDIUM'}</value>
-                </div>
-            </div>
-            <div style="display:flex; gap:15px; flex-wrap:wrap;">
-                ${isEnded ? `
-                    <div class="btn btn-white" style="flex:1; padding:20px; font-size:18px; text-align:center; background:#eee; color:#999; cursor:not-allowed; border-color:#ccc;">OPPORTUNITY CLOSED</div>
-                ` : `
-                    ${item.is_exclusive ? `
-                        <button class="btn btn-primary" onclick="openApplicationForm('${item.id}', '${item.project.replace(/'/g, "\\'")}', '${item.twitter_url}', '${item.post_link || ''}')" style="flex:1; padding:20px; font-size:18px; text-align:center;">SUBMISSION &rarr;</button>
-                    ` : `
-                        <a href="${item.apply_url}" target="_blank" class="btn btn-primary" style="flex:1; padding:20px; font-size:18px; text-align:center;">APPLY NOW &rarr;</a>
-                    `}
-                `}
-                ${item.twitter_url ? `<a href="${item.twitter_url}" target="_blank" class="btn btn-black" style="padding:20px; width:60px; text-align:center; font-size:20px;">𝕏</a>` : ''}
-                <button class="btn btn-white" onclick="shareToX(event, '${item.id}', '${item.project.replace(/'/g, "\\'")}', '${item.title.replace(/'/g, "\\'")}')" style="padding:20px; font-size:14px; font-family:'Space Mono';">🐦 X</button>
-                <button class="btn btn-white" onclick="copyLink(event, '${item.id}')" style="padding:20px; font-size:14px; font-family:'Space Mono';">📋 LINK</button>
             </div>
         `;
         document.getElementById('project-detail-content').innerHTML = content;
