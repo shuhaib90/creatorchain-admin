@@ -95,7 +95,7 @@ export default async (req, res) => {
             return res.status(200).send('OK');
         }
 
-        let message = `🔥 <b>LIVE OPPORTUNITIES</b>\n\n`;
+        let responseText = `🔥 <b>LIVE OPPORTUNITIES</b>\n\n`;
         
         // Show top 10 to avoid hitting message length limits
         const displayItems = allItems.slice(0, 10);
@@ -107,17 +107,17 @@ export default async (req, res) => {
             const id = item.id;
             const url = `https://creatorchain-web3-jobs.vercel.app/opportunity.html?id=${id}`;
             
-            message += `${index + 1}. <b>${project}</b>\n`;
-            message += `🔹 ${title}\n`;
-            message += `💰 <b>Reward:</b> ${reward}\n`;
-            message += `🔗 <a href="${url}">VIEW_DETAILS & APPLY</a>\n\n`;
+            responseText += `${index + 1}. <b>${project}</b>\n`;
+            responseText += `🔹 ${title}\n`;
+            responseText += `💰 <b>Reward:</b> ${reward}\n`;
+            responseText += `🔗 <a href="${url}">VIEW_DETAILS & APPLY</a>\n\n`;
         });
 
         if (allItems.length > 10) {
-            message += `...and ${allItems.length - 10} more! View all at <a href="https://creatorchain-web3-jobs.vercel.app/">CreatorChain</a>.`;
+            responseText += `...and ${allItems.length - 10} more! View all at <a href="https://creatorchain-web3-jobs.vercel.app/">CreatorChain</a>.`;
         }
 
-        await sendSimpleMessage(chatId, message);
+        await sendSimpleMessage(chatId, responseText);
     } catch (err) {
         console.error('Opportunities fetch error:', err.response?.data || err.message);
         await sendSimpleMessage(chatId, `❌ <b>Error fetching opportunities.</b> Please try again later.`);
