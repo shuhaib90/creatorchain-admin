@@ -1374,7 +1374,8 @@
                             </button>
                         </div>
 
-                        <!-- 2. REPUTATION BLOCK -->
+                        <!-- 2. REPUTATION BLOCK (CONDITIONAL) -->
+                        ${(profile.score > 0 || profile.approved_submissions > 0 || profile.total_submissions > 0) ? `
                         <div class="p-area-stats">
                             <span class="p-card-label">REPUTATION & TRUST</span>
                             <div class="p-stats-row">
@@ -1391,7 +1392,7 @@
                                     <span class="p-stat-val">${profile.total_submissions || 0}</span>
                                 </div>
                             </div>
-                        </div>
+                        </div>` : ''}
 
                         <!-- 3. SKILLS BLOCK -->
                         <div class="p-area-skills">
