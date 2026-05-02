@@ -526,18 +526,14 @@ const UsersPage = () => {
 const Opportunities = () => {
   const [opps, setOpps] = useState<any[]>([]);
   const [apps, setApps] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedOppId, setSelectedOppId] = useState<string | 'all'>('all');
 
   const fetchData = async () => {
-    setLoading(true);
     const [{ data: oData }, { data: aData }] = await Promise.all([
       supabase.from('opportunities').select('*').order('created_at', { ascending: false }),
       supabase.from('applications').select('*, opportunities(project_name, title)').order('created_at', { ascending: false })
     ]);
     setOpps(oData || []);
     setApps(aData || []);
-    setLoading(false);
   };
 
   useEffect(() => {
