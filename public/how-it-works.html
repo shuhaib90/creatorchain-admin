@@ -172,6 +172,12 @@
             .step-visual { box-shadow: 10px 10px 0 var(--secondary); }
             .step-num { width: 60px; height: 60px; font-size: 24px; top: -20px; left: -20px; }
         }
+
+        .explore-menu a:hover {
+            background: var(--primary) !important;
+            padding-left: 25px !important;
+            transition: all 0.2s;
+        }
     </style>
 </head>
 <body>
@@ -185,6 +191,14 @@
         <div class="nav-links">
             <a href="/" class="nav-link">HOME</a>
             <a href="/talent.html" class="nav-link">TALENT</a>
+            <div class="explore-dropdown" style="position:relative; display:inline-block;">
+                <button class="nav-link" style="background:none; border:none; cursor:pointer; padding:0;" onclick="toggleExplore()">EXPLORE ▼</button>
+                <div class="explore-menu" id="exploreMenu" style="position:absolute; top:100%; right:0; background:#fff; border:3px solid #000; box-shadow:6px 6px 0 #000; display:none; flex-direction:column; min-width:220px; z-index:2000; padding:10px 0;">
+                    <a href="/talent.html" style="padding:12px 20px; text-decoration:none; color:#000; font-family:'Space Mono',monospace; font-weight:700; font-size:13px; display:flex; align-items:center; gap:10px;"><i data-lucide="sparkles" style="width:14px;"></i> FIND TALENT</a>
+                    <a href="/?submit=true" style="padding:12px 20px; text-decoration:none; color:#000; font-family:'Space Mono',monospace; font-weight:700; font-size:13px; display:flex; align-items:center; gap:10px;"><i data-lucide="plus-circle" style="width:14px;"></i> SUBMIT PROJECT (COMMUNITY)</a>
+                    <a href="/launch-opportunities.html" style="padding:12px 20px; text-decoration:none; color:#000; font-family:'Space Mono',monospace; font-weight:700; font-size:13px; display:flex; align-items:center; gap:10px;"><i data-lucide="rocket" style="width:14px;"></i> LAUNCH OPPORTUNITIES (FOR TEAMS)</a>
+                </div>
+            </div>
             <a href="/how-it-works.html" class="nav-link" style="color:var(--primary);">HOW IT WORKS</a>
             <a href="https://x.com/Zenvicalpha" target="_blank" class="nav-link">SUPPORT</a>
         </div>
@@ -286,8 +300,8 @@
                 </div>
             </div>
             <div class="step-content reveal">
-                <h2>SUBMIT YOUR <span class="outline">PROJECT</span></h2>
-                <p>Ready to scale? List your project, bounties, or campaigns on CreatorChain. Provide the details, set your rewards, and get your roles in front of thousands of active Web3 builders instantly.</p>
+                <h2>LAUNCH <span class="outline">OPPORTUNITIES</span></h2>
+                <p>Ready to scale? Launch your project, bounties, or campaigns on CreatorChain. Provide the details, set your rewards, and get your roles in front of thousands of active Web3 builders instantly.</p>
                 <div>
                     <span class="feature-pill"><i data-lucide="check"></i> EASY LISTING</span>
                     <span class="feature-pill"><i data-lucide="check"></i> GLOBAL REACH</span>
@@ -371,6 +385,18 @@
 
     document.querySelectorAll('.reveal').forEach(el => {
         observer.observe(el);
+    });
+
+    function toggleExplore() {
+        const menu = document.getElementById('exploreMenu');
+        menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    window.addEventListener('click', function(e) {
+        if (!e.target.closest('.explore-dropdown')) {
+            const menu = document.getElementById('exploreMenu');
+            if (menu) menu.style.display = 'none';
+        }
     });
 </script>
 

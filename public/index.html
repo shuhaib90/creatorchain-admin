@@ -636,8 +636,8 @@
                 <button class="explore-btn" onclick="toggleExplore()">EXPLORE ▼</button>
                 <div class="explore-menu" id="exploreMenu">
                     <a href="/talent.html" class="explore-item"><i data-lucide="sparkles" style="width:16px; height:16px;"></i> FIND TALENT</a>
-                    <a href="/how-it-works.html" class="explore-item"><i data-lucide="help-circle" style="width:16px; height:16px;"></i> HOW IT WORKS</a>
-                    <a href="#" onclick="openSubmitModal(); toggleExplore(); return false;" class="explore-item"><i data-lucide="rocket" style="width:16px; height:16px;"></i> SUBMIT PROJECT</a>
+                    <a href="#" onclick="openSubmitModal(); toggleExplore(); return false;" class="explore-item"><i data-lucide="plus-circle" style="width:16px; height:16px;"></i> SUBMIT PROJECT (COMMUNITY)</a>
+                    <a href="/launch-opportunities.html" class="explore-item"><i data-lucide="rocket" style="width:16px; height:16px;"></i> LAUNCH OPPORTUNITIES (FOR TEAMS)</a>
                     <a href="#" onclick="openStatusModal(); toggleExplore(); return false;" class="explore-item"><i data-lucide="clipboard-list" style="width:16px; height:16px;"></i> TRACK SUBMISSION</a>
                 </div>
             </div>
@@ -672,7 +672,10 @@
                 <button class="subscribe-btn" id="sub-btn" onclick="handleSubscribe()">GET UPDATES</button>
             </div>
             <div style="margin-top:25px; display:flex; gap:15px; align-items:center;">
-                <button class="btn btn-secondary" style="font-size:14px; padding:12px 24px;" onclick="openSubmitModal()">Submit Your Project &rarr;</button>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <a href="#" onclick="openSubmitModal(); return false;" class="btn btn-secondary" style="font-size:14px; padding:12px 24px; background:var(--white); color:var(--black);">Submit Found Project &rarr;</a>
+                    <a href="/launch-opportunities.html" class="btn btn-secondary" style="font-size:14px; padding:12px 24px;">Launch Exclusive Opportunity (Teams) &rarr;</a>
+                </div>
                 <div style="display:flex; align-items:center; gap:15px;">
                     <div id="auth-hero-box">
                         <button class="btn btn-black" style="font-size:16px; padding:16px 32px; box-shadow: 10px 10px 0 var(--primary);" onclick="openAuthModal()">
@@ -744,7 +747,8 @@
                 <div class="footer-submit-cta">
                     <h3 style="font-size:22px; color:var(--primary);">Running a Web3 Project?</h3>
                     <p style="color:#aaa; font-size:14px; margin: 10px 0 20px;">Submit your opportunity and reach thousands of Web3 creators.</p>
-                    <button class="btn btn-secondary" style="width:100%;" onclick="openSubmitModal()">Submit a Bounty or Opportunity &rarr;</button>
+                    <a href="/launch-opportunities.html" class="btn btn-secondary" style="width:100%; margin-bottom:10px;">Launch Exclusive Opportunity &rarr;</a>
+                    <button class="btn btn-white" style="width:100%; font-size:12px;" onclick="openSubmitModal()">Submit Found Project (Community) &rarr;</button>
                     <p class="submit-count" id="submission-count">Loading submissions...</p>
                 </div>
             </div>

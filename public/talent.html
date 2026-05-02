@@ -610,6 +610,14 @@
             </a>
             <div style="display:flex; align-items:center; gap:20px;">
                 <a href="/how-it-works.html" class="nav-link" style="text-decoration:none; color:var(--black); font-family:var(--font-mono); font-size:12px; font-weight:800;">HOW IT WORKS</a>
+                <div class="explore-dropdown">
+                    <button class="explore-btn" onclick="toggleExplore()">EXPLORE <i data-lucide="chevron-down" style="width:14px; height:14px;"></i></button>
+                    <div class="explore-menu" id="exploreMenu">
+                        <a href="/talent.html" class="explore-item"><i data-lucide="sparkles" style="width:16px; height:16px;"></i> FIND TALENT</a>
+                        <a href="/?submit=true" class="explore-item"><i data-lucide="plus-circle" style="width:16px; height:16px;"></i> SUBMIT PROJECT (COMMUNITY)</a>
+                        <a href="/launch-opportunities.html" class="explore-item"><i data-lucide="rocket" style="width:16px; height:16px;"></i> LAUNCH OPPORTUNITIES (FOR TEAMS)</a>
+                    </div>
+                </div>
                 <div id="auth-nav-box">
                     <button class="btn btn-black btn-sm" onclick="openAuthModal()">SIGN IN</button>
                 </div>
