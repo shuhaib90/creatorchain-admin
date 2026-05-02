@@ -1004,7 +1004,8 @@
                         <input type="text" id="p-discord" placeholder="username#1234">
                     </div>
                     <div class="field">
-                        <label>TELEGRAM <span id="p-tg-status" style="font-size:10px; margin-left:10px;"></span></label>
+                        <label>TELEGRAM <span class="req">*</span> <span id="p-tg-status" style="font-size:10px; margin-left:10px;"></span></label>
+                        <input type="hidden" id="p-tg-verified" value="false">
                         <div style="display:flex; gap:10px;">
                             <input type="text" id="p-telegram" placeholder="@username" style="flex:1;">
                             <a id="p-tg-verify-btn" href="https://t.me/creatorchainbot" target="_blank" class="btn btn-black btn-sm" style="display:none; align-items:center; gap:5px; white-space:nowrap; padding:0 15px;">
@@ -2319,13 +2320,16 @@
                 // Update TG verification status
                 const tgStatus = document.getElementById('p-tg-status');
                 const verifyBtn = document.getElementById('p-tg-verify-btn');
+                const tgVerified = document.getElementById('p-tg-verified');
                 if (data.telegram_id) {
                     tgStatus.innerHTML = '<span style="color:var(--secondary);">VERIFIED ✅</span>';
                     tgStatus.style.display = 'inline';
                     verifyBtn.style.display = 'none';
+                    tgVerified.value = 'true';
                 } else {
                     tgStatus.innerHTML = '<span style="color:var(--accent);">UNVERIFIED ❌</span>';
                     tgStatus.style.display = 'inline';
+                    tgVerified.value = 'false';
                     if (data.telegram) verifyBtn.style.display = 'flex';
                 }
             }
@@ -2378,6 +2382,22 @@
         if (selectedProfileSkills.length === 0) {
             errEl.textContent = 'You must select at least one skill.';
             errEl.style.display = 'block';
+            return;
+        }
+
+        const tgHandle = document.getElementById('p-telegram').value.trim();
+        const isTgVerified = document.getElementById('p-tg-verified').value === 'true';
+
+        if (!tgHandle) {
+            errEl.textContent = 'Telegram handle is required.';
+            errEl.style.display = 'block';
+            return;
+        }
+
+        if (!isTgVerified) {
+            errEl.textContent = 'You must verify your Telegram with our bot before saving.';
+            errEl.style.display = 'block';
+            document.getElementById('p-tg-verify-btn').style.display = 'flex';
             return;
         }
 
