@@ -612,14 +612,23 @@ const ApplicantsModal = ({ opportunity, applicants, onClose }: { opportunity: an
   const downloadCSV = () => {
     if (applicants.length === 0) return;
     
-    const headers = ['ID', 'Applied At', 'Wallet Address', 'Portfolio Links', 'Message'];
-    const rows = applicants.map(app => [
-      app.id,
-      new Date(app.created_at).toLocaleString(),
-      app.user_id,
-      app.portfolio_links || 'N/A',
-      `"${app.message.replace(/"/g, '""')}"` // Escape quotes for CSV
-    ]);
+    const headers = ['Submit Link', 'Wallet Address', 'Telegram Username'];
+    const rows = applicants.map(app => {
+      let telegram = 'N/A';
+      try {
+        const msgObj = JSON.parse(app.message);
+        telegram = msgObj.telegram || 'N/A';
+      } catch (e) {
+        // Fallback if message is not JSON
+        telegram = app.message.substring(0, 50);
+      }
+
+      return [
+        app.portfolio_links || 'N/A',
+        app.user_id,
+        telegram
+      ];
+    });
 
     const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
