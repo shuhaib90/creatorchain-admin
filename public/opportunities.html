@@ -65,7 +65,17 @@
 
         .opp-project { font-family: var(--font-mono); font-size: 12px; color: #666; font-weight: 700; text-transform: uppercase; }
         .opp-title { font-size: 24px; font-weight: 900; margin: 0; color: #000; line-height: 1.1; }
-        .opp-desc { font-size: 14px; color: #444; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .opp-desc { 
+            font-size: 14px; 
+            color: #444; 
+            line-height: 1.5; 
+            display: -webkit-box !important;
+            -webkit-line-clamp: 3 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+            max-height: 4.5em !important;
+            white-space: normal !important;
+        }
 
         .opp-meta { display: flex; gap: 15px; font-size: 12px; font-weight: 700; color: #888; border-top: 1px solid #eee; pt: 15px; padding-top: 15px; }
         .opp-meta span { display: flex; align-items: center; gap: 5px; }

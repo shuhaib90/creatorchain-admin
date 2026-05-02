@@ -164,6 +164,18 @@
         .card-logo { width: 54px; height: 54px; border: 2px solid var(--black); display: flex; align-items: center; justify-content: center; font-size: 26px; background: #fff; overflow: hidden; flex-shrink: 0; }
         .card-logo img { width: 100%; height: 100%; object-fit: cover; }
         .reward-tag { background: var(--black); color: var(--primary); padding: 5px 14px; display: inline-block; font-family: 'Space Mono', monospace; font-weight: 700; font-size: 18px; }
+        .card-desc { 
+            display: -webkit-box !important;
+            -webkit-line-clamp: 4 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+            line-height: 1.5 !important;
+            max-height: 6em !important;
+            font-size: 14px;
+            color: var(--muted);
+            margin: 0;
+            white-space: normal !important;
+        }
         .card-footer { padding: 18px 28px; border-top: 2px solid var(--black); display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
 
         /* EMPTY STATE */
@@ -1570,7 +1582,7 @@
                             <h3 style="font-size:18px;letter-spacing:-0.5px;">${item.title}</h3>
                         </div>
                     </div>
-                    <p style="font-size:14px;color:var(--muted)">${item.description||'Global opportunity for Web3 creators and community leaders.'}</p>
+                    <p class="card-desc">${item.description||'Global opportunity for Web3 creators and community leaders.'}</p>
                     <div class="reward-tag">${item.reward||'TBA'}</div>
                 </div>
                 <div class="card-footer">
