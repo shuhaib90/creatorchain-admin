@@ -38,12 +38,9 @@ export default async (req, res) => {
         return res.status(400).json({ error: 'You must select at least one skill' });
       }
 
-      // Mandatory Telegram Verification Check
+      // Mandatory Telegram Handle Check
       if (!profileData.telegram) {
         return res.status(400).json({ error: 'Telegram handle is mandatory' });
-      }
-      if (profileData.is_verified === false) {
-        return res.status(400).json({ error: 'Telegram account must be verified via our bot' });
       }
       
       // Upsert logic based on user_id

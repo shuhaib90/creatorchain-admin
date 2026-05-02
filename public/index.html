@@ -1016,14 +1016,8 @@
                         <input type="text" id="p-discord" placeholder="username#1234">
                     </div>
                     <div class="field">
-                        <label>TELEGRAM <span class="req">*</span> <span id="p-tg-status" style="font-size:10px; margin-left:10px;"></span></label>
-                        <input type="hidden" id="p-tg-verified" value="false">
-                        <div style="display:flex; gap:10px;">
-                            <input type="text" id="p-telegram" placeholder="@username" style="flex:1;">
-                            <a id="p-tg-verify-btn" href="https://t.me/creatorchainbot" target="_blank" class="btn btn-black btn-sm" style="display:none; align-items:center; gap:5px; white-space:nowrap; padding:0 15px;">
-                                <i data-lucide="external-link" style="width:12px; height:12px;"></i> VERIFY
-                            </a>
-                        </div>
+                        <label>TELEGRAM <span class="req">*</span></label>
+                        <input type="text" id="p-telegram" placeholder="@username">
                     </div>
                 </div>
                 <div class="field-row">
@@ -2366,48 +2360,15 @@
                 document.getElementById('p-email-notif').checked = data.email_notifications || false;
                 document.getElementById('p-tg-notif').checked = data.telegram_notifications || false;
                 
-                // Update TG verification status
-                const tgStatus = document.getElementById('p-tg-status');
-                const verifyBtn = document.getElementById('p-tg-verify-btn');
-                const tgVerified = document.getElementById('p-tg-verified');
-                if (data.telegram_id) {
-                    tgStatus.innerHTML = '<span style="color:var(--secondary);">VERIFIED ✅</span>';
-                    tgStatus.style.display = 'inline';
-                    verifyBtn.style.display = 'none';
-                    tgVerified.value = 'true';
-                } else {
-                    tgStatus.innerHTML = '<span style="color:var(--accent);">UNVERIFIED ❌</span>';
-                    tgStatus.style.display = 'inline';
-                    tgVerified.value = 'false';
-                    if (data.telegram) verifyBtn.style.display = 'flex';
-                }
+                // Telegram handle is handled via input field
+            }
             }
         } catch (err) {
             console.error('Error loading profile:', err);
         }
     }
 
-    // Live update for Telegram verification button
-    document.getElementById('p-telegram')?.addEventListener('input', (e) => {
-        const val = e.target.value.trim();
-        const verifyBtn = document.getElementById('p-tg-verify-btn');
-        const tgNotif = document.getElementById('p-tg-notif');
-        if (val && tgNotif.checked) {
-            verifyBtn.style.display = 'flex';
-        } else {
-            verifyBtn.style.display = 'none';
-        }
-    });
-
-    document.getElementById('p-tg-notif')?.addEventListener('change', (e) => {
-        const tgVal = document.getElementById('p-telegram').value.trim();
-        const verifyBtn = document.getElementById('p-tg-verify-btn');
-        if (e.target.checked && tgVal) {
-            verifyBtn.style.display = 'flex';
-        } else {
-            verifyBtn.style.display = 'none';
-        }
-    });
+    // Telegram logic simplified
 
     async function saveProfile(e) {
         if(e) e.preventDefault();
@@ -2435,18 +2396,10 @@
         }
 
         const tgHandle = document.getElementById('p-telegram').value.trim();
-        const isTgVerified = document.getElementById('p-tg-verified').value === 'true';
 
         if (!tgHandle) {
             errEl.textContent = 'Telegram handle is required.';
             errEl.style.display = 'block';
-            return;
-        }
-
-        if (!isTgVerified) {
-            errEl.textContent = 'You must verify your Telegram with our bot before saving.';
-            errEl.style.display = 'block';
-            document.getElementById('p-tg-verify-btn').style.display = 'flex';
             return;
         }
 
