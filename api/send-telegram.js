@@ -46,6 +46,13 @@ export default async (req, res) => {
                 `💰 <b>Reward:</b> ${reward}\n` +
                 `📂 <b>Category:</b> ${payload.category || 'General'}\n\n` +
                 `🚀 <a href="${url}">VIEW_DETAILS & APPLY</a>`;
+    } else if (type === 'hire_request') {
+      message = `💼 <b>NEW HIRE REQUEST</b>\n\n` +
+                `<b>From Team:</b> ${payload.sender_name}\n` +
+                `<b>Contact Email:</b> ${payload.sender_email}\n` +
+                `${payload.telegram ? `<b>Telegram:</b> ${payload.telegram}\n` : ''}` +
+                `\n<b>Message:</b>\n<i>${payload.message}</i>\n\n` +
+                `🤝 <a href="https://creatorchain-web3-jobs.vercel.app/talent.html">Go to CreatorChain</a>`;
     } else if (type === 'custom') {
       message = payload.message;
     } else {

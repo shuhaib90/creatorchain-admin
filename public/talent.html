@@ -1279,8 +1279,11 @@
                 const { error } = await db.from('hire_requests').insert([payload]);
                 if (error) throw error;
                 
-                // 2. Fetch builder profile to get their email
-                const { data: profile } = await db.from('user_profiles').select('email, email_notifications').eq('user_id', receiverId).single();
+                // 2. Fetch builder profile to get their email and telegram info
+                const { data: profile } = await db.from('user_profiles')
+                    .select('email, email_notifications, telegram_id, telegram_notifications')
+                    .eq('user_id', receiverId)
+                    .single();
                 
                 // 3. Trigger email if builder has an email and notifications enabled
                 if (profile && profile.email && profile.email_notifications !== false) {
@@ -1300,7 +1303,29 @@
                             })
                         });
                     } catch (emailErr) {
-                        console.warn('Email notification failed but request was logged:', emailErr);
+                        console.warn('Email notification failed:', emailErr);
+                    }
+                }
+
+                // 4. Trigger Telegram if builder has notifications enabled
+                if (profile && profile.telegram_id && profile.telegram_notifications !== false) {
+                    try {
+                        await fetch('/api/send-telegram', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                type: 'hire_request',
+                                payload: {
+                                    chat_ids: [profile.telegram_id],
+                                    sender_name: senderName,
+                                    sender_email: senderEmail,
+                                    message: message,
+                                    telegram: telegram
+                                }
+                            })
+                        });
+                    } catch (tgErr) {
+                        console.warn('Telegram notification failed:', tgErr);
                     }
                 }
                 
