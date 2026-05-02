@@ -303,9 +303,16 @@
                         <div>
                             <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
                                 <span class="mono ${item.is_exclusive?'exclusive-text':''}" style="font-size:12px; ${!item.is_exclusive?'color:var(--muted)':''}">${item.project.toUpperCase()}</span>
-                                <div class="${item.is_exclusive?'exclusive-stamp':'status-indicator'}">
-                                    ${!item.is_exclusive ? `<div class="status-dot ${isEnded?'ended':'active'}"></div>` : ''}
-                                    <span class="mono" style="font-size:10px;">${item.is_exclusive ? 'CREATORCHAIN_EXCLUSIVE' : (isEnded?'SUBMISSIONS_CLOSED':'SUBMISSIONS_OPEN')}</span>
+                                
+                                ${item.is_exclusive ? `
+                                    <div class="exclusive-stamp">
+                                        <span class="mono" style="font-size:10px;">CREATORCHAIN_EXCLUSIVE</span>
+                                    </div>
+                                ` : ''}
+
+                                <div class="status-indicator">
+                                    <div class="status-dot ${isEnded?'ended':'active'}"></div>
+                                    <span class="mono" style="font-size:10px;">${isEnded?'SUBMISSIONS_CLOSED':'SUBMISSIONS_OPEN'}</span>
                                 </div>
                             </div>
                             <h2 style="font-size:32px; letter-spacing:-1px; margin:0;">${item.title}</h2>
