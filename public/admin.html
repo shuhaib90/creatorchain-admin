@@ -113,6 +113,7 @@
 <main class="container">
     <div class="admin-tabs">
         <div class="admin-tab active" onclick="switchTab('tab-pending')">PENDING REVIEW (<span id="pending-count">0</span>)</div>
+        <div class="admin-tab" onclick="switchTab('tab-exclusives')">EXCLUSIVES (<span id="exclusive-pending-count">0</span>)</div>
         <div class="admin-tab" onclick="switchTab('tab-all')">ALL LISTINGS</div>
         <div class="admin-tab" onclick="switchTab('tab-add')">ADD / EDIT</div>
     </div>
@@ -121,6 +122,16 @@
     <div id="tab-pending" class="tab-content active">
         <div class="pending-grid" id="pending-list">
             <!-- Dynamic Content -->
+        </div>
+    </div>
+
+    <!-- EXCLUSIVES TAB -->
+    <div id="tab-exclusives" class="tab-content">
+        <div class="pending-grid" id="exclusive-list">
+            <!-- Dynamic Content -->
+        </div>
+        <div id="exclusive-all-list" style="margin-top: 40px;">
+            <!-- All Exclusives Table -->
         </div>
     </div>
 
@@ -232,7 +243,7 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
         document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         // Find tab by text content to set active
-        const tabMap = {'tab-pending':0, 'tab-all':1, 'tab-add':2};
+        const tabMap = {'tab-pending':0, 'tab-exclusives':1, 'tab-all':2, 'tab-add':3};
         document.querySelectorAll('.admin-tab')[tabMap[id]].classList.add('active');
     }
 
@@ -264,6 +275,7 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
     async function initAdmin() {
         lucide.createIcons();
         loadPendingListings();
+        loadExclusives();
         loadAllListings();
         subscribeRealtime();
     }
@@ -298,6 +310,127 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
                 </div>
             </div>
         `).join('');
+    }
+
+    async function loadExclusives() {
+        const [{ data: pending }, { data: all }] = await Promise.all([
+            db.from('opportunities').select('*').eq('status','pending').order('created_at',{ascending:true}),
+            db.from('opportunities').select('*').order('created_at',{ascending:false})
+        ]);
+
+        document.getElementById('exclusive-pending-count').textContent = pending ? pending.length : 0;
+        
+        const pendingList = document.getElementById('exclusive-list');
+        if(!pending || pending.length === 0) {
+            pendingList.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:60px; border:3px dashed #ccc;"><h3>No pending exclusive opportunities.</h3></div>';
+        } else {
+            pendingList.innerHTML = pending.map(o => `
+                <div class="pending-card">
+                    <div class="pending-card-header">
+                        <span class="status-badge status-pending">EXCLUSIVE_PENDING</span>
+                        <span class="mono" style="font-size:11px;">${timeAgo(o.created_at)}</span>
+                    </div>
+                    <div class="pending-card-body">
+                        <h3 style="font-size:20px; margin-bottom:5px;">${o.project_name}</h3>
+                        <p style="font-weight:700; color:var(--black);">${o.title}</p>
+                        <p style="font-size:13px; color:#666; margin-top:10px;">${o.description || 'No description'}</p>
+                    </div>
+                    <div class="pending-actions">
+                        <button class="btn btn-primary" onclick="approveExclusive('${o.id}')">APPROVE & BROADCAST</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        const allList = document.getElementById('exclusive-all-list');
+        allList.innerHTML = `
+            <h3 class="mono" style="margin-bottom:15px;">ALL EXCLUSIVES / LAUNCH OPPORTUNITIES</h3>
+            <table class="listings-table">
+                <thead>
+                    <tr>
+                        <th>PROJECT</th>
+                        <th>TYPE</th>
+                        <th>STATUS</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${all.map(o => `
+                        <tr>
+                            <td><strong>${o.project_name}</strong><br><small>${o.title}</small></td>
+                            <td><span class="mono">${o.type.toUpperCase()}</span></td>
+                            <td><span class="status-badge status-${o.status === 'live' ? 'approved' : o.status === 'pending' ? 'pending' : 'rejected'}">${o.status.toUpperCase()}</span></td>
+                            <td>
+                                <div style="display:flex; gap:5px;">
+                                    <button class="btn btn-sm btn-black" onclick="broadcastExclusive('${o.id}')" title="Broadcast update"><i data-lucide="megaphone" style="width:12px; height:12px;"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteExclusive('${o.id}')">DEL</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+        lucide.createIcons();
+    }
+
+    async function approveExclusive(id) {
+        await db.from('opportunities').update({ status: 'live' }).eq('id', id);
+        showToast('✓ Exclusive Opportunity Approved!');
+        broadcastExclusive(id);
+        loadExclusives();
+    }
+
+    async function broadcastExclusive(id) {
+        const { data: item } = await db.from('opportunities').select('*').eq('id', id).single();
+        if (!item) return;
+
+        showToast('📣 Broadcasting Exclusive Launch...', 'info');
+
+        try {
+            const [{ data: profiles }, { data: subscribers }] = await Promise.all([
+                db.from('user_profiles').select('telegram_id, telegram_notifications'),
+                db.from('telegram_subscribers').select('chat_id')
+            ]);
+
+            const profileTgIds = (profiles || []).filter(p => p.telegram_notifications && p.telegram_id).map(p => p.telegram_id);
+            const globalTgIds = (subscribers || []).map(s => s.chat_id);
+            const tgRecipients = Array.from(new Set([...profileTgIds, ...globalTgIds]));
+
+            if (tgRecipients.length === 0) {
+                showToast('No Telegram subscribers found.', 'error');
+                return;
+            }
+
+            await fetch('/api/send-telegram', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'exclusive_opportunity',
+                    payload: {
+                        chat_ids: tgRecipients,
+                        id: item.id,
+                        project_name: item.project_name,
+                        category: item.type,
+                        reward: item.reward || 'TBA',
+                        description: item.title
+                    }
+                })
+            });
+
+            showToast(`🚀 Exclusive Broadcast sent to ${tgRecipients.length} users!`);
+        } catch (err) {
+            console.error('Exclusive Broadcast Error:', err);
+            showToast('Broadcast failed: ' + err.message, 'error');
+        }
+    }
+
+    async function deleteExclusive(id) {
+        if(confirm('DELETE this exclusive?')) {
+            await db.from('opportunities').delete().eq('id', id);
+            showToast('🗑 Deleted');
+            loadExclusives();
+        }
     }
 
     async function loadAllListings() {

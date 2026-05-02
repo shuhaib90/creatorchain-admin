@@ -35,12 +35,15 @@ export default async (req, res) => {
                 `<b>From:</b> ${payload.submitted_by}\n` +
                 `<b>Category:</b> ${payload.category}\n\n` +
                 `👉 <a href="https://creatorchain-admin-fo2n.vercel.app/">Open Admin Terminal</a>`;
-    } else if (type === 'new_opportunity') {
+    } else if (type === 'new_opportunity' || type === 'exclusive_opportunity') {
       const reward = payload.reward || payload.budget || 'TBA';
       const id = payload.id;
       const url = id ? `https://creatorchain-web3-jobs.vercel.app/opportunity.html?id=${id}` : `https://creatorchain-web3-jobs.vercel.app/`;
+      const isExclusive = type === 'exclusive_opportunity' || (payload.project_name && payload.project_name.toLowerCase().includes('creatorchain'));
       
-      message = `🔥 <b>NEW OPPORTUNITY</b>\n\n` +
+      const header = isExclusive ? `✨ <b>EXCLUSIVE LAUNCH OPPORTUNITY</b> ✨` : `🔥 <b>NEW OPPORTUNITY</b>`;
+
+      message = `${header}\n\n` +
                 `<b>${payload.project_name}</b>\n` +
                 `${payload.description}\n\n` +
                 `💰 <b>Reward:</b> ${reward}\n` +
