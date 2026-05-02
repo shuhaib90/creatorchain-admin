@@ -56,8 +56,13 @@ export default async (req, res) => {
     } catch (err) {
         console.error('Webhook processing error:', err.response?.data || err.message);
     }
-  } else if (command === '/opportunities') {
+  } else if (command === '/opportunities' || command === '/oopportunities') {
     try {
+        if (!SUPABASE_KEY) {
+            await sendSimpleMessage(chatId, `❌ <b>Configuration Error:</b> SUPABASE_KEY is missing. Please check Vercel environment variables.`);
+            return res.status(200).send('OK');
+        }
+
         const headers = { 
             'apikey': SUPABASE_KEY, 
             'Authorization': `Bearer ${SUPABASE_KEY}`
@@ -107,6 +112,17 @@ export default async (req, res) => {
     }
   } else if (command === '/chatid') {
     await sendSimpleMessage(chatId, `🆔 <b>YOUR_TELEGRAM_CHAT_ID:</b> <code>${chatId}</code>\n\nUse this to configure manual alerts if needed.`);
+  } else if (command === '/help' || command === '/start') {
+     const helpText = `🛠 <b>CREATORCHAIN BOT HELP</b>\n\n` +
+                      `Available commands:\n` +
+                      `/opportunities - View all live Web3 opportunities\n` +
+                      `/chatid - Get your Telegram Chat ID\n` +
+                      `/help - Show this help message\n\n` +
+                      `Visit <a href="https://creatorchain-web3-jobs.vercel.app/">CreatorChain</a> for the full experience.`;
+     await sendSimpleMessage(chatId, helpText);
+  } else {
+      // Default response for unknown commands
+      await sendSimpleMessage(chatId, `❓ <b>Unknown command:</b> <code>${command}</code>\n\nType /help to see available commands.`);
   }
 
   res.status(200).send('OK');
