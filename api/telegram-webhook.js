@@ -7,9 +7,11 @@ const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
 export default async (req, res) => {
   // Handle incoming Telegram Webhook
+  console.log('--- TELEGRAM WEBHOOK RECEIVED ---');
   const { message } = req.body;
   
-  if (!message || !message.text) {
+  if (!message) {
+    console.log('No message in body:', req.body);
     return res.status(200).send('OK');
   }
 
@@ -18,8 +20,14 @@ export default async (req, res) => {
   const tgHandle = message.from ? message.from.username : null;
   const command = text.split(' ')[0].split('@')[0]; // Handle /command@botname
 
+  console.log(`Command: ${command}, ChatId: ${chatId}, From: ${tgHandle}`);
+
   if (command === '/start') {
     try {
+        if (!SUPABASE_KEY) {
+            throw new Error('SUPABASE_KEY is missing');
+        }
+
         const headers = { 
             'apikey': SUPABASE_KEY, 
             'Authorization': `Bearer ${SUPABASE_KEY}`, 
@@ -54,7 +62,9 @@ export default async (req, res) => {
         await sendSimpleMessage(chatId, `🚀 <b>Welcome to CreatorChain!</b>\n\nYou're now subscribed to all new Web3 opportunities. Alerts will be sent here the moment they go live!\n\nUse /opportunities to see live gigs.`);
         
     } catch (err) {
-        console.error('Webhook processing error:', err.response?.data || err.message);
+        const errMsg = err.response?.data?.message || err.message;
+        console.error('Webhook /start error:', errMsg);
+        await sendSimpleMessage(chatId, `❌ <b>Initialization Error:</b> ${errMsg}`);
     }
   } else if (command === '/opportunities' || command === '/oopportunities') {
     try {
