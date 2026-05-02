@@ -523,9 +523,72 @@ const UsersPage = () => {
   );
 };
 
+const ApplicantsModal = ({ opportunity, applicants, onClose }: { opportunity: any, applicants: any[], onClose: () => void }) => {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="modal-content" 
+        onClick={e => e.stopPropagation()}
+        style={{ maxWidth: '900px', maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
+      >
+        <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
+          <div>
+            <h2 className="mono" style={{ fontSize: '18px', color: 'var(--primary)' }}>APPLICANTS_FOR: {opportunity.project_name}</h2>
+            <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{opportunity.title} • {applicants.length} SUBMISSIONS</div>
+          </div>
+          <button onClick={onClose} style={{ background: 'var(--border)', border: 'none', color: 'white', cursor: 'pointer', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+        </div>
+        
+        <div style={{ padding: '32px', overflowY: 'auto', flex: 1 }}>
+          {applicants.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }} className="mono">NO_APPLICANTS_YET_FOR_THIS_OPPORTUNITY</div>
+          ) : (
+            <div style={{ display: 'grid', gap: '20px' }}>
+              {applicants.map(app => (
+                <div key={app.id} className="card" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
+                    <div className="mono" style={{ fontSize: '11px', color: 'var(--primary)' }}>ID: {app.id.substring(0,8)}...</div>
+                    <div className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{new Date(app.created_at).toLocaleString()}</div>
+                  </div>
+                  
+                  <div style={{ marginBottom: '20px' }}>
+                    <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '8px' }}>PITCH_MESSAGE</div>
+                    <p style={{ fontSize: '14px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{app.message}</p>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', background: 'rgba(0,0,0,0.2)', padding: '15px', border: '1px solid var(--border)' }}>
+                    <div>
+                      <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>WALLET_ADDRESS</div>
+                      <div className="mono" style={{ fontSize: '11px', wordBreak: 'break-all' }}>{app.user_id}</div>
+                    </div>
+                    <div>
+                      <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>PORTFOLIO_LINKS</div>
+                      <div style={{ fontSize: '11px', color: 'var(--primary)', textDecoration: 'underline', cursor: 'pointer' }} onClick={() => window.open(app.portfolio_links, '_blank')}>
+                        {app.portfolio_links || 'N/A'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+                    <a href={`mailto:?subject=Regarding your application for ${opportunity.title}`} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', fontSize: '11px' }}>EMAIL_APPLICANT</a>
+                    <button className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', fontSize: '11px' }}>CONTACT_VIA_X</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
 const Opportunities = () => {
   const [opps, setOpps] = useState<any[]>([]);
   const [apps, setApps] = useState<any[]>([]);
+  const [selectedOpp, setSelectedOpp] = useState<any | null>(null);
 
   const fetchData = async () => {
     const [{ data: oData }, { data: aData }] = await Promise.all([
@@ -585,6 +648,7 @@ const Opportunities = () => {
               <th className="mono">PROJECT</th>
               <th className="mono">TITLE</th>
               <th className="mono">TYPE</th>
+              <th className="mono">APPLICANTS</th>
               <th className="mono">STATUS</th>
               <th className="mono" style={{ textAlign: 'right' }}>ACTIONS</th>
             </tr>
@@ -595,6 +659,20 @@ const Opportunities = () => {
                 <td>{opp.project_name}</td>
                 <td><div style={{ fontWeight: '700' }}>{opp.title}</div><div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{opp.team_contact}</div></td>
                 <td><span className="mono" style={{ fontSize: '10px' }}>{opp.type.toUpperCase()}</span></td>
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="mono" style={{ fontSize: '12px', fontWeight: '700' }}>
+                      {apps.filter(a => a.opportunity_id === opp.id).length}
+                    </span>
+                    <button 
+                       className="btn btn-outline" 
+                       style={{ padding: '4px 8px', fontSize: '9px' }}
+                       onClick={() => setSelectedOpp(opp)}
+                     >
+                       VIEW
+                     </button>
+                  </div>
+                </td>
                 <td><span className={`status-badge status-${opp.status}`}>{opp.status}</span></td>
                 <td style={{ textAlign: 'right' }}>
                   {opp.status === 'pending' && (
@@ -651,6 +729,16 @@ const Opportunities = () => {
           </motion.div>
         ))}
       </div>
+
+      <AnimatePresence>
+        {selectedOpp && (
+          <ApplicantsModal 
+            opportunity={selectedOpp}
+            applicants={apps.filter(a => a.opportunity_id === selectedOpp.id)}
+            onClose={() => setSelectedOpp(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
