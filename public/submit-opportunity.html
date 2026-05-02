@@ -94,6 +94,18 @@
     </style>
 </head>
 <body>
+    <nav style="background:var(--white); border-bottom:4px solid var(--black); padding:15px 0; position:sticky; top:0; z-index:1000;">
+        <div style="max-width:1100px; margin:0 auto; padding:0 20px; display:flex; justify-content:space-between; align-items:center;">
+            <a href="/" style="text-decoration:none; display:flex; align-items:center; gap:10px;">
+                <img src="/logo.png" alt="Logo" style="height:44px;">
+                <span style="font-weight:900; font-size:20px; color:var(--black); font-family:var(--font-mono);">CREATOR<span style="-webkit-text-stroke: 1px var(--black); color:transparent;">CHAIN</span></span>
+            </a>
+            <div style="display:flex; gap:20px;">
+                <a href="/" style="font-family:var(--font-mono); font-weight:700; font-size:12px; color:var(--black); text-decoration:none;">HOME</a>
+                <a href="/launch-opportunities.html" style="font-family:var(--font-mono); font-weight:700; font-size:12px; color:var(--black); text-decoration:none;">FOR TEAMS</a>
+            </div>
+        </div>
+    </nav>
     <div class="submit-container">
         <div id="success-msg">
             <h2>Submission Received!</h2>
@@ -167,35 +179,15 @@
     </div>
 
     <script type="module">
-        // Import existing config if possible, or use defaults
-        const supabaseUrl = 'https://mwefmtmcljdsptcgowmb.supabase.co';
-        // We'll try to get the key from localStorage or a global config if it exists
-        const supabaseKey = localStorage.getItem('supabase_anon_key') || ''; 
-
-        // For this demo, we'll try to use the global client if it exists
-        let supabase;
-        try {
-            // Check if supabase is already globally available (some of your other scripts might have initialized it)
-            if (window.supabase) {
-                supabase = window.supabase;
-            } else {
-                // Fallback or initialization logic
-                // supabase = supabase.createClient(supabaseUrl, supabaseKey);
-            }
-        } catch(e) {}
+        // Supabase configuration from main site
+        const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
 
         document.getElementById('opportunity-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Re-fetch key if missing (user might have it in a separate script)
-            const anonKey = localStorage.getItem('supabase_anon_key');
-            if (!anonKey) {
-                alert("Supabase config missing. Please ensure you are logged in.");
-                return;
-            }
-            
             const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
-            const supabase = createClient(supabaseUrl, anonKey);
+            const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
             const btn = document.getElementById('submit-btn');
             btn.disabled = true;
