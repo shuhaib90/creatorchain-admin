@@ -92,7 +92,22 @@
 
         /* EXPLORE DROPDOWN */
         .explore-dropdown { position: relative; display: inline-block; }
-        .explore-btn { background: var(--black); color: var(--accent); border: 2px solid var(--black); padding: 8px 16px; font-family: var(--font-mono); font-weight: 700; cursor: pointer; box-shadow: 4px 4px 0 var(--accent); transition: all 0.2s; }
+        .explore-btn { 
+            background: var(--black); 
+            color: var(--accent); 
+            border: 2px solid var(--black); 
+            padding: 6px 14px; 
+            font-family: var(--font-mono); 
+            font-weight: 700; 
+            font-size: 12px;
+            cursor: pointer; 
+            box-shadow: 4px 4px 0 var(--accent); 
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 36px;
+        }
         .explore-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--accent); }
         .explore-menu { position: absolute; top: 100%; right: 0; margin-top: 8px; background: var(--black); border: 2px solid var(--accent); box-shadow: 8px 8px 0 rgba(0,0,0,0.2); min-width: 200px; display: none; flex-direction: column; z-index: 10006; padding: 5px; }
         .explore-menu.show { display: flex; }
