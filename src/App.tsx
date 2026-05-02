@@ -618,6 +618,17 @@ const EditOpportunityModal = ({ opportunity, onClose, onSave }: { opportunity: a
             </div>
           </div>
 
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            <div className="form-group">
+              <label>LOGO_URL</label>
+              <input className="form-input" value={formData.logo || ''} onChange={e => setFormData({...formData, logo: e.target.value})} placeholder="https://..." />
+            </div>
+            <div className="form-group">
+              <label>BANNER_URL (SHARE_IMAGE)</label>
+              <input className="form-input" value={formData.share_image || ''} onChange={e => setFormData({...formData, share_image: e.target.value})} placeholder="https://..." />
+            </div>
+          </div>
+
           <div className="form-group">
             <label>TEAM_CONTACT</label>
             <input className="form-input" value={formData.team_contact || ''} onChange={e => setFormData({...formData, team_contact: e.target.value})} placeholder="@username or email" />
@@ -844,7 +855,14 @@ const Opportunities = () => {
           <tbody>
             {opps.map(opp => (
               <tr key={opp.id}>
-                <td>{opp.project_name}</td>
+                <td style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {opp.logo ? (
+                    <img src={opp.logo} style={{ width: '32px', height: '32px', objectFit: 'contain', border: '1px solid var(--border)', padding: '2px', background: 'white' }} />
+                  ) : (
+                    <div className="mono" style={{ width: '32px', height: '32px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifySelf: 'center', fontSize: '10px', justifyContent: 'center' }}>N/A</div>
+                  )}
+                  <span>{opp.project_name}</span>
+                </td>
                 <td><div style={{ fontWeight: '700' }}>{opp.title}</div><div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{opp.team_contact}</div></td>
                 <td><span className="mono" style={{ fontSize: '10px' }}>{opp.type.toUpperCase()}</span></td>
                 <td>
@@ -870,7 +888,13 @@ const Opportunities = () => {
                     </>
                   )}
                   {opp.status === 'live' && (
-                    <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '10px' }} onClick={() => updateStatus(opp.id, 'pending')}>PAUSE</button>
+                    <>
+                      <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '10px' }} onClick={() => updateStatus(opp.id, 'closed')}>CLOSE</button>
+                      <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '10px', marginLeft: '8px' }} onClick={() => updateStatus(opp.id, 'pending')}>PAUSE</button>
+                    </>
+                  )}
+                  {opp.status === 'closed' && (
+                    <button className="btn btn-primary" style={{ padding: '6px 12px', fontSize: '10px' }} onClick={() => updateStatus(opp.id, 'live')}>RE-OPEN</button>
                   )}
                   <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '10px', marginLeft: '8px' }} onClick={() => setEditingOpp(opp)}>EDIT</button>
                   <button 

@@ -201,8 +201,9 @@ td {
 }
 
 .status-pending { background: var(--secondary); color: var(--black); }
-.status-approved { background: var(--primary); color: var(--black); }
+.status-approved, .status-live { background: var(--primary); color: var(--black); }
 .status-rejected { background: var(--accent); color: var(--white); }
+.status-closed { background: var(--black); color: var(--white); border-color: var(--white); }
 
 /* Modal Overlay */
 .modal-overlay {
