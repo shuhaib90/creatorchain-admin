@@ -1631,7 +1631,10 @@
         copyLink(e, id);
     }
 
-    function openApplicationForm(oppId, projectName) {
+    function openApplicationForm(oppId, projectName, twitterUrl) {
+        const handle = twitterUrl ? '@' + twitterUrl.split('/').pop() : '@PROJECT';
+        const projectLink = twitterUrl || '#';
+        
         const content = `
             <div style="padding:10px; max-height:80vh; overflow-y:auto; scrollbar-width:thin;">
                 <h2 style="font-size:24px; margin-bottom:5px;">SUBMIT TO ${projectName.toUpperCase()}</h2>
@@ -1660,7 +1663,7 @@
 
                     <!-- X MENTION CHECK -->
                     <div class="form-group">
-                        <label style="display:block; font-weight:900; margin-bottom:8px; font-size:14px;">Have you tagged/mentioned the @tmbfun official account in your post on X? ( 🚨 Mandatory ) <span style="color:var(--accent)">*</span></label>
+                        <label style="display:block; font-weight:900; margin-bottom:8px; font-size:14px;">Have you tagged/mentioned the ${handle} official account in your post on X? ( 🚨 Mandatory ) <span style="color:var(--accent)">*</span></label>
                         <div style="display:flex; gap:15px;">
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="app-mention" value="yes" required> Yes</label>
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="app-mention" value="no"> No</label>
@@ -1669,7 +1672,7 @@
 
                     <!-- X FOLLOW CHECK -->
                     <div class="form-group">
-                        <label style="display:block; font-weight:900; margin-bottom:8px; font-size:14px;">Have you followed the project official account on X? <a href="https://x.com/tmbfun" target="_blank" style="color:var(--primary); text-decoration:underline;">Follow Here</a> ( 🚨 Mandatory ) <span style="color:var(--accent)">*</span></label>
+                        <label style="display:block; font-weight:900; margin-bottom:8px; font-size:14px;">Have you followed the project official account on X? <a href="${projectLink}" target="_blank" style="color:var(--primary); text-decoration:underline;">Follow Here</a> ( 🚨 Mandatory ) <span style="color:var(--accent)">*</span></label>
                         <div style="display:flex; gap:15px;">
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="app-follow" value="yes" required> Yes</label>
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="app-follow" value="no"> No, doing it now</label>
@@ -1687,7 +1690,7 @@
 
                     <!-- RIGHTS AGREEMENT -->
                     <div class="form-group" style="background:rgba(0,0,0,0.05); padding:15px; border-left:4px solid var(--primary);">
-                        <label style="display:block; font-weight:900; margin-bottom:12px; font-size:13px; line-height:1.4;">Do you agree to grant the project permanent, worldwide commercial usage rights to your content — including the right to use, edit, redistribute, and sub-license it across all channels? <span style="color:var(--accent)">*</span></label>
+                        <label style="display:block; font-weight:900; margin-bottom:12px; font-size:13px; line-height:1.4;">Do you agree to grant ${projectName} permanent, worldwide commercial usage rights to your content — including the right to use, edit, redistribute, and sub-license it across all channels? <span style="color:var(--accent)">*</span></label>
                         <div style="display:flex; flex-direction:column; gap:10px;">
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="app-rights" value="yes" required> Yes. I agree!</label>
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="app-rights" value="no"> No, I won't participate then.</label>
@@ -1803,7 +1806,7 @@
                     <div class="btn btn-white" style="flex:1; padding:20px; font-size:18px; text-align:center; background:#eee; color:#999; cursor:not-allowed; border-color:#ccc;">OPPORTUNITY CLOSED</div>
                 ` : `
                     ${item.is_exclusive ? `
-                        <button class="btn btn-primary" onclick="openApplicationForm('${item.id}', '${item.project.replace(/'/g, "\\'")}')" style="flex:1; padding:20px; font-size:18px; text-align:center;">SUBMISSION &rarr;</button>
+                        <button class="btn btn-primary" onclick="openApplicationForm('${item.id}', '${item.project.replace(/'/g, "\\'")}', '${item.twitter_url}')" style="flex:1; padding:20px; font-size:18px; text-align:center;">SUBMISSION &rarr;</button>
                     ` : `
                         <a href="${item.apply_url}" target="_blank" class="btn btn-primary" style="flex:1; padding:20px; font-size:18px; text-align:center;">APPLY NOW &rarr;</a>
                     `}
