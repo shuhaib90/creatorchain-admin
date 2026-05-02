@@ -704,6 +704,7 @@
 
 <!-- CATEGORIES -->
 <div class="container">
+    <section class="cat-section" id="creatorchain-section"><div class="section-num">00</div><h2 class="section-title" style="color:var(--primary);">CreatorChain Exclusive</h2><div class="grid" id="creatorchain-cards"></div></section>
     <section class="cat-section" id="ambassador-section"><div class="section-num">01</div><h2 class="section-title">Ambassadors</h2><div class="grid" id="ambassador-cards"></div></section>
     <section class="cat-section" id="discord-section"><div class="section-num">02</div><h2 class="section-title">Discord Roles</h2><div class="grid" id="discord-cards"></div></section>
     <section class="cat-section" id="bounty-section"><div class="section-num">03</div><h2 class="section-title">Content Bounties</h2><div class="grid" id="bounty-cards"></div></section>
@@ -1222,15 +1223,34 @@
 
     // ─── Public listings (APPROVED only) ──────────────────
     async function loadListings() {
-        const { data, error } = await db.from('listings').select('*')
+        const { data: listings, error: lError } = await db.from('listings').select('*')
             .eq('approval_status','approved')
             .order('created_at', { ascending: false });
-        if (error) { console.error(error); return; }
-        updateTicker(data || []);
-        updateStats(data || []);
-        renderGrid(data || []);
+        
+        const { data: opportunities, error: oError } = await db.from('opportunities').select('*')
+            .eq('status','live')
+            .order('created_at', { ascending: false });
+
+        if (lError || oError) { console.error(lError || oError); return; }
+
+        // Normalize opportunities to match listing structure
+        const normalizedOpps = (opportunities || []).map(o => ({
+            ...o,
+            project: o.project_name,
+            section: 'creatorchain',
+            apply_url: o.external_link,
+            logo: '/logo.png', // Default for exclusive launches
+            urgency: 'HIGH',   // Exclusive roles are prioritized
+            is_exclusive: true
+        }));
+
+        const allData = [...normalizedOpps, ...(listings || [])];
+
+        updateTicker(allData);
+        updateStats(allData);
+        renderGrid(allData);
         loadSubmissionCount();
-        checkDeepLink(data || []);
+        checkDeepLink(allData);
     }
 
     function checkDeepLink(listings) {
@@ -1263,7 +1283,7 @@
     }
 
     function renderGrid(listings) {
-        const cats = ['ambassador','discord','bounty','developer','campaign','ended'];
+        const cats = ['creatorchain','ambassador','discord','bounty','developer','campaign','ended'];
         cats.forEach(c => { const el = document.getElementById(`${c}-cards`); if(el) el.innerHTML=''; });
         const now = new Date();
         const threeDaysAgo = new Date(now-3*24*60*60*1000);
