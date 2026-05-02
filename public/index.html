@@ -1836,14 +1836,19 @@
                         <span style="display:flex; align-items:center; gap:6px;">
                             <div class="status-dot" style="background:${isEnded ? '#ff3e00' : '#00f5a0'}"></div>
                             ${isEnded ? 'SUBMISSIONS_CLOSED' : 'SUBMISSIONS_OPEN'}
-                        </span>
-                        <span style="color:#eee">|</span>
-                        <span>${item.section.toUpperCase()}</span>
+            <div class="project-detail-header">
+                <div style="display:flex; gap:20px; align-items:center;">
+                    <div class="detail-logo">${logoHtml}</div>
+                    <div>
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
+                            <span class="mono" style="font-size:12px; color:var(--muted)">${item.project.toUpperCase()}</span>
+                            <div class="status-indicator">
+                                <div class="status-dot ${isEnded?'ended':'active'}"></div>
+                                <span class="mono" style="font-size:10px;">${isEnded?'SUBMISSIONS_CLOSED':'SUBMISSIONS_OPEN'}</span>
+                            </div>
+                        </div>
+                        <h2 style="font-size:32px; letter-spacing:-1px;">${item.title || item.project}</h2>
                     </div>
-                </div>
-                <div style="display:flex; gap:12px;">
-                    ${item.twitter_url ? `<a href="${item.twitter_url}" target="_blank" class="btn btn-black" style="width:48px; height:48px; display:flex; align-items:center; justify-content:center; padding:0; font-size:18px;">𝕏</a>` : ''}
-                    <button class="btn btn-white" onclick="copyLink(event, '${item.id}')" style="width:48px; height:48px; display:flex; align-items:center; justify-content:center; padding:0;"><i data-lucide="link" style="width:18px;"></i></button>
                 </div>
             </div>
 
@@ -1856,25 +1861,21 @@
                             <div class="prize-list">
                                 <div class="prize-item highlight">
                                     <span class="prize-rank">1st Prize</span>
-                                    <span class="prize-value">${prizeNumeric ? '$'+Math.round(prizeNumeric*0.5) : 'TBA'}</span>
+                                    <span class="prize-value">${prize1}</span>
                                 </div>
                                 <div class="prize-item">
                                     <span class="prize-rank">2nd Prize</span>
-                                    <span class="prize-value">${prizeNumeric ? '$'+Math.round(prizeNumeric*0.3) : 'TBA'}</span>
+                                    <span class="prize-value">${prize2}</span>
                                 </div>
                                 <div class="prize-item">
                                     <span class="prize-rank">3rd Prize</span>
-                                    <span class="prize-value">${prizeNumeric ? '$'+Math.round(prizeNumeric*0.2) : 'TBA'}</span>
+                                    <span class="prize-value">${prize3}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="submission-stats">
-                        <div class="stat-item">
-                            <span class="stat-lbl">SUBMISSIONS</span>
-                            <span class="stat-val">36</span>
-                        </div>
                         <div class="stat-item">
                             <span class="stat-lbl">REMAINING</span>
                             <span class="stat-val">${item.deadline || 'OPEN'}</span>
@@ -1896,36 +1897,34 @@
                     <div>
                         <span class="sidebar-section-label">SKILLS_REQUIRED</span>
                         <div class="skill-tags">
-                            <div class="skill-tag">Content</div>
-                            <div class="skill-tag">Growth</div>
-                            <div class="skill-tag">Research</div>
+                            ${skillsList.map(s => `<div class="skill-tag">${s}</div>`).join('')}
                         </div>
                     </div>
 
                     <div style="margin-top:auto;">
                         <span class="sidebar-section-label">CONTACT</span>
                         <p style="font-size:12px; color:var(--muted);">Have questions? Reach out to the team via X.</p>
+                        ${item.twitter_url ? `<a href="${item.twitter_url}" target="_blank" class="mono" style="font-size:10px; color:var(--primary); text-decoration:none;">FOLLOW ON X &rarr;</a>` : ''}
                     </div>
                 </div>
 
                 <div class="project-detail-main">
                     <div class="detail-section">
                         <h3><i data-lucide="target" style="width:20px; color:var(--primary)"></i> MISSION</h3>
-                        <p>${item.description || 'No detailed mission available.'}</p>
+                        <p>${item.mission || item.description || 'No detailed mission available.'}</p>
                     </div>
 
+                    ${item.about_project ? `
                     <div class="detail-section">
                         <h3><i data-lucide="info" style="width:20px; color:var(--primary)"></i> ABOUT_PROJECT</h3>
-                        <p>${item.project} is a revolutionary ecosystem building on CreatorChain. We empower creators with decentralized tools and verifiable engagement.</p>
+                        <p>${item.about_project}</p>
                     </div>
+                    ` : ''}
 
                     <div class="detail-section">
                         <h3><i data-lucide="list-checks" style="width:20px; color:var(--primary)"></i> SCOPE_&_REQUIREMENTS</h3>
                         <ul>
-                            <li>Create original content (X Thread, Article, or Video)</li>
-                            <li>Explain the core value proposition of ${item.project}</li>
-                            <li>Minimum 500 impressions required for eligibility</li>
-                            <li>Must follow ${item.project} on official channels</li>
+                            ${scopeHtml}
                         </ul>
                     </div>
 

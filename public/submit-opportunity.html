@@ -141,8 +141,23 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Detailed Description</label>
-                <textarea id="description" class="form-textarea" rows="6" placeholder="Describe the scope, requirements, and what you're looking for..." required></textarea>
+                <label class="form-label">Detailed Description <span class="req">*</span></label>
+                <textarea id="description" class="form-textarea" rows="4" placeholder="Describe the opportunity..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Mission (Optional)</label>
+                <textarea id="mission" class="form-textarea" rows="2" placeholder="What is the core goal of this opportunity?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">About Project (Optional)</label>
+                <textarea id="about_project" class="form-textarea" rows="3" placeholder="Brief background about your project..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Scope & Requirements (Optional)</label>
+                <textarea id="scope_requirements" class="form-textarea" rows="4" placeholder="List specific tasks, eligibility criteria, and submission requirements..."></textarea>
             </div>
 
             <div class="form-group">
@@ -152,12 +167,22 @@
 
             <div class="form-grid">
                 <div class="form-group">
-                    <label class="form-label">Reward (Optional)</label>
+                    <label class="form-label">Total Reward (Optional)</label>
                     <input type="text" id="reward" class="form-input" placeholder="e.g. $500 / 1000 STRK">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Deadline (Optional)</label>
                     <input type="date" id="deadline" class="form-input">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Prize Breakdown (Optional)</label>
+                <p style="font-size:11px; color:var(--orange); font-family:var(--font-mono); margin-bottom:10px;">// DEFINE HOW REWARDS ARE DISTRIBUTED (E.G. 1ST: $500, 2ND: $300...)</p>
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                    <input type="text" id="prize_1" class="form-input" placeholder="1st Place Reward">
+                    <input type="text" id="prize_2" class="form-input" placeholder="2nd Place Reward">
+                    <input type="text" id="prize_3" class="form-input" placeholder="3rd Place Reward">
                 </div>
             </div>
 
@@ -209,6 +234,14 @@
                 title: document.getElementById('title').value,
                 type: document.getElementById('type').value,
                 description: document.getElementById('description').value,
+                mission: document.getElementById('mission').value,
+                about_project: document.getElementById('about_project').value,
+                scope_requirements: document.getElementById('scope_requirements').value,
+                prize_breakdown: {
+                    first: document.getElementById('prize_1').value,
+                    second: document.getElementById('prize_2').value,
+                    third: document.getElementById('prize_3').value
+                },
                 skills: document.getElementById('skills').value,
                 reward: document.getElementById('reward').value,
                 deadline: document.getElementById('deadline').value || null,
