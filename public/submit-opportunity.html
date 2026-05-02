@@ -130,6 +130,25 @@
                 </div>
             </div>
 
+            <div class="form-grid">
+                <div class="form-group" style="position:relative;">
+                    <label class="form-label">Project Logo</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="logo_url" class="form-input" placeholder="https://... or Upload" style="flex:1;">
+                        <input type="file" id="logo_file" accept="image/*" style="display:none;" onchange="document.getElementById('logo_url').value = this.files[0] ? 'File: ' + this.files[0].name : '';">
+                        <button type="button" class="form-input" onclick="document.getElementById('logo_file').click()" style="width:auto; padding:0 20px; background:#000; color:#fff; cursor:pointer;"><i data-lucide="upload" style="width:16px; height:16px;"></i></button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Project Image / Banner</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="banner_url" class="form-input" placeholder="https://... or Upload" style="flex:1;">
+                        <input type="file" id="banner_file" accept="image/*" style="display:none;" onchange="document.getElementById('banner_url').value = this.files[0] ? 'File: ' + this.files[0].name : '';">
+                        <button type="button" class="form-input" onclick="document.getElementById('banner_file').click()" style="width:auto; padding:0 20px; background:#000; color:#fff; cursor:pointer;"><i data-lucide="upload" style="width:16px; height:16px;"></i></button>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label class="form-label">Type of Opportunity</label>
                 <select id="type" class="form-select" required>
@@ -229,31 +248,52 @@
             btn.disabled = true;
             btn.innerHTML = 'SUBMITTING...';
 
-            const formData = {
-                project_name: document.getElementById('project_name').value,
-                title: document.getElementById('title').value,
-                type: document.getElementById('type').value,
-                description: document.getElementById('description').value,
-                mission: document.getElementById('mission').value,
-                about_project: document.getElementById('about_project').value,
-                scope_requirements: document.getElementById('scope_requirements').value,
-                prize_breakdown: {
-                    first: document.getElementById('prize_1').value,
-                    second: document.getElementById('prize_2').value,
-                    third: document.getElementById('prize_3').value
-                },
-                skills: document.getElementById('skills').value,
-                reward: document.getElementById('reward').value,
-                deadline: document.getElementById('deadline').value || null,
-                external_link: document.getElementById('external_link').value,
-                twitter_url: document.getElementById('twitter_url').value,
-                post_link: document.getElementById('post_link').value,
-                team_contact: document.getElementById('team_contact').value,
-                status: 'pending',
-                created_at: new Date().toISOString()
-            };
-
             try {
+                // File Upload Logic
+                const uploadFile = async (inputId, fileId, bucket) => {
+                    const fileInput = document.getElementById(fileId);
+                    const urlInput = document.getElementById(inputId);
+                    if (fileInput.files && fileInput.files.length > 0) {
+                        const file = fileInput.files[0];
+                        const fileExt = file.name.split('.').pop();
+                        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+                        const { data, error } = await supabase.storage.from(bucket).upload(`public/${fileName}`, file);
+                        if (error) throw error;
+                        const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(`public/${fileName}`);
+                        return urlData.publicUrl;
+                    }
+                    return urlInput.value.trim();
+                };
+
+                const logoUrl = await uploadFile('logo_url', 'logo_file', 'logos');
+                const bannerUrl = await uploadFile('banner_url', 'banner_file', 'banners');
+
+                const formData = {
+                    project_name: document.getElementById('project_name').value,
+                    title: document.getElementById('title').value,
+                    type: document.getElementById('type').value,
+                    description: document.getElementById('description').value,
+                    mission: document.getElementById('mission').value,
+                    about_project: document.getElementById('about_project').value,
+                    scope_requirements: document.getElementById('scope_requirements').value,
+                    logo: logoUrl,
+                    share_image: bannerUrl,
+                    prize_breakdown: {
+                        first: document.getElementById('prize_1').value,
+                        second: document.getElementById('prize_2').value,
+                        third: document.getElementById('prize_3').value
+                    },
+                    skills: document.getElementById('skills').value,
+                    reward: document.getElementById('reward').value,
+                    deadline: document.getElementById('deadline').value || null,
+                    external_link: document.getElementById('external_link').value,
+                    twitter_url: document.getElementById('twitter_url').value,
+                    post_link: document.getElementById('post_link').value,
+                    team_contact: document.getElementById('team_contact').value,
+                    status: 'pending',
+                    created_at: new Date().toISOString()
+                };
+
                 const { data, error } = await supabase
                     .from('opportunities')
                     .insert([formData]);
