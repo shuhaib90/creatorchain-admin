@@ -108,6 +108,16 @@
         @media (max-width: 800px) {
             .brutal-table { display: block; overflow-x: auto; }
         }
+
+        .broadcast-badge {
+            background: #FFD700;
+            color: #000;
+            padding: 2px 6px;
+            font-size: 9px;
+            font-weight: 900;
+            border: 1px solid #000;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -213,7 +223,7 @@
                     <td><span class="status-badge">${opp.type}</span></td>
                     <td>${opp.team_contact}</td>
                     <td>
-                        <button class="action-btn btn-approve" onclick="updateStatus('${opp.id}', 'live')">Approve</button>
+                        <button class="action-btn btn-approve" onclick="updateStatus('${opp.id}', 'live')">Approve & Broadcast</button>
                         <button class="action-btn btn-reject" onclick="updateStatus('${opp.id}', 'rejected')">Reject</button>
                     </td>
                 `;
@@ -245,9 +255,10 @@
                     <td><span class="status-badge ${isLive ? 'status-live' : 'status-closed'}">${opp.status}</span></td>
                     <td>
                         <button class="action-btn" onclick="updateStatus('${opp.id}', '${isLive ? 'closed' : 'live'}')">
-                            ${isLive ? 'Close Submissions' : 'Open Submissions'}
+                            ${isLive ? 'Close' : 'Open'}
                         </button>
-                        <button class="action-btn btn-reject" onclick="updateStatus('${opp.id}', 'pending')">Pause/Hide</button>
+                        <button class="action-btn" onclick="broadcastExclusive('${opp.id}')" title="Re-broadcast to Telegram">📣</button>
+                        <button class="action-btn btn-reject" onclick="updateStatus('${opp.id}', 'pending')">Pause</button>
                     </td>
                 `;
                 list.appendChild(tr);
@@ -300,14 +311,65 @@
             });
         }
 
+        async function broadcastExclusive(id) {
+            const { data: item } = await supabase.from('opportunities').select('*').eq('id', id).single();
+            if (!item) return;
+
+            try {
+                const [{ data: profiles }, { data: subscribers }] = await Promise.all([
+                    supabase.from('user_profiles').select('telegram_id, telegram_notifications'),
+                    supabase.from('telegram_subscribers').select('chat_id')
+                ]);
+
+                const profileTgIds = (profiles || []).filter(p => p.telegram_notifications && p.telegram_id).map(p => p.telegram_id);
+                const globalTgIds = (subscribers || []).map(s => s.chat_id);
+                const adminChatId = '2127320399';
+                const tgRecipients = Array.from(new Set([...profileTgIds, ...globalTgIds, adminChatId]));
+
+                if (tgRecipients.length === 0) {
+                    alert('No subscribers found.');
+                    return;
+                }
+
+                await fetch('/api/send-telegram', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'exclusive_opportunity',
+                        payload: {
+                            chat_ids: tgRecipients,
+                            id: item.id,
+                            project_name: item.project_name,
+                            category: item.type,
+                            reward: item.reward || 'TBA',
+                            description: item.title
+                        }
+                    })
+                });
+
+                alert(`🚀 Exclusive Broadcast sent to ${tgRecipients.length} users!`);
+            } catch (err) {
+                console.error('Broadcast Error:', err);
+                alert('Broadcast failed: ' + err.message);
+            }
+        }
+
+        window.broadcastExclusive = broadcastExclusive;
+
         window.updateStatus = async (id, status) => {
             const { data, error } = await supabase
                 .from('opportunities')
                 .update({ status: status })
                 .eq('id', id);
 
-            if (error) alert(error.message);
-            else loadData();
+            if (error) {
+                alert(error.message);
+            } else {
+                if (status === 'live') {
+                    broadcastExclusive(id);
+                }
+                loadData();
+            }
         };
 
         window.showSection = (id) => {
