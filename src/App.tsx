@@ -1074,6 +1074,8 @@ const Broadcast = () => {
   const [imageUrl, setImageUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [targetUserId, setTargetUserId] = useState('');
+  const [isSpecificUser, setIsSpecificUser] = useState(false);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1109,18 +1111,29 @@ const Broadcast = () => {
   const handleBroadcast = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
-    if (!confirm('GLOBAL_BROADCAST: Are you sure you want to send this to ALL bot subscribers?')) return;
+    
+    if (!isSpecificUser && !confirm('GLOBAL_BROADCAST: Are you sure you want to send this to ALL bot subscribers?')) return;
+    if (isSpecificUser && !targetUserId.trim()) {
+      alert('TARGET_REQUIRED: Please enter a specific Telegram User ID.');
+      return;
+    }
 
     setSending(true);
     try {
-      const [{ data: profiles }, { data: subscribers }] = await Promise.all([
-        supabase.from('user_profiles').select('telegram_id, telegram_notifications'),
-        supabase.from('telegram_subscribers').select('chat_id')
-      ]);
+      let tgRecipients: string[] = [];
 
-      const profileTgIds = (profiles || []).filter(p => p.telegram_notifications && p.telegram_id).map(p => p.telegram_id);
-      const globalTgIds = (subscribers || []).map(s => s.chat_id);
-      const tgRecipients = Array.from(new Set([...profileTgIds, ...globalTgIds]));
+      if (isSpecificUser) {
+        tgRecipients = [targetUserId.trim()];
+      } else {
+        const [{ data: profiles }, { data: subscribers }] = await Promise.all([
+          supabase.from('user_profiles').select('telegram_id, telegram_notifications'),
+          supabase.from('telegram_subscribers').select('chat_id')
+        ]);
+
+        const profileTgIds = (profiles || []).filter(p => p.telegram_notifications && p.telegram_id).map(p => p.telegram_id);
+        const globalTgIds = (subscribers || []).map(s => s.chat_id);
+        tgRecipients = Array.from(new Set([...profileTgIds, ...globalTgIds]));
+      }
 
       if (tgRecipients.length > 0) {
         const response = await fetch('https://creatorchain-web3-jobs.vercel.app/api/send-telegram', {
@@ -1159,6 +1172,46 @@ const Broadcast = () => {
 
       <div className="card" style={{ maxWidth: '800px' }}>
         <form onSubmit={handleBroadcast}>
+          <div className="form-group" style={{ marginBottom: '30px', borderBottom: '1px solid var(--border)', paddingBottom: '20px' }}>
+            <label>TARGETING_MODE</label>
+            <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} className="mono">
+                <input 
+                  type="radio" 
+                  name="targeting" 
+                  checked={!isSpecificUser} 
+                  onChange={() => setIsSpecificUser(false)} 
+                />
+                ALL_SUBSCRIBERS
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} className="mono">
+                <input 
+                  type="radio" 
+                  name="targeting" 
+                  checked={isSpecificUser} 
+                  onChange={() => setIsSpecificUser(true)} 
+                />
+                SPECIFIC_USER_ID
+              </label>
+            </div>
+            
+            {isSpecificUser && (
+              <div style={{ marginTop: '20px' }}>
+                <label className="mono" style={{ fontSize: '10px', color: 'var(--primary)' }}>TELEGRAM_USER_ID (CHAT_ID)</label>
+                <input 
+                  className="form-input" 
+                  value={targetUserId}
+                  onChange={(e) => setTargetUserId(e.target.value)}
+                  placeholder="e.g. 2127320399"
+                  style={{ marginTop: '5px' }}
+                />
+                <div className="mono" style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Tip: Users can get their ID by typing /chatid to the bot.
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="form-group">
             <label>BROADCAST_MEDIA</label>
             <div style={{ display: 'flex', gap: '15px', marginBottom: '10px' }}>
