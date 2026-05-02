@@ -1196,16 +1196,18 @@
                         ${p.bio || 'Building the future of Web3 at CreatorChain.'}
                     </p>
 
+                    ${(p.score > 0 || p.location) ? `
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px; background:#f9f9f9; border:2px solid #000; box-shadow:4px 4px 0 #000;">
+                        ${p.score > 0 ? `
                         <div>
                             <span style="font-size:8px; font-weight:900; color:#888; text-transform:uppercase; display:block;">Trust Score</span>
-                            <span style="font-family:var(--font-mono); font-weight:900; font-size:15px; color:#00E676;">${p.score || 0}%</span>
-                        </div>
+                            <span style="font-family:var(--font-mono); font-weight:900; font-size:15px; color:#00E676;">${p.score}%</span>
+                        </div>` : ''}
                         <div>
                             <span style="font-size:8px; font-weight:900; color:#888; text-transform:uppercase; display:block;">Location</span>
                             <span style="font-weight:900; font-size:11px; text-transform:uppercase;">${p.location || 'GLOBAL'}</span>
                         </div>
-                    </div>
+                    </div>` : ''}
                 </div>
             `;
             return card;
@@ -1358,6 +1360,7 @@
 
                         <!-- RIGHT PANEL -->
                         <div class="p-card-right">
+                            ${(profile.score > 0 || profile.approved_submissions > 0 || profile.total_submissions > 0) ? `
                             <div class="p-card-section-title">REPUTATION & STATS</div>
                             <div class="p-card-stats-grid">
                                 <div class="p-stat-box">
@@ -1372,7 +1375,7 @@
                                     <span class="p-stat-label">TOTAL SUBMISSIONS</span>
                                     <span class="p-stat-val">${profile.total_submissions || 0}</span>
                                 </div>
-                            </div>
+                            </div>` : ''}
 
                             <div class="p-card-section-title">SKILLS & MASTERY</div>
                             <div class="p-card-skills">
