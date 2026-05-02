@@ -1631,6 +1631,19 @@
     }
     function closeSubmitModal() { document.getElementById('submit-modal').style.display = 'none'; }
 
+    window.renderSubmitTiers = function(count) {
+        const container = document.getElementById('s-tiers-container');
+        container.innerHTML = '';
+        for (let i = 1; i <= parseInt(count); i++) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = `s-prize-${i}`;
+            input.placeholder = i === 1 ? '1st Place Reward' : i === 2 ? '2nd Place Reward' : i === 3 ? '3rd Place Reward' : `${i}th Place Reward`;
+            input.style = 'font-size:12px; padding:10px; border:3px solid var(--black); font-family:inherit; font-weight:600; outline:none; background:#fff;';
+            container.appendChild(input);
+        }
+    }
+
     // ─── Status Tracking ───────────────────────────────────
     function closeStatusModal() { 
         document.getElementById('status-modal').style.display = 'none'; 
