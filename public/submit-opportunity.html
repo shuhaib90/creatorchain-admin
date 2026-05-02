@@ -212,9 +212,18 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Prize Breakdown (Optional)</label>
-                <p style="font-size:11px; color:var(--orange); font-family:var(--font-mono); margin-bottom:10px;">// DEFINE HOW REWARDS ARE DISTRIBUTED (E.G. 1ST: $500, 2ND: $300...)</p>
-                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                <label class="form-label">Reward Breakdown</label>
+                <p style="font-size:11px; color:var(--orange); font-family:var(--font-mono); margin-bottom:10px;">// SELECT HOW MANY TIERS YOU NEED AND DEFINE REWARDS</p>
+                <div style="margin-bottom: 15px;">
+                    <select id="tier_count" class="form-select" onchange="renderTiers(this.value)" style="max-width: 200px;">
+                        <option value="1">1 Tier</option>
+                        <option value="2">2 Tiers</option>
+                        <option value="3" selected>3 Tiers</option>
+                        <option value="4">4 Tiers</option>
+                        <option value="5">5 Tiers</option>
+                    </select>
+                </div>
+                <div id="tiers_container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px;">
                     <input type="text" id="prize_1" class="form-input" placeholder="1st Place Reward">
                     <input type="text" id="prize_2" class="form-input" placeholder="2nd Place Reward">
                     <input type="text" id="prize_3" class="form-input" placeholder="3rd Place Reward">
@@ -295,9 +304,11 @@
                     logo: logoUrl,
                     share_image: bannerUrl,
                     prize_breakdown: {
-                        first: document.getElementById('prize_1').value,
-                        second: document.getElementById('prize_2').value,
-                        third: document.getElementById('prize_3').value
+                        first: document.getElementById('prize_1')?.value || '',
+                        second: document.getElementById('prize_2')?.value || '',
+                        third: document.getElementById('prize_3')?.value || '',
+                        fourth: document.getElementById('prize_4')?.value || '',
+                        fifth: document.getElementById('prize_5')?.value || ''
                     },
                     skills: document.getElementById('skills').value,
                     reward: document.getElementById('reward').value,
@@ -325,6 +336,19 @@
                 btn.innerHTML = 'SUBMIT FOR REVIEW';
             }
         });
+        
+        window.renderTiers = (count) => {
+            const container = document.getElementById('tiers_container');
+            container.innerHTML = '';
+            for (let i = 1; i <= parseInt(count); i++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = `prize_${i}`;
+                input.className = 'form-input';
+                input.placeholder = i === 1 ? '1st Place Reward' : i === 2 ? '2nd Place Reward' : i === 3 ? '3rd Place Reward' : `${i}th Place Reward`;
+                container.appendChild(input);
+            }
+        };
 
         lucide.createIcons();
     </script>

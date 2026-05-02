@@ -1149,6 +1149,23 @@
                         <input type="date" id="s-deadline">
                     </div>
                 </div>
+                <div class="field" style="margin-top:5px; grid-column: span 2;">
+                    <label>Reward Breakdown</label>
+                    <div style="margin-bottom: 10px;">
+                        <select id="s-tier-count" style="width: auto; padding: 5px 10px; font-size: 11px;" onchange="renderSubmitTiers(this.value)">
+                            <option value="1">1 Tier</option>
+                            <option value="2">2 Tiers</option>
+                            <option value="3" selected>3 Tiers</option>
+                            <option value="4">4 Tiers</option>
+                            <option value="5">5 Tiers</option>
+                        </select>
+                    </div>
+                    <div id="s-tiers-container" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                        <input type="text" id="s-prize-1" placeholder="1st Place Reward" style="font-size:12px; padding:10px;">
+                        <input type="text" id="s-prize-2" placeholder="2nd Place Reward" style="font-size:12px; padding:10px;">
+                        <input type="text" id="s-prize-3" placeholder="3rd Place Reward" style="font-size:12px; padding:10px;">
+                    </div>
+                </div>
                 <div class="field" style="margin-top:5px;">
                     <label>Description</label>
                     <textarea id="s-desc" rows="3" placeholder="Describe the opportunity..."></textarea>
@@ -1759,10 +1776,17 @@
                 twitter_url: document.getElementById('s-twitter').value,
                 submitted_by: document.getElementById('s-submitter').value.replace('@', ''),
                 submitter_email: document.getElementById('s-email').value,
-                share_image: document.getElementById('s-banner').value || document.getElementById('s-detected-thumb')?.value || '',
-                about_project: document.getElementById('s-about').value,
-                mission: document.getElementById('s-mission').value,
-                scope_requirements: document.getElementById('s-scope').value,
+                share_image: document.getElementById('s-banner')?.value || '',
+                about_project: document.getElementById('s-about')?.value || '',
+                mission: document.getElementById('s-mission')?.value || '',
+                scope_requirements: document.getElementById('s-scope')?.value || '',
+                prize_breakdown: {
+                    first: document.getElementById('s-prize-1')?.value || '',
+                    second: document.getElementById('s-prize-2')?.value || '',
+                    third: document.getElementById('s-prize-3')?.value || '',
+                    fourth: document.getElementById('s-prize-4')?.value || '',
+                    fifth: document.getElementById('s-prize-5')?.value || ''
+                },
                 submission_token: token,
                 approval_status: 'pending',
                 submitted_at: new Date().toISOString(),

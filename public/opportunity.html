@@ -290,9 +290,24 @@
         const logoHtml = item.logo ? `<img src="${item.logo}" onerror="this.src='/logo.png'">` : `<img src="/logo.png" style="opacity:0.5; object-fit:contain;">`;
 
         const skillsList = (item.skills || 'Community, Content, Growth').split(',').map(s => s.trim());
-        const prize1 = item.prize_breakdown?.first || (prizeNumeric ? '$'+Math.round(prizeNumeric*0.5) : 'TBA');
-        const prize2 = item.prize_breakdown?.second || (prizeNumeric ? '$'+Math.round(prizeNumeric*0.3) : 'TBA');
-        const prize3 = item.prize_breakdown?.third || (prizeNumeric ? '$'+Math.round(prizeNumeric*0.2) : 'TBA');
+        
+        // Dynamic Prize Tiers
+        const prizes = [
+            { label: '1st Prize', value: item.prize_breakdown?.first || (prizeNumeric ? '$'+Math.round(prizeNumeric*0.5) : '') },
+            { label: '2nd Prize', value: item.prize_breakdown?.second || (prizeNumeric ? '$'+Math.round(prizeNumeric*0.3) : '') },
+            { label: '3rd Prize', value: item.prize_breakdown?.third || (prizeNumeric ? '$'+Math.round(prizeNumeric*0.2) : '') },
+            { label: '4th Prize', value: item.prize_breakdown?.fourth || '' },
+            { label: '5th Prize', value: item.prize_breakdown?.fifth || '' }
+        ].filter(p => p.value);
+        
+        const prizesHtml = prizes.map((p, idx) => `
+            <div class="prize-item ${idx === 0 ? 'highlight' : ''}">
+                <span class="prize-rank">${p.label}</span>
+                <span class="prize-value">${p.value}</span>
+            </div>
+        `).join('');
+        
+        const hasTiers = prizes.length > 0;
 
         const scopeHtml = item.scope_requirements 
             ? item.scope_requirements.split('\n').filter(l => l.trim()).map(l => `<li>${l.replace(/^[•\-\*]\s*/, '')}</li>`).join('')
@@ -343,18 +358,7 @@
                             
                             ${hasTiers ? `
                             <div class="prize-list" style="margin-top:20px;">
-                                <div class="prize-item highlight">
-                                    <span class="prize-rank">1st Prize</span>
-                                    <span class="prize-value">${prize1}</span>
-                                </div>
-                                <div class="prize-item">
-                                    <span class="prize-rank">2nd Prize</span>
-                                    <span class="prize-value">${prize2}</span>
-                                </div>
-                                <div class="prize-item">
-                                    <span class="prize-rank">3rd Prize</span>
-                                    <span class="prize-value">${prize3}</span>
-                                </div>
+                                ${prizesHtml}
                             </div>
                             ` : ''}
                         </div>
