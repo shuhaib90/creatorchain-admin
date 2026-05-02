@@ -523,6 +523,142 @@ const UsersPage = () => {
   );
 };
 
+const Opportunities = () => {
+  const [opps, setOpps] = useState<any[]>([]);
+  const [apps, setApps] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedOppId, setSelectedOppId] = useState<string | 'all'>('all');
+
+  const fetchData = async () => {
+    setLoading(true);
+    const [{ data: oData }, { data: aData }] = await Promise.all([
+      supabase.from('opportunities').select('*').order('created_at', { ascending: false }),
+      supabase.from('applications').select('*, opportunities(project_name, title)').order('created_at', { ascending: false })
+    ]);
+    setOpps(oData || []);
+    setApps(aData || []);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const updateStatus = async (id: string, status: string) => {
+    const { error } = await supabase.from('opportunities').update({ status }).eq('id', id);
+    if (!error) {
+      setOpps(opps.map(o => o.id === id ? { ...o, status } : o));
+    } else {
+      alert('Status update failed');
+    }
+  };
+
+  const pendingCount = opps.filter(o => o.status === 'pending').length;
+
+  return (
+    <div className="fade-in">
+      <header style={{ marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div>
+          <h1 style={{ fontSize: '36px' }}>Opportunity <span className="text-gradient">Manager</span></h1>
+          <p style={{ color: 'var(--text-muted)' }}>Review project submissions and applicant data.</p>
+        </div>
+      </header>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '24px', marginBottom: '40px' }}>
+        <div className="card" style={{ borderLeft: '4px solid var(--secondary)' }}>
+          <div className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>PENDING_REQUESTS</div>
+          <div style={{ fontSize: '28px', fontWeight: '800' }}>{pendingCount}</div>
+        </div>
+        <div className="card" style={{ borderLeft: '4px solid var(--primary)' }}>
+          <div className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>LIVE_OPPORTUNITIES</div>
+          <div style={{ fontSize: '28px', fontWeight: '800' }}>{opps.filter(o => o.status === 'live').length}</div>
+        </div>
+        <div className="card" style={{ borderLeft: '4px solid var(--accent)' }}>
+          <div className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>TOTAL_APPLICANTS</div>
+          <div style={{ fontSize: '28px', fontWeight: '800' }}>{apps.length}</div>
+        </div>
+      </div>
+
+      <div className="card" style={{ padding: '0', marginBottom: '48px' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
+          <h3 className="mono" style={{ fontSize: '12px' }}>SUBMISSION_QUEUE</h3>
+        </div>
+        <table style={{ width: '100%' }}>
+          <thead>
+            <tr>
+              <th className="mono">PROJECT</th>
+              <th className="mono">TITLE</th>
+              <th className="mono">TYPE</th>
+              <th className="mono">STATUS</th>
+              <th className="mono" style={{ textAlign: 'right' }}>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {opps.map(opp => (
+              <tr key={opp.id}>
+                <td>{opp.project_name}</td>
+                <td><div style={{ fontWeight: '700' }}>{opp.title}</div><div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{opp.team_contact}</div></td>
+                <td><span className="mono" style={{ fontSize: '10px' }}>{opp.type.toUpperCase()}</span></td>
+                <td><span className={`status-badge status-${opp.status}`}>{opp.status}</span></td>
+                <td style={{ textAlign: 'right' }}>
+                  {opp.status === 'pending' && (
+                    <>
+                      <button className="btn btn-primary" style={{ padding: '6px 12px', fontSize: '10px' }} onClick={() => updateStatus(opp.id, 'live')}>APPROVE</button>
+                      <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '10px', marginLeft: '8px' }} onClick={() => updateStatus(opp.id, 'rejected')}>REJECT</button>
+                    </>
+                  )}
+                  {opp.status === 'live' && (
+                    <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '10px' }} onClick={() => updateStatus(opp.id, 'pending')}>PAUSE</button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <header style={{ marginBottom: '24px' }}>
+        <h2 className="mono" style={{ fontSize: '18px' }}>APPLICANT_DATABASE</h2>
+      </header>
+
+      <div style={{ display: 'grid', gap: '20px' }}>
+        {apps.map(app => (
+          <motion.div key={app.id} className="card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '16px' }}>
+              <div>
+                <div className="mono" style={{ fontSize: '10px', color: 'var(--primary)' }}>APPLYING_FOR</div>
+                <div style={{ fontWeight: '800', fontSize: '18px' }}>{app.opportunities.project_name} // {app.opportunities.title}</div>
+              </div>
+              <div className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{new Date(app.created_at).toLocaleDateString()}</div>
+            </div>
+            
+            <div style={{ marginBottom: '20px' }}>
+              <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '8px' }}>PITCH_MESSAGE</div>
+              <p style={{ fontSize: '14px', lineHeight: '1.5' }}>{app.message}</p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', background: 'rgba(0,0,0,0.2)', padding: '20px', border: '1px solid var(--border)' }}>
+              <div>
+                <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>WALLET_ADDRESS</div>
+                <div className="mono" style={{ fontSize: '12px', wordBreak: 'break-all' }}>{app.user_id}</div>
+              </div>
+              <div>
+                <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>PORTFOLIO_LINKS</div>
+                <div style={{ fontSize: '12px' }}>{app.portfolio_links || 'N/A'}</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              <a href={`mailto:?subject=CreatorChain Opportunity: ${app.opportunities.title}`} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}>EMAIL_APPLICANT</a>
+              <button className="btn btn-outline" style={{ flex: 1, justifyContent: 'center' }}>CONTACT_VIA_X</button>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const Broadcast = () => {
   const [message, setMessage] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -686,22 +822,31 @@ const Broadcast = () => {
 const Layout = ({ children, onLogout }: { children: React.ReactNode, onLogout: () => void }) => {
   const location = useLocation();
   const [listings, setListings] = useState<any[]>([]);
+  const [opps, setOpps] = useState<any[]>([]);
+
+  const fetchData = async () => {
+    const [{ data: lData }, { data: oData }] = await Promise.all([
+      supabase.from('listings').select('approval_status'),
+      supabase.from('opportunities').select('status')
+    ]);
+    setListings(lData || []);
+    setOpps(oData || []);
+  };
 
   useEffect(() => {
-    const fetchListings = async () => {
-      const { data } = await supabase.from('listings').select('approval_status');
-      setListings(data || []);
+    fetchData();
+
+    const lChannel = supabase.channel('layout_listings').on('postgres_changes', { event: '*', schema: 'public', table: 'listings' }, fetchData).subscribe();
+    const oChannel = supabase.channel('layout_opps').on('postgres_changes', { event: '*', schema: 'public', table: 'opportunities' }, fetchData).subscribe();
+
+    return () => { 
+      supabase.removeChannel(lChannel);
+      supabase.removeChannel(oChannel);
     };
-    fetchListings();
-
-    const channel = supabase.channel('layout_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'listings' }, () => {
-      fetchListings();
-    }).subscribe();
-
-    return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const pendingCount = listings.filter(l => l.approval_status === 'pending').length;
+  const pendingListings = listings.filter(l => l.approval_status === 'pending').length;
+  const pendingOpps = opps.filter(o => o.status === 'pending').length;
   const isActive = (path: string) => location.pathname === path;
 
   return (
@@ -723,13 +868,17 @@ const Layout = ({ children, onLogout }: { children: React.ReactNode, onLogout: (
           </Link>
           <Link to="/listings" className={`nav-item ${isActive('/listings') ? 'active' : ''}`}>
             <ListTodo size={18} /> LISTINGS 
-            {pendingCount > 0 && <span style={{ marginLeft: 'auto', background: 'var(--accent)', color: 'white', padding: '2px 6px', fontSize: '10px', border: '1px solid var(--black)' }}>{pendingCount}</span>}
+            {pendingListings > 0 && <span style={{ marginLeft: 'auto', background: 'var(--accent)', color: 'white', padding: '2px 6px', fontSize: '10px', border: '1px solid var(--black)' }}>{pendingListings}</span>}
           </Link>
           <Link to="/users" className={`nav-item ${isActive('/users') ? 'active' : ''}`}>
             <Users size={18} /> COMMUNITY
           </Link>
           <Link to="/broadcast" className={`nav-item ${isActive('/broadcast') ? 'active' : ''}`}>
             <Radio size={18} /> BROADCAST
+          </Link>
+          <Link to="/opportunities" className={`nav-item ${isActive('/opportunities') ? 'active' : ''}`}>
+            <ListTodo size={18} /> OPPORTUNITIES
+            {pendingOpps > 0 && <span style={{ marginLeft: 'auto', background: 'var(--secondary)', color: 'black', padding: '2px 6px', fontSize: '10px', border: '1px solid var(--black)', fontWeight: '900' }}>{pendingOpps}</span>}
           </Link>
           <Link to="/settings" className={`nav-item ${isActive('/settings') ? 'active' : ''}`}>
             <Settings size={18} /> SETTINGS
@@ -846,6 +995,7 @@ function App() {
           <Route path="/listings" element={<Listings />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/broadcast" element={<Broadcast />} />
+          <Route path="/opportunities" element={<Opportunities />} />
           <Route path="/settings" element={
             <div className="fade-in">
               <header style={{ marginBottom: '40px' }}>
