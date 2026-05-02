@@ -283,7 +283,8 @@
         const prizeTotal = item.reward || 'TBA';
         const hasTiers = item.prize_breakdown && (item.prize_breakdown.first || item.prize_breakdown.second || item.prize_breakdown.third);
         
-        const isEnded = item.status === 'ended' || (item.deadline && new Date(item.deadline) < new Date());
+        const isClosed = item.status === 'closed';
+        const isEnded = item.status === 'ended' || isClosed || (item.deadline && new Date(item.deadline) < new Date());
         const logoHtml = item.logo ? `<img src="${item.logo}" onerror="this.src='/logo.png'">` : `<img src="/logo.png" style="opacity:0.5; object-fit:contain;">`;
 
         const skillsList = (item.skills || 'Community, Content, Growth').split(',').map(s => s.trim());
@@ -312,7 +313,7 @@
 
                                 <div class="status-indicator">
                                     <div class="status-dot ${isEnded?'ended':'active'}"></div>
-                                    <span class="mono" style="font-size:10px;">${isEnded?'SUBMISSIONS_CLOSED':'SUBMISSIONS_OPEN'}</span>
+                                    <span class="mono" style="font-size:10px;">${isClosed ? 'CLOSED' : (isEnded ? 'SUBMISSIONS_CLOSED' : 'SUBMISSIONS_OPEN')}</span>
                                 </div>
                             </div>
                             <h2 style="font-size:32px; letter-spacing:-1px; margin:0;">${item.title}</h2>

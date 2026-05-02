@@ -174,11 +174,24 @@
             document.getElementById('opp-grid').innerHTML = 'Please log in to view opportunities.';
         }
 
+        function getDaysLeft(deadlineStr) {
+            if (!deadlineStr || deadlineStr === 'N/A' || deadlineStr === 'OPEN') return 'OPEN';
+            const d = new Date(deadlineStr);
+            if (isNaN(d.getTime())) return deadlineStr;
+            const now = new Date();
+            const diff = d - now;
+            const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+            if (days < 0) return 'ENDED';
+            if (days === 0) return 'ENDS TODAY';
+            if (days === 1) return '1 DAY LEFT';
+            return `${days} DAYS LEFT`;
+        }
+
         async function loadOpportunities() {
             const { data, error } = await supabase
                 .from('opportunities')
                 .select('*')
-                .eq('status', 'live')
+                .in('status', ['live', 'closed'])
                 .order('created_at', { ascending: false });
 
             if (error) {
@@ -195,20 +208,33 @@
             }
 
             data.forEach(opp => {
+                const isClosed = opp.status === 'closed';
                 const card = document.createElement('div');
                 card.className = 'opp-card';
+                const logoHtml = opp.logo ? `<img src="${opp.logo}" style="height:40px; width:40px; object-fit:contain; border:2px solid #000; padding:2px; background:#fff;">` : `<div style="height:40px; width:40px; background:#eee; display:flex; align-items:center; justify-content:center; border:2px solid #000; font-family:var(--font-mono); font-size:10px;">LOGO</div>`;
+                
                 card.innerHTML = `
-                    <div class="opp-badge ${opp.type}">${opp.type.replace('_', ' ')}</div>
-                    <div>
-                        <div class="opp-project">${opp.project_name}</div>
-                        <h3 class="opp-title">${opp.title}</h3>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div class="opp-badge ${opp.type}">${opp.type.replace('_', ' ')}</div>
+                        ${isClosed ? '<div class="opp-badge" style="background:#000; color:#fff;">CLOSED</div>' : ''}
+                    </div>
+                    <div style="display:flex; gap:15px; align-items:center;">
+                        ${logoHtml}
+                        <div>
+                            <div class="opp-project">${opp.project_name}</div>
+                            <h3 class="opp-title">${opp.title}</h3>
+                        </div>
                     </div>
                     <p class="opp-desc">${opp.description}</p>
                     <div class="opp-meta">
-                        ${opp.reward ? `<span><i data-lucide="award"></i> ${opp.reward}</span>` : ''}
-                        ${opp.deadline ? `<span><i data-lucide="calendar"></i> ${opp.deadline}</span>` : ''}
+                        ${opp.reward ? `<span><i data-lucide="award" style="width:14px; height:14px;"></i> ${opp.reward}</span>` : ''}
+                        <span><i data-lucide="calendar" style="width:14px; height:14px;"></i> ${getDaysLeft(opp.deadline)}</span>
                     </div>
-                    <button class="apply-btn" onclick="openModal('${opp.id}', '${opp.title.replace(/'/g, "\\'")}', '${opp.project_name.replace(/'/g, "\\'")}')">APPLY DIRECTLY</button>
+                    ${isClosed ? `
+                        <button class="apply-btn" style="background:#eee; border-color:#ccc; color:#999; cursor:not-allowed;" disabled>SUBMISSIONS CLOSED</button>
+                    ` : `
+                        <button class="apply-btn" onclick="openModal('${opp.id}', '${opp.title.replace(/'/g, "\\'")}', '${opp.project_name.replace(/'/g, "\\'")}')">APPLY DIRECTLY</button>
+                    `}
                 `;
                 grid.appendChild(card);
             });

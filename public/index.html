@@ -1338,7 +1338,7 @@
             .order('created_at', { ascending: false });
         
         const { data: opportunities, error: oError } = await db.from('opportunities').select('*')
-            .eq('status','live')
+            .in('status', ['live', 'closed'])
             .order('created_at', { ascending: false });
 
         if (lError || oError) { console.error(lError || oError); return; }
@@ -1349,10 +1349,10 @@
             project: o.project_name,
             section: 'creatorchain',
             apply_url: o.external_link,
-            logo: '/logo.png', // Default for exclusive launches
-            urgency: 'HIGH',   // Exclusive roles are prioritized
+            logo: o.logo || '/logo.png',
+            urgency: 'HIGH',
             is_exclusive: true,
-            post_link: o.post_link // For retweet task
+            post_link: o.post_link
         }));
 
         const allData = [...normalizedOpps, ...(listings || [])];
@@ -1393,6 +1393,19 @@
         document.getElementById('hero-rewards').innerText = total>=1000 ? `$${(total/1000).toFixed(0)}K+` : `$${total}`;
     }
 
+    function getDaysLeft(deadlineStr) {
+        if (!deadlineStr || deadlineStr === 'N/A' || deadlineStr === 'OPEN') return 'OPEN';
+        const d = new Date(deadlineStr);
+        if (isNaN(d.getTime())) return deadlineStr;
+        const now = new Date();
+        const diff = d - now;
+        const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+        if (days < 0) return 'ENDED';
+        if (days === 0) return 'ENDS TODAY';
+        if (days === 1) return '1 DAY LEFT';
+        return `${days} DAYS LEFT`;
+    }
+
     function renderGrid(listings) {
         const cats = ['creatorchain','ambassador','discord','bounty','developer','campaign','ended'];
         cats.forEach(c => { const el = document.getElementById(`${c}-cards`); if(el) el.innerHTML=''; });
@@ -1401,18 +1414,23 @@
 
         listings.forEach(item => {
             const deadline = parseDeadline(item.deadline);
+            const isClosed = item.status === 'closed';
+            const isEnded = item.status === 'ended' || isClosed || (deadline && deadline < now);
+            
             let target = item.section, status = '';
-            if(deadline) { if(deadline < threeDaysAgo) { target='ended'; } else if(deadline < now) { status='EXPIRED'; } }
+            if(isEnded && deadline && deadline < threeDaysAgo) { target='ended'; }
+            else if(isEnded) { status='CLOSED'; }
+
             const logoHtml = isUrl(item.logo) ? `<img src="${item.logo}" onerror="this.src='/logo.png'">` : `<img src="/logo.png" style="opacity:0.5; object-fit:contain;">`;
-            const deadlineLabel = deadline ? (status ? `EXPIRED ${deadline.toLocaleDateString()}` : deadline.toLocaleDateString()) : (item.deadline||'OPEN');
+            const deadlineLabel = getDaysLeft(item.deadline);
 
             const card = document.createElement('div');
             card.className = `card ${item.featured?'featured':''} ${status?'expired':''} ${item.is_exclusive?'exclusive-glow':''}`;
             card.style.cursor = 'pointer';
             card.onclick = () => window.location.href = `opportunity.html?id=${item.id}`;
             
-            const stampText = item.is_exclusive ? 'EXCLUSIVE' : (status || item.section);
-            const stampClass = item.is_exclusive ? 'exclusive-stamp' : (status ? 'expired-stamp' : '');
+            const stampText = isClosed ? 'CLOSED' : (item.is_exclusive ? 'EXCLUSIVE' : (status || item.section));
+            const stampClass = isClosed ? 'expired-stamp' : (item.is_exclusive ? 'exclusive-stamp' : (status ? 'expired-stamp' : ''));
 
             card.innerHTML = `
                 ${item.is_exclusive ? '<div class="exclusive-inner-bg"></div>' : ''}
@@ -1432,7 +1450,7 @@
                 <div class="card-footer">
                     <div class="mono" style="font-size:10px;color:${status?'var(--accent)':'var(--muted)'};">${deadlineLabel}</div>
                     <div style="display:flex;gap:4px;align-items:center;">
-                        ${target === 'ended' ? `
+                        ${(target === 'ended' || status === 'CLOSED') ? `
                             <div class="btn btn-white btn-sm" style="background:#eee; border-color:#ccc; color:#999; cursor:not-allowed;">CLOSED</div>
                         ` : `
                             <div class="share-container">
