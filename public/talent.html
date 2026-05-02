@@ -23,6 +23,7 @@
             --black: #000000;
             --white: #FFFFFF;
             --muted: #64748B;
+            --secondary: #FFD600;
             --font-main: 'Outfit', sans-serif;
             --font-mono: 'Space Mono', monospace;
         }
@@ -436,35 +437,34 @@
 
         /* PRO CARD ENHANCEMENTS */
         .profile-card.is-pro-card {
-            border: 4px solid #FFD600 !important;
-            box-shadow: 15px 15px 0 rgba(255, 214, 0, 0.4) !important;
+            border: 4px solid var(--secondary) !important;
+            box-shadow: 10px 10px 0 var(--black), 0 0 20px rgba(255, 214, 0, 0.2) !important;
+            background: #fffcf0 !important;
+        }
+        .is-pro-card .card-header { 
+            background: #fffcf0; 
+            border-bottom: 2px solid var(--secondary); 
             position: relative;
-            overflow: hidden;
-            background: linear-gradient(to bottom right, #fff, #fff9e6);
         }
-        .profile-card.is-pro-card::before {
-            content: '';
+        .is-pro-card .card-header::after {
+            content: 'TRUSTED BUILDER';
             position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 214, 0, 0.1), transparent);
-            transform: rotate(45deg);
-            animation: proShimmer 4s infinite;
-            pointer-events: none;
+            top: 15px;
+            right: 15px;
+            background: var(--black);
+            color: var(--secondary);
+            padding: 3px 8px;
+            font-family: var(--font-mono);
+            font-weight: 900;
+            font-size: 8px;
+            border: 1.5px solid var(--secondary);
+            letter-spacing: 0.5px;
+            z-index: 5;
         }
-        @keyframes proShimmer {
-            0% { transform: translateX(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) rotate(45deg); }
-        }
-        .is-pro-card .verification-badge svg {
-            filter: drop-shadow(0 0 5px rgba(255, 214, 0, 0.8));
-            animation: badgePulse 2s infinite;
-        }
-        @keyframes badgePulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-            100% { transform: scale(1); }
-        }
+        .is-pro-card .avatar { border-color: var(--secondary); }
+        .is-pro-card .card-body { background: #fffcf0; }
+        .is-pro-card .card-footer { background: #fffcf0; border-top: 1.5px solid var(--secondary); }
+        .is-pro-card .score-value { color: var(--accent); }
 
         /* AUTH MODAL */
         .auth-modal {
@@ -1131,6 +1131,9 @@
                             ${getBadgeHtml(p)}
                         </h3>
                         <p class="mono" style="font-size:11px; color:var(--muted); margin:0;">@${handle}</p>
+                    </div>
+                    <div class="score-value" style="margin-left:auto; font-family:var(--font-mono); font-weight:900; font-size:16px;">
+                        ${p.score || 0}%
                     </div>
                 </div>
                 <div class="card-body">
