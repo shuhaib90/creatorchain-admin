@@ -359,8 +359,18 @@
 
                     <div class="submission-stats">
                         <div class="stat-item">
-                            <span class="stat-lbl">REMAINING</span>
-                            <span class="stat-val">${item.deadline || 'OPEN'}</span>
+                            <span class="stat-lbl">TIME_REMAINING</span>
+                            <span class="stat-val">
+                                ${(() => {
+                                    if (!item.deadline) return 'OPEN';
+                                    const diff = new Date(item.deadline) - new Date();
+                                    if (diff <= 0) return 'ENDED';
+                                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                    if (days > 0) return `${days}D ${hours}H LEFT`;
+                                    return `${hours}H LEFT`;
+                                })()}
+                            </span>
                         </div>
                     </div>
 
