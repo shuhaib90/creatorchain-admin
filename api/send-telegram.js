@@ -36,12 +36,16 @@ export default async (req, res) => {
                 `<b>Category:</b> ${payload.category}\n\n` +
                 `👉 <a href="https://creatorchain-admin-fo2n.vercel.app/">Open Admin Terminal</a>`;
     } else if (type === 'new_opportunity') {
+      const reward = payload.reward || payload.budget || 'TBA';
+      const id = payload.id;
+      const url = id ? `https://creatorchain-web3-jobs.vercel.app/opportunity.html?id=${id}` : `https://creatorchain-web3-jobs.vercel.app/`;
+      
       message = `🔥 <b>NEW OPPORTUNITY</b>\n\n` +
                 `<b>${payload.project_name}</b>\n` +
                 `${payload.description}\n\n` +
-                `💰 <b>Reward:</b> ${payload.budget || 'TBA'}\n` +
+                `💰 <b>Reward:</b> ${reward}\n` +
                 `📂 <b>Category:</b> ${payload.category || 'General'}\n\n` +
-                `🚀 <a href="https://creatorchain-web3-jobs.vercel.app/">View on CreatorChain</a>`;
+                `🚀 <a href="${url}">VIEW_DETAILS & APPLY</a>`;
     } else if (type === 'custom') {
       message = payload.message;
     } else {

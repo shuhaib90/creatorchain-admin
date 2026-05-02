@@ -14,10 +14,11 @@ export default async (req, res) => {
   }
 
   const chatId = message.chat.id;
-  const text = message.text;
-  const tgHandle = message.from.username; // Note: may be undefined if user has no handle
+  const text = message.text || '';
+  const tgHandle = message.from ? message.from.username : null;
+  const command = text.split(' ')[0].split('@')[0]; // Handle /command@botname
 
-  if (text.startsWith('/start')) {
+  if (command === '/start') {
     try {
         const headers = { 
             'apikey': SUPABASE_KEY, 
@@ -44,17 +45,68 @@ export default async (req, res) => {
                     telegram_notifications: true
                 }, { headers });
                 
-                await sendSimpleMessage(chatId, `✅ <b>Connection Active!</b>\n\nHi ${profile.name || tgHandle}, your account is linked. You'll receive real-time notifications for ALL new listings!`);
+                await sendSimpleMessage(chatId, `✅ <b>Connection Active!</b>\n\nHi ${profile.name || tgHandle}, your account is linked. You'll receive real-time notifications for ALL new listings!\n\nUse /opportunities to see what's live.`);
                 return res.status(200).send('OK');
             }
         }
 
         // Default response for non-profile users
-        await sendSimpleMessage(chatId, `🚀 <b>Welcome to CreatorChain!</b>\n\nYou're now subscribed to all new Web3 opportunities. Alerts will be sent here the moment they go live!`);
+        await sendSimpleMessage(chatId, `🚀 <b>Welcome to CreatorChain!</b>\n\nYou're now subscribed to all new Web3 opportunities. Alerts will be sent here the moment they go live!\n\nUse /opportunities to see live gigs.`);
         
     } catch (err) {
         console.error('Webhook processing error:', err.response?.data || err.message);
     }
+  } else if (command === '/opportunities') {
+    try {
+        const headers = { 
+            'apikey': SUPABASE_KEY, 
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+        };
+
+        // Fetch active opportunities and listings
+        const [oppsResp, listingsResp] = await Promise.all([
+            axios.get(`${SUPABASE_URL}/rest/v1/opportunities?status=eq.open&select=*`, { headers }),
+            axios.get(`${SUPABASE_URL}/rest/v1/listings?approval_status=eq.approved&select=*`, { headers })
+        ]);
+
+        const opportunities = oppsResp.data || [];
+        const listings = listingsResp.data || [];
+        const allItems = [...opportunities.map(o => ({...o, type: 'opp'})), ...listings.map(l => ({...l, type: 'list'}))];
+
+        if (allItems.length === 0) {
+            await sendSimpleMessage(chatId, `📭 <b>No active opportunities found at the moment.</b>\n\nCheck back later or visit <a href="https://creatorchain-web3-jobs.vercel.app/">CreatorChain</a>.`);
+            return res.status(200).send('OK');
+        }
+
+        let message = `🔥 <b>LIVE OPPORTUNITIES</b>\n\n`;
+        
+        // Show top 10 to avoid hitting message length limits
+        const displayItems = allItems.slice(0, 10);
+
+        displayItems.forEach((item, index) => {
+            const title = item.title || item.project_name || 'Untitled';
+            const project = item.project_name || item.project || 'Web3 Project';
+            const reward = item.reward || 'TBA';
+            const id = item.id;
+            const url = `https://creatorchain-web3-jobs.vercel.app/opportunity.html?id=${id}`;
+            
+            message += `${index + 1}. <b>${project}</b>\n`;
+            message += `🔹 ${title}\n`;
+            message += `💰 <b>Reward:</b> ${reward}\n`;
+            message += `🔗 <a href="${url}">VIEW_DETAILS & APPLY</a>\n\n`;
+        });
+
+        if (allItems.length > 10) {
+            message += `...and ${allItems.length - 10} more! View all at <a href="https://creatorchain-web3-jobs.vercel.app/">CreatorChain</a>.`;
+        }
+
+        await sendSimpleMessage(chatId, message);
+    } catch (err) {
+        console.error('Opportunities fetch error:', err.response?.data || err.message);
+        await sendSimpleMessage(chatId, `❌ <b>Error fetching opportunities.</b> Please try again later.`);
+    }
+  } else if (command === '/chatid') {
+    await sendSimpleMessage(chatId, `🆔 <b>YOUR_TELEGRAM_CHAT_ID:</b> <code>${chatId}</code>\n\nUse this to configure manual alerts if needed.`);
   }
 
   res.status(200).send('OK');
