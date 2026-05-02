@@ -405,9 +405,6 @@ const Listings = () => {
 
   const handleSaveEdit = (updated: any) => {
     setListings(listings.map(l => l.id === updated.id ? updated : l));
-    if (updated.approval_status === 'approved') {
-      notifyMatchingBuilders(updated.id);
-    }
   };
 
   return (
