@@ -1159,7 +1159,26 @@
 <script>
     const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
-    let db;
+    let db, currentUser = null;
+
+    // ─── Mobile Restriction ───────────────────────────────
+    (function() {
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile && !window.location.search.includes('bypass=true')) {
+            const overlay = document.createElement('div');
+            overlay.style = "position:fixed; inset:0; background:#0a0a0a; z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px; text-align:center; color:#fff;";
+            overlay.innerHTML = `
+                <div style="font-size:60px; margin-bottom:20px;">💻</div>
+                <h1 style="font-size:32px; color:var(--primary); -webkit-text-stroke:0;">SWITCH TO DESKTOP</h1>
+                <p class="mono" style="font-size:14px; margin-top:20px; color:#888; max-width:300px;">CreatorChain terminal requires a full desktop view for optimal performance and security protocols.</p>
+                <div style="margin-top:40px; padding:20px; border:2px dashed #333;">
+                    <p class="mono" style="font-size:10px; color:var(--primary)">ACCESS_DENIED // DEVICE_NOT_SUPPORTED</p>
+                </div>
+            `;
+            document.documentElement.appendChild(overlay);
+            document.body.style.display = 'none';
+        }
+    })();
 
     // BADGE LOGIC & SVG GENERATOR
     function getBadgeHtml(profile, size = 'small') {
@@ -1263,6 +1282,7 @@
 
     async function checkUser() {
         const { data: { user } } = await db.auth.getUser();
+        currentUser = user;
         if (user) {
             updateUIForUser(user);
         }
@@ -1427,7 +1447,14 @@
             const card = document.createElement('div');
             card.className = `card ${item.featured?'featured':''} ${status?'expired':''} ${item.is_exclusive?'exclusive-glow':''}`;
             card.style.cursor = 'pointer';
-            card.onclick = () => window.location.href = `opportunity.html?id=${item.id}`;
+            card.onclick = () => {
+                if (!currentUser) {
+                    showToast('PLEASE_SIGN_IN: Accessing opportunity data requires ecosystem authentication.', 'warning');
+                    openAuthModal();
+                    return;
+                }
+                window.location.href = `opportunity.html?id=${item.id}`;
+            };
             
             const stampText = isClosed ? 'CLOSED' : (item.is_exclusive ? 'EXCLUSIVE' : (status || item.section));
             const stampClass = isClosed ? 'expired-stamp' : (item.is_exclusive ? 'exclusive-stamp' : (status ? 'expired-stamp' : ''));
@@ -1461,7 +1488,12 @@
                                 <div class="share-btn" onclick="toggleShareMenu(event, '${item.id}')" title="Share Project"><i data-lucide="share-2" style="width:14px; height:14px;"></i></div>
                             </div>
                             ${item.twitter_url ? `<a href="${item.twitter_url}" target="_blank" class="x-link-small" title="Follow on X" onclick="event.stopPropagation()">𝗫</a>` : ''}
-                            <a href="${item.is_exclusive ? `opportunity.html?id=${item.id}` : (item.apply_url||'#')}" ${item.is_exclusive ? '' : 'target="_blank"'} class="btn btn-primary btn-sm" onclick="event.stopPropagation(); window.va && window.va('track', 'Apply_Click', { project: '${item.project.replace(/'/g, "\\'")}', title: '${item.title.replace(/'/g, "\\'")}' })">APPLY</a>
+                            <a href="${item.is_exclusive ? `opportunity.html?id=${item.id}` : (item.apply_url||'#')}" 
+                               ${item.is_exclusive ? '' : 'target="_blank"'} 
+                               class="btn btn-primary btn-sm" 
+                               onclick="event.stopPropagation(); if(!currentUser){ openAuthModal(); return false; } window.va && window.va('track', 'Apply_Click', { project: '${item.project.replace(/'/g, "\\")}', title: '${item.title.replace(/'/g, "\\")}' })">
+                               APPLY
+                            </a>
                         `}
                     </div>
                 </div>

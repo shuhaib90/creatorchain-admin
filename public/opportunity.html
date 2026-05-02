@@ -453,19 +453,104 @@
         lucide.createIcons();
     }
 
-    async function openApplicationForm(id, projectName) {
-        document.getElementById('app-opportunity-id').value = id;
-        document.getElementById('app-project-name').textContent = projectName.toUpperCase();
+    async function init() {
+        if (!initSupabase()) return;
         
-        const { data: { user } } = await db.auth.getUser();
-        if (!user) {
-            document.getElementById('proposal-form').style.display = 'none';
-            document.getElementById('auth-check-msg').style.display = 'block';
-        } else {
-            document.getElementById('proposal-form').style.display = 'block';
-            document.getElementById('auth-check-msg').style.display = 'none';
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        if (!id) {
+            window.location.href = 'index.html';
+            return;
         }
 
+        const { data: { user } } = await db.auth.getUser();
+        currentUser = user;
+        if (!user) {
+            openAuthModal();
+        } else {
+            updateUIForUser(user);
+        }
+
+        const { data: item, error } = await db.from('opportunities').select('*').eq('id', id).single();
+        if (error || !item) {
+            console.error(error);
+            document.getElementById('project-detail-content').innerHTML = `
+                <div style="text-align:center; padding:100px 0;">
+                    <h2 class="mono">OPPORTUNITY_NOT_FOUND</h2>
+                    <p class="mono" style="font-size:12px; margin-top:20px;">The requested data stream has been terminated or moved.</p>
+                    <a href="index.html" class="btn btn-primary" style="margin-top:30px;">BACK TO FEED</a>
+                </div>
+            `;
+            return;
+        }
+
+        renderDetails(item);
+    }
+
+    async function checkUser() {
+        const { data: { user } } = await db.auth.getUser();
+        currentUser = user;
+        if (user) {
+            updateUIForUser(user);
+        }
+    }
+
+    async function updateUIForUser(user) {
+        const metadata = user.user_metadata;
+        const displayName = metadata.full_name || metadata.user_name || 'User';
+        const displayAvatar = metadata.avatar_url || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png';
+        
+        document.getElementById('auth-status-nav').innerHTML = `
+            <div style="display:flex; align-items:center; gap:12px; background:var(--black); padding:4px 12px; border:2px solid var(--black);">
+                <img src="${displayAvatar}" style="width:24px; height:24px; border:1px solid #fff;">
+                <span class="mono" style="font-size:10px; color:#fff;">${displayName.toUpperCase()}</span>
+                <button onclick="signOut()" style="background:none; border:none; color:var(--accent); font-family:var(--font-mono); font-size:10px; cursor:pointer; font-weight:900;">[LOGOUT]</button>
+            </div>
+        `;
+    }
+
+    function openAuthModal() {
+        document.getElementById('auth-modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeAuthModal() {
+        if (!currentUser) {
+            // If they close it without logging in, maybe redirect back to index?
+            // window.location.href = 'index.html';
+        }
+        document.getElementById('auth-modal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    async function signInWithGoogle() {
+        const { error } = await db.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: window.location.origin + '/auth/callback' }
+        });
+        if (error) alert(error.message);
+    }
+
+    async function signInWithX() {
+        const { error } = await db.auth.signInWithOAuth({
+            provider: 'x',
+            options: { redirectTo: window.location.origin + '/auth/callback' }
+        });
+        if (error) alert(error.message);
+    }
+
+    async function signOut() {
+        await db.auth.signOut();
+        window.location.reload();
+    }
+
+    async function openApplicationForm(id, projectName) {
+        if (!currentUser) {
+            openAuthModal();
+            return;
+        }
+        document.getElementById('app-opportunity-id').value = id;
+        document.getElementById('app-project-name').textContent = projectName.toUpperCase();
         document.getElementById('application-modal').style.display = 'flex';
         document.body.style.overflow = 'hidden';
         lucide.createIcons();
@@ -482,28 +567,26 @@
         btn.disabled = true;
         btn.textContent = 'SENDING_PROPOSAL...';
 
+        if (!currentUser) {
+            alert('Session expired. Please sign in.');
+            location.reload();
+            return;
+        }
+
         const opportunity_id = document.getElementById('app-opportunity-id').value;
         const wallet = document.getElementById('app-wallet').value;
         const link = document.getElementById('app-link').value;
         const telegram = document.getElementById('app-telegram').value;
 
-        const { data: { user } } = await db.auth.getUser();
-        if (!user) {
-            showToast('Please sign in first', 'error');
-            btn.disabled = false;
-            btn.textContent = 'SEND_SUBMISSION &rarr;';
-            return;
-        }
-
         const payload = {
             opportunity_id,
-            user_id: user.id, // Use actual user.id from Supabase Auth
+            user_id: currentUser.id,
             portfolio_links: link,
             message: JSON.stringify({ 
                 telegram, 
                 wallet_address: wallet,
                 submitted_at: new Date().toISOString(),
-                user_handle: user.user_metadata.user_name || user.email
+                user_handle: currentUser.user_metadata.user_name || currentUser.email
             }),
             status: 'pending'
         };
@@ -511,10 +594,9 @@
         const { error } = await db.from('applications').insert([payload]);
 
         if (error) {
-            console.error(error);
-            showToast('Failed to send proposal: ' + error.message, 'error');
+            alert('Failed: ' + error.message);
         } else {
-            showToast('🚀 Proposal sent successfully!');
+            alert('🚀 Proposal sent successfully!');
             closeApplicationForm();
         }
         
@@ -524,6 +606,32 @@
 
     document.addEventListener('DOMContentLoaded', init);
 </script>
+
+<!-- AUTH MODAL -->
+<style>
+    .auth-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 100000; backdrop-filter: blur(8px); padding: 20px; }
+    .auth-card { background: #fff; border: 4px solid #000; width: 100%; max-width: 400px; padding: 40px; box-shadow: 20px 20px 0 var(--black); text-align: center; }
+    .auth-social-btn { width: 100%; padding: 15px; margin-bottom: 15px; border: 3px solid #000; font-family: 'Space Mono', monospace; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; transition: 0.2s; }
+    .auth-social-btn:hover { transform: translate(-3px, -3px); box-shadow: 6px 6px 0 #000; }
+    .auth-social-btn.google { background: #fff; color: #000; }
+    .auth-social-btn.x { background: #000; color: #fff; }
+    .outline { -webkit-text-stroke: 1.5px #000; color: transparent; }
+</style>
+<div id="auth-modal" class="auth-modal">
+    <div class="auth-card">
+        <button onclick="closeAuthModal()" style="position:absolute; top:20px; right:20px; background:none; border:none; font-size:24px; cursor:pointer; font-weight:900;">✕</button>
+        <h2 style="font-size:32px; margin-bottom:10px;">ACCESS <span class="outline">PORTAL</span></h2>
+        <p class="mono" style="font-size:11px; color:#666; margin-bottom:30px;">AUTHENTICATION REQUIRED TO INTERACT WITH DATA STREAMS.</p>
+        <div class="auth-btn-list">
+            <button class="auth-social-btn google" onclick="signInWithGoogle()">
+                <i data-lucide="mail" style="width:20px;"></i> CONTINUE WITH GOOGLE
+            </button>
+            <button class="auth-social-btn x" onclick="signInWithX()">
+                <i>𝕏</i> SIGN IN WITH X
+            </button>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
