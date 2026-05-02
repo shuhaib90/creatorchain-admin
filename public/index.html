@@ -1004,8 +1004,13 @@
                         <input type="text" id="p-discord" placeholder="username#1234">
                     </div>
                     <div class="field">
-                        <label>TELEGRAM</label>
-                        <input type="text" id="p-telegram" placeholder="@username">
+                        <label>TELEGRAM <span id="p-tg-status" style="font-size:10px; margin-left:10px;"></span></label>
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="p-telegram" placeholder="@username" style="flex:1;">
+                            <a id="p-tg-verify-btn" href="https://t.me/creatorchainbot" target="_blank" class="btn btn-black btn-sm" style="display:none; align-items:center; gap:5px; white-space:nowrap; padding:0 15px;">
+                                <i data-lucide="external-link" style="width:12px; height:12px;"></i> VERIFY
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="field-row">
@@ -2310,11 +2315,46 @@
                 document.getElementById('p-available').checked = data.available_for_work !== false;
                 document.getElementById('p-email-notif').checked = data.email_notifications || false;
                 document.getElementById('p-tg-notif').checked = data.telegram_notifications || false;
+                
+                // Update TG verification status
+                const tgStatus = document.getElementById('p-tg-status');
+                const verifyBtn = document.getElementById('p-tg-verify-btn');
+                if (data.telegram_id) {
+                    tgStatus.innerHTML = '<span style="color:var(--secondary);">VERIFIED ✅</span>';
+                    tgStatus.style.display = 'inline';
+                    verifyBtn.style.display = 'none';
+                } else {
+                    tgStatus.innerHTML = '<span style="color:var(--accent);">UNVERIFIED ❌</span>';
+                    tgStatus.style.display = 'inline';
+                    if (data.telegram) verifyBtn.style.display = 'flex';
+                }
             }
         } catch (err) {
             console.error('Error loading profile:', err);
         }
     }
+
+    // Live update for Telegram verification button
+    document.getElementById('p-telegram')?.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        const verifyBtn = document.getElementById('p-tg-verify-btn');
+        const tgNotif = document.getElementById('p-tg-notif');
+        if (val && tgNotif.checked) {
+            verifyBtn.style.display = 'flex';
+        } else {
+            verifyBtn.style.display = 'none';
+        }
+    });
+
+    document.getElementById('p-tg-notif')?.addEventListener('change', (e) => {
+        const tgVal = document.getElementById('p-telegram').value.trim();
+        const verifyBtn = document.getElementById('p-tg-verify-btn');
+        if (e.target.checked && tgVal) {
+            verifyBtn.style.display = 'flex';
+        } else {
+            verifyBtn.style.display = 'none';
+        }
+    });
 
     async function saveProfile(e) {
         if(e) e.preventDefault();
