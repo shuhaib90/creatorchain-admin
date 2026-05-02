@@ -278,7 +278,8 @@ const Listings = () => {
               project_name: project.project,
               category: project.section,
               budget: project.reward || 'TBA', // API expects 'budget'
-              description: project.title
+              description: project.title,
+              id: project.id // Add ID for deep-linking
             }
           })
         });
