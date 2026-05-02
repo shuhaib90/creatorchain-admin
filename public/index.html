@@ -1062,6 +1062,10 @@
                         <label>Reward</label>
                         <input type="text" id="s-reward" placeholder="e.g. $2,000">
                     </div>
+                    <div class="field">
+                        <label>Deadline (Optional)</label>
+                        <input type="date" id="s-deadline">
+                    </div>
                 </div>
                 <div class="field" style="margin-top:5px;">
                     <label>Description</label>
@@ -1094,6 +1098,25 @@
                         <input type="email" id="s-email" placeholder="For status updates" required>
                     </div>
                 </div>
+
+                <div class="form-section-title">02 // LAUNCH OPPORTUNITY DETAILS (Optional)</div>
+                <div class="field">
+                    <label>About Project</label>
+                    <textarea id="s-about" rows="3" placeholder="Tell us about the project..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Mission</label>
+                    <textarea id="s-mission" rows="3" placeholder="What's the goal of this opportunity?"></textarea>
+                </div>
+                <div class="field">
+                    <label>Scope & Requirements</label>
+                    <textarea id="s-scope" rows="3" placeholder="List requirements (one per line)..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Project Banner/Image URL</label>
+                    <input type="text" id="s-banner" placeholder="https://...">
+                </div>
+
                 <div class="info-note" style="margin-top:5px;">⚡ Submissions go to admin review before going live. Usually approved within 24 hours.</div>
                 <div class="submit-error" id="submit-error">Something went wrong. Please try again.</div>
                 <button type="submit" id="submit-btn" class="btn btn-primary" style="width:100%; font-size:18px; padding:18px; margin-top:20px;">Submit for Review &rarr;</button>
@@ -1600,11 +1623,14 @@
                 description: document.getElementById('s-desc').value,
                 apply_url: document.getElementById('s-url').value,
                 logo: logoVal,
-                deadline: 'OPEN',
+                deadline: document.getElementById('s-deadline')?.value || 'N/A',
                 twitter_url: document.getElementById('s-twitter').value,
                 submitted_by: document.getElementById('s-submitter').value.replace('@', ''),
                 submitter_email: document.getElementById('s-email').value,
-                share_image: document.getElementById('s-detected-thumb')?.value || '',
+                share_image: document.getElementById('s-banner').value || document.getElementById('s-detected-thumb')?.value || '',
+                about_project: document.getElementById('s-about').value,
+                mission: document.getElementById('s-mission').value,
+                scope_requirements: document.getElementById('s-scope').value,
                 submission_token: token,
                 approval_status: 'pending',
                 submitted_at: new Date().toISOString(),

@@ -361,7 +361,9 @@
                         <div class="mono" style="font-size:10px; color:var(--muted); margin-bottom:12px; text-align:center; letter-spacing:1px;">TIME_REMAINING</div>
                         <div style="display:flex; justify-content:center; align-items:baseline; gap:12px;">
                             ${(() => {
-                                if (!item.deadline) return '<span class="mono" style="font-size:24px; font-weight:900;">OPEN</span>';
+                                if (!item.deadline || item.deadline === 'N/A' || item.deadline === 'OPEN') {
+                                    return '<span class="mono" style="font-size:24px; font-weight:900;">N/A</span>';
+                                }
                                 const diff = new Date(item.deadline) - new Date();
                                 if (diff <= 0) return '<span class="mono" style="font-size:24px; font-weight:900; color:var(--accent);">ENDED</span>';
                                 
