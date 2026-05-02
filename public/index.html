@@ -2360,9 +2360,8 @@
                 document.getElementById('p-email-notif').checked = data.email_notifications || false;
                 document.getElementById('p-tg-notif').checked = data.telegram_notifications || false;
                 
-                // Telegram handle is handled via input field
             }
-            }
+
         } catch (err) {
             console.error('Error loading profile:', err);
         }
