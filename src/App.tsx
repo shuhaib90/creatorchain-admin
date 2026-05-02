@@ -782,10 +782,58 @@ const Opportunities = () => {
     fetchData();
   }, []);
 
+  const broadcastExclusive = async (id: string) => {
+    const { data: item } = await supabase.from('opportunities').select('*').eq('id', id).single();
+    if (!item) return;
+
+    try {
+      const [{ data: profiles }, { data: subscribers }] = await Promise.all([
+        supabase.from('user_profiles').select('telegram_id, telegram_notifications'),
+        supabase.from('telegram_subscribers').select('chat_id')
+      ]);
+
+      const profileTgIds = (profiles || []).filter(p => p.telegram_notifications && p.telegram_id).map(p => p.telegram_id);
+      const globalTgIds = (subscribers || []).map(s => s.chat_id);
+      
+      // Include admin chat ID by default
+      const adminChatId = '2127320399';
+      const tgRecipients = Array.from(new Set([...profileTgIds, ...globalTgIds, adminChatId]));
+
+      if (tgRecipients.length === 0) {
+        alert('No Telegram subscribers found.');
+        return;
+      }
+
+      await fetch('https://creatorchain-web3-jobs.vercel.app/api/send-telegram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'exclusive_opportunity',
+          payload: {
+            chat_ids: tgRecipients,
+            id: item.id,
+            project_name: item.project_name,
+            category: item.type,
+            reward: item.reward || 'TBA',
+            description: item.title
+          }
+        })
+      });
+
+      alert(`🚀 Exclusive Broadcast sent to ${tgRecipients.length} users!`);
+    } catch (err: any) {
+      console.error('Exclusive Broadcast Error:', err);
+      alert('Broadcast failed: ' + err.message);
+    }
+  };
+
   const updateStatus = async (id: string, status: string) => {
     const { error } = await supabase.from('opportunities').update({ status }).eq('id', id);
     if (!error) {
       setOpps(opps.map(o => o.id === id ? { ...o, status } : o));
+      if (status === 'live') {
+        broadcastExclusive(id);
+      }
     } else {
       alert('Status update failed');
     }
@@ -897,6 +945,7 @@ const Opportunities = () => {
                   {opp.status === 'closed' && (
                     <button className="btn btn-primary" style={{ padding: '6px 12px', fontSize: '10px' }} onClick={() => updateStatus(opp.id, 'live')}>RE-OPEN</button>
                   )}
+                  <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '10px', marginLeft: '8px' }} onClick={() => broadcastExclusive(opp.id)} title="Broadcast update"><Radio size={12} /></button>
                   <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '10px', marginLeft: '8px' }} onClick={() => setEditingOpp(opp)}>EDIT</button>
                   <button 
                     className="btn btn-outline" 
