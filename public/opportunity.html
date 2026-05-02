@@ -357,20 +357,36 @@
                         </div>
                     </div>
 
-                    <div class="submission-stats">
-                        <div class="stat-item">
-                            <span class="stat-lbl">TIME_REMAINING</span>
-                            <span class="stat-val">
-                                ${(() => {
-                                    if (!item.deadline) return 'OPEN';
-                                    const diff = new Date(item.deadline) - new Date();
-                                    if (diff <= 0) return 'ENDED';
-                                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                                    if (days > 0) return `${days}D ${hours}H LEFT`;
-                                    return `${hours}H LEFT`;
-                                })()}
-                            </span>
+                    <div class="submission-stats" style="border:3px solid #000; padding:20px; background:#fff; box-shadow:6px 6px 0 #000; margin-bottom:25px;">
+                        <div class="mono" style="font-size:10px; color:var(--muted); margin-bottom:12px; text-align:center; letter-spacing:1px;">TIME_REMAINING</div>
+                        <div style="display:flex; justify-content:center; align-items:baseline; gap:12px;">
+                            ${(() => {
+                                if (!item.deadline) return '<span class="mono" style="font-size:24px; font-weight:900;">OPEN</span>';
+                                const diff = new Date(item.deadline) - new Date();
+                                if (diff <= 0) return '<span class="mono" style="font-size:24px; font-weight:900; color:var(--accent);">ENDED</span>';
+                                
+                                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                
+                                if (days > 0) {
+                                    return `
+                                        <div style="text-align:center;">
+                                            <span class="mono" style="font-size:32px; font-weight:900; line-height:1;">${days}</span>
+                                            <span class="mono" style="font-size:10px; display:block; color:var(--muted); margin-top:2px;">DAYS</span>
+                                        </div>
+                                        <div style="text-align:center;">
+                                            <span class="mono" style="font-size:32px; font-weight:900; line-height:1;">${hours}</span>
+                                            <span class="mono" style="font-size:10px; display:block; color:var(--muted); margin-top:2px;">HRS</span>
+                                        </div>
+                                    `;
+                                }
+                                return `
+                                    <div style="text-align:center;">
+                                        <span class="mono" style="font-size:32px; font-weight:900; line-height:1;">${hours}</span>
+                                        <span class="mono" style="font-size:10px; display:block; color:var(--muted); margin-top:2px;">HOURS</span>
+                                    </div>
+                                `;
+                            })()}
                         </div>
                     </div>
 
