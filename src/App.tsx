@@ -523,7 +523,115 @@ const UsersPage = () => {
   );
 };
 
+const EditOpportunityModal = ({ opportunity, onClose, onSave }: { opportunity: any, onClose: () => void, onSave: (updated: any) => void }) => {
+  const [formData, setFormData] = useState({ ...opportunity });
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    const { error } = await supabase.from('opportunities').update(formData).eq('id', opportunity.id);
+    if (!error) {
+      onSave(formData);
+      onClose();
+    } else {
+      alert('Error updating opportunity');
+    }
+    setSaving(false);
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="modal-content" 
+        onClick={e => e.stopPropagation()}
+        style={{ maxWidth: '800px' }}
+      >
+        <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h2 className="mono" style={{ fontSize: '18px', color: 'var(--primary)' }}>EDIT_OPPORTUNITY</h2>
+            <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>ID: {opportunity.id}</div>
+          </div>
+          <button onClick={onClose} style={{ background: 'var(--border)', border: 'none', color: 'white', cursor: 'pointer', width: '32px', height: '32px', borderRadius: '50%' }}>✕</button>
+        </div>
+        
+        <form onSubmit={handleSubmit} style={{ padding: '32px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            <div className="form-group">
+              <label>PROJECT_NAME</label>
+              <input className="form-input" value={formData.project_name} onChange={e => setFormData({...formData, project_name: e.target.value})} required />
+            </div>
+            <div className="form-group">
+              <label>TYPE</label>
+              <select className="form-input" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
+                <option value="ambassador">Ambassador</option>
+                <option value="discord">Discord</option>
+                <option value="bounty">Bounty</option>
+                <option value="developer">Developer</option>
+                <option value="campaign">Campaign</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>TITLE</label>
+            <input className="form-input" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
+          </div>
+
+          <div className="form-group">
+            <label>TEAM_CONTACT</label>
+            <input className="form-input" value={formData.team_contact || ''} onChange={e => setFormData({...formData, team_contact: e.target.value})} placeholder="@username or email" />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            <div className="form-group">
+              <label>TWITTER_URL</label>
+              <input className="form-input" value={formData.twitter_url || ''} onChange={e => setFormData({...formData, twitter_url: e.target.value})} placeholder="https://x.com/..." />
+            </div>
+            <div className="form-group">
+              <label>POST_LINK (OPTIONAL)</label>
+              <input className="form-input" value={formData.post_link || ''} onChange={e => setFormData({...formData, post_link: e.target.value})} placeholder="https://x.com/.../status/..." />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px', marginTop: '40px' }}>
+            <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={onClose}>ABORT</button>
+            <button type="submit" className="btn btn-primary" style={{ flex: 2 }} disabled={saving}>
+              {saving ? 'UPDATING...' : 'SAVE_CHANGES'}
+            </button>
+          </div>
+        </form>
+      </motion.div>
+    </div>
+  );
+};
+
 const ApplicantsModal = ({ opportunity, applicants, onClose }: { opportunity: any, applicants: any[], onClose: () => void }) => {
+  const downloadCSV = () => {
+    if (applicants.length === 0) return;
+    
+    const headers = ['ID', 'Applied At', 'Wallet Address', 'Portfolio Links', 'Message'];
+    const rows = applicants.map(app => [
+      app.id,
+      new Date(app.created_at).toLocaleString(),
+      app.user_id,
+      app.portfolio_links || 'N/A',
+      `"${app.message.replace(/"/g, '""')}"` // Escape quotes for CSV
+    ]);
+
+    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `applicants_${opportunity.project_name.toLowerCase().replace(/\s+/g, '_')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <motion.div 
@@ -538,7 +646,18 @@ const ApplicantsModal = ({ opportunity, applicants, onClose }: { opportunity: an
             <h2 className="mono" style={{ fontSize: '18px', color: 'var(--primary)' }}>APPLICANTS_FOR: {opportunity.project_name}</h2>
             <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{opportunity.title} • {applicants.length} SUBMISSIONS</div>
           </div>
-          <button onClick={onClose} style={{ background: 'var(--border)', border: 'none', color: 'white', cursor: 'pointer', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            {applicants.length > 0 && (
+              <button 
+                onClick={downloadCSV}
+                className="btn btn-primary" 
+                style={{ padding: '6px 16px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                DOWNLOAD_DATA (.CSV)
+              </button>
+            )}
+            <button onClick={onClose} style={{ background: 'var(--border)', border: 'none', color: 'white', cursor: 'pointer', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+          </div>
         </div>
         
         <div style={{ padding: '32px', overflowY: 'auto', flex: 1 }}>
@@ -589,6 +708,7 @@ const Opportunities = () => {
   const [opps, setOpps] = useState<any[]>([]);
   const [apps, setApps] = useState<any[]>([]);
   const [selectedOpp, setSelectedOpp] = useState<any | null>(null);
+  const [editingOpp, setEditingOpp] = useState<any | null>(null);
 
   const fetchData = async () => {
     const [{ data: oData }, { data: aData }] = await Promise.all([
@@ -609,6 +729,27 @@ const Opportunities = () => {
       setOpps(opps.map(o => o.id === id ? { ...o, status } : o));
     } else {
       alert('Status update failed');
+    }
+  };
+
+  const handleDeleteOpportunity = async (id: string) => {
+    if (confirm('⚠️ NUCLEAR_DELETE: This will erase the project AND all associated submissions. This cannot be undone. Proceed?')) {
+      // 1. Delete associated applications
+      const { error: appError } = await supabase.from('applications').delete().eq('opportunity_id', id);
+      if (appError) {
+        alert('Failed to delete associated applications: ' + appError.message);
+        return;
+      }
+
+      // 2. Delete the opportunity itself
+      const { error: oppError } = await supabase.from('opportunities').delete().eq('id', id);
+      if (!oppError) {
+        setOpps(opps.filter(o => o.id !== id));
+        setApps(apps.filter(a => a.opportunity_id !== id));
+        alert('Project and all submissions erased successfully.');
+      } else {
+        alert('Failed to delete opportunity: ' + oppError.message);
+      }
     }
   };
 
@@ -684,6 +825,14 @@ const Opportunities = () => {
                   {opp.status === 'live' && (
                     <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '10px' }} onClick={() => updateStatus(opp.id, 'pending')}>PAUSE</button>
                   )}
+                  <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '10px', marginLeft: '8px' }} onClick={() => setEditingOpp(opp)}>EDIT</button>
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ padding: '6px 12px', fontSize: '10px', marginLeft: '8px', color: 'var(--accent)', borderColor: 'rgba(255,62,0,0.3)' }} 
+                    onClick={() => handleDeleteOpportunity(opp.id)}
+                  >
+                    DELETE
+                  </button>
                 </td>
               </tr>
             ))}
@@ -736,6 +885,13 @@ const Opportunities = () => {
             opportunity={selectedOpp}
             applicants={apps.filter(a => a.opportunity_id === selectedOpp.id)}
             onClose={() => setSelectedOpp(null)}
+          />
+        )}
+        {editingOpp && (
+          <EditOpportunityModal 
+            opportunity={editingOpp}
+            onClose={() => setEditingOpp(null)}
+            onSave={(updated) => setOpps(opps.map(o => o.id === updated.id ? updated : o))}
           />
         )}
       </AnimatePresence>
