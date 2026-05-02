@@ -423,6 +423,46 @@ const UsersPage = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
 
+  const notifyUserBadge = async (user: any, type: 'verification' | 'badge', status: any) => {
+    if (!user.telegram_id) {
+      console.log('No telegram_id found for user:', user.username);
+      return;
+    }
+
+    let message = '';
+    if (type === 'verification') {
+      if (status) {
+        message = `🎊 <b>HAPPY NEWS!</b>\n\nHey @${user.username}, your builder profile has been <b>VERIFIED</b> by the CreatorChain Team! ✅\n\nYour trust badge is now live. High-performance projects can now see your verified status!`;
+      } else {
+        return; // Don't notify on removal unless needed
+      }
+    } else {
+      if (status) {
+        const level = status.toUpperCase();
+        message = `🎊 <b>BIG NEWS!</b>\n\nCongratulations @${user.username}! Admin has officially granted you the <b>${level} BADGE</b>! 🏆\n\nYour reputation within the ecosystem has increased. Stand tall, builder!`;
+      } else {
+        return;
+      }
+    }
+
+    try {
+      await fetch('https://creatorchain-web3-jobs.vercel.app/api/send-telegram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'custom',
+          payload: {
+            chat_ids: [user.telegram_id],
+            message: message
+          }
+        })
+      });
+      console.log('Notification sent to:', user.username);
+    } catch (err) {
+      console.error('Telegram notification failed:', err);
+    }
+  };
+
   const fetchUsers = async () => {
     setLoading(true);
     const { data } = await supabase.from('user_profiles').select('*').order('created_at', { ascending: false });
@@ -442,7 +482,12 @@ const UsersPage = () => {
       .eq('user_id', userId);
     
     if (!error) {
-      setUsers(users.map(u => u.user_id === userId ? { ...u, is_verified: !currentStatus } : u));
+      const updatedStatus = !currentStatus;
+      setUsers(users.map(u => u.user_id === userId ? { ...u, is_verified: updatedStatus } : u));
+      
+      // Notify User
+      const user = users.find(u => u.user_id === userId);
+      if (user) notifyUserBadge(user, 'verification', updatedStatus);
     } else {
       console.error('VERIFICATION_UPDATE_ERROR:', error);
       alert(`FAILED_TO_UPDATE_VERIFICATION: ${error.message} (${error.code})`);
@@ -459,6 +504,10 @@ const UsersPage = () => {
     
     if (!error) {
       setUsers(users.map(u => u.user_id === userId ? { ...u, badge_level: level } : u));
+      
+      // Notify User
+      const user = users.find(u => u.user_id === userId);
+      if (user) notifyUserBadge(user, 'badge', level);
     } else {
       console.error('BADGE_UPDATE_ERROR:', error);
       alert(`FAILED_TO_UPDATE_BADGE: ${error.message} (${error.code})`);
