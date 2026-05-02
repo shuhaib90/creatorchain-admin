@@ -432,14 +432,14 @@ const UsersPage = () => {
     let message = '';
     if (type === 'verification') {
       if (status) {
-        message = `🎊 <b>HAPPY NEWS!</b>\n\nHey @${user.username}, your builder profile has been <b>VERIFIED</b> by the CreatorChain Team! ✅\n\nYour trust badge is now live. High-performance projects can now see your verified status!`;
+        message = `🎊 <b>HAPPY NEWS!</b>\n\nHey @${user.username}, your builder profile has been <b>OFFICIALLY VERIFIED</b> by the CreatorChain Team! ✅\n\nYour trust badge is now live. High-performance projects can now see your verified status! Stand tall, builder! 🚀`;
       } else {
         return; // Don't notify on removal unless needed
       }
     } else {
       if (status) {
         const level = status.toUpperCase();
-        message = `🎊 <b>BIG NEWS!</b>\n\nCongratulations @${user.username}! Admin has officially granted you the <b>${level} BADGE</b>! 🏆\n\nYour reputation within the ecosystem has increased. Stand tall, builder!`;
+        message = `🎊 <b>LEGENDARY NEWS!</b>\n\nCongratulations @${user.username}! Admin has officially granted you the <b>${level} BADGE</b>! 🏆\n\nYour reputation within the ecosystem just leveled up. Keep building great things! 🚀`;
       } else {
         return;
       }
