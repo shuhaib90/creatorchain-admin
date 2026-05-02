@@ -1341,7 +1341,7 @@
             const card = document.createElement('div');
             card.className = `card ${item.featured?'featured':''} ${status?'expired':''}`;
             card.style.cursor = 'pointer';
-            card.onclick = () => window.open(`opportunity.html?id=${item.id}`, '_blank');
+            card.onclick = () => window.location.href = `opportunity.html?id=${item.id}`;
             
             card.innerHTML = `
                 <div class="card-urgency urgency-${item.urgency||'MEDIUM'}"></div>
@@ -1371,7 +1371,7 @@
                                 <div class="share-btn" onclick="toggleShareMenu(event, '${item.id}')" title="Share Project"><i data-lucide="share-2" style="width:14px; height:14px;"></i></div>
                             </div>
                             ${item.twitter_url ? `<a href="${item.twitter_url}" target="_blank" class="x-link-small" title="Follow on X" onclick="event.stopPropagation()">𝗫</a>` : ''}
-                            <a href="${item.is_exclusive ? `opportunity.html?id=${item.id}` : (item.apply_url||'#')}" target="_blank" class="btn btn-primary btn-sm" onclick="event.stopPropagation(); window.va && window.va('track', 'Apply_Click', { project: '${item.project.replace(/'/g, "\\'")}', title: '${item.title.replace(/'/g, "\\'")}' })">APPLY</a>
+                            <a href="${item.is_exclusive ? `opportunity.html?id=${item.id}` : (item.apply_url||'#')}" ${item.is_exclusive ? '' : 'target="_blank"'} class="btn btn-primary btn-sm" onclick="event.stopPropagation(); window.va && window.va('track', 'Apply_Click', { project: '${item.project.replace(/'/g, "\\'")}', title: '${item.title.replace(/'/g, "\\'")}' })">APPLY</a>
                         `}
                     </div>
                 </div>
