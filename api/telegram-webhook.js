@@ -5,10 +5,16 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://mwefmtmcljdsptcgowmb.s
 const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
 const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8299168473:AAFEH6t0sKDE0ZlFfQnfsU-v1p2ayg12QV4';
 
+let lastError = null;
+
 export default async (req, res) => {
   // Handle incoming Telegram Webhook
   console.log('--- TELEGRAM WEBHOOK RECEIVED ---');
   
+  if (req.method === 'GET') {
+      return res.status(200).json({ status: 'live', last_error: lastError });
+  }
+
   const body = req.body || {};
   const { message } = body;
   
@@ -65,14 +71,14 @@ export default async (req, res) => {
         
     } catch (err) {
         const errMsg = err.response?.data?.message || err.message;
+        lastError = `Start Error: ${errMsg}`;
         console.error('Webhook /start error:', errMsg);
         await sendSimpleMessage(chatId, `❌ <b>Initialization Error:</b> ${errMsg}`);
     }
   } else if (command === '/opportunities' || command === '/oopportunities') {
     try {
         if (!SUPABASE_KEY) {
-            await sendSimpleMessage(chatId, `❌ <b>Configuration Error:</b> SUPABASE_KEY is missing. Please check Vercel environment variables.`);
-            return res.status(200).send('OK');
+            throw new Error('SUPABASE_KEY is missing');
         }
 
         const headers = { 
@@ -143,12 +149,14 @@ export default async (req, res) => {
 
         await sendSimpleMessage(chatId, responseText);
     } catch (err) {
-        console.error('Opportunities fetch error:', err.response?.data || err.message);
+        const errMsg = err.response?.data?.message || err.message;
+        lastError = `Opps Error: ${errMsg}`;
+        console.error('Opportunities fetch error:', errMsg);
         await sendSimpleMessage(chatId, `❌ <b>Error fetching opportunities.</b> Please try again later.`);
     }
   } else if (command === '/chatid') {
     await sendSimpleMessage(chatId, `🆔 <b>YOUR_TELEGRAM_CHAT_ID:</b> <code>${chatId}</code>\n\nUse this to configure manual alerts if needed.`);
-  } else if (command === '/help' || command === '/start') {
+  } else if (command === '/help') {
      const helpText = `🛠 <b>CREATORCHAIN BOT HELP</b>\n\n` +
                       `Available commands:\n` +
                       `/opportunities - View all live Web3 opportunities\n` +
@@ -172,6 +180,7 @@ async function sendSimpleMessage(chatId, text) {
             parse_mode: 'HTML'
         });
     } catch (err) {
+        lastError = `Send Error: ${err.message}`;
         console.error('Failed to send response message:', err.message);
     }
 }
