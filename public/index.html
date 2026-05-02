@@ -1633,37 +1633,72 @@
 
     function openApplicationForm(oppId, projectName) {
         const content = `
-            <div style="padding:10px;">
-                <h2 style="font-size:24px; margin-bottom:10px;">Apply for ${projectName}</h2>
-                <p style="color:var(--muted); font-size:14px; margin-bottom:25px;">Fill out the details below to submit your application directly to the team.</p>
+            <div style="padding:10px; max-height:80vh; overflow-y:auto; scrollbar-width:thin;">
+                <h2 style="font-size:24px; margin-bottom:5px;">SUBMIT TO ${projectName.toUpperCase()}</h2>
+                <p style="color:var(--muted); font-size:12px; margin-bottom:20px; font-family:'Space Mono';">// COMPLETE ALL MANDATORY VERIFICATIONS BELOW</p>
                 
-                <form id="internal-app-form" onsubmit="submitInternalApplication(event, '${oppId}')">
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
-                        <div class="form-group">
-                            <label style="font-family:'Space Mono'; font-size:11px; color:var(--primary);">WALLET_ADDRESS</label>
-                            <input type="text" id="app-wallet" class="form-input" placeholder="0x..." required style="width:100%; box-sizing:border-box;">
+                <form id="internal-app-form" onsubmit="submitInternalApplication(event, '${oppId}')" style="display:flex; flex-direction:column; gap:25px;">
+                    <!-- WALLET ADDRESS -->
+                    <div class="form-group">
+                        <label style="display:block; font-weight:900; margin-bottom:8px; font-size:14px;">Wallet Address <span style="color:var(--accent)">*</span></label>
+                        <input type="text" id="app-wallet" class="form-input" placeholder="0x1234...abcd" required style="width:100%; box-sizing:border-box; padding:15px;">
+                        <p style="font-size:11px; color:var(--muted); mt:5px;">Enter your wallet address where you'd like to receive the prize if you win.</p>
+                    </div>
+
+                    <!-- SUBMISSION LINKS -->
+                    <div class="form-group">
+                        <label style="display:block; font-weight:900; margin-bottom:8px; font-size:14px;">Submission Link(s) <span style="color:var(--accent)">*</span></label>
+                        <input type="text" id="app-portfolio" class="form-input" placeholder="https://x.com/post/..." required style="width:100%; box-sizing:border-box; padding:15px;">
+                        <p style="font-size:11px; color:var(--muted); mt:5px;">Share link to your submission (if on multiple platforms, share both with a ",")</p>
+                    </div>
+
+                    <!-- TELEGRAM -->
+                    <div class="form-group">
+                        <label style="display:block; font-weight:900; margin-bottom:8px; font-size:14px;">Telegram Username <span style="color:var(--accent)">*</span></label>
+                        <input type="text" id="app-telegram" class="form-input" placeholder="@username" required style="width:100%; box-sizing:border-box; padding:15px;">
+                    </div>
+
+                    <!-- X MENTION CHECK -->
+                    <div class="form-group">
+                        <label style="display:block; font-weight:900; margin-bottom:8px; font-size:14px;">Have you tagged/mentioned the @tmbfun official account in your post on X? ( 🚨 Mandatory ) <span style="color:var(--accent)">*</span></label>
+                        <div style="display:flex; gap:15px;">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="app-mention" value="yes" required> Yes</label>
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="app-mention" value="no"> No</label>
                         </div>
-                        <div class="form-group">
-                            <label style="font-family:'Space Mono'; font-size:11px; color:var(--primary);">X_USERNAME</label>
-                            <input type="text" id="app-x" class="form-input" placeholder="@username" required style="width:100%; box-sizing:border-box;">
+                    </div>
+
+                    <!-- X FOLLOW CHECK -->
+                    <div class="form-group">
+                        <label style="display:block; font-weight:900; margin-bottom:8px; font-size:14px;">Have you followed the project official account on X? <a href="https://x.com/tmbfun" target="_blank" style="color:var(--primary); text-decoration:underline;">Follow Here</a> ( 🚨 Mandatory ) <span style="color:var(--accent)">*</span></label>
+                        <div style="display:flex; gap:15px;">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="app-follow" value="yes" required> Yes</label>
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="app-follow" value="no"> No, doing it now</label>
+                        </div>
+                    </div>
+
+                    <!-- X RETWEET CHECK -->
+                    <div class="form-group">
+                        <label style="display:block; font-weight:900; margin-bottom:8px; font-size:14px;">Have you retweeted this post: "dropping soon" ( 🚨 Mandatory ) <span style="color:var(--accent)">*</span></label>
+                        <div style="display:flex; gap:15px;">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="app-retweet" value="yes" required> Yes</label>
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="app-retweet" value="no"> No, doing it now</label>
+                        </div>
+                    </div>
+
+                    <!-- RIGHTS AGREEMENT -->
+                    <div class="form-group" style="background:rgba(0,0,0,0.05); padding:15px; border-left:4px solid var(--primary);">
+                        <label style="display:block; font-weight:900; margin-bottom:12px; font-size:13px; line-height:1.4;">Do you agree to grant the project permanent, worldwide commercial usage rights to your content — including the right to use, edit, redistribute, and sub-license it across all channels? <span style="color:var(--accent)">*</span></label>
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="app-rights" value="yes" required> Yes. I agree!</label>
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="app-rights" value="no"> No, I won't participate then.</label>
                         </div>
                     </div>
                     
-                    <div class="form-group" style="margin-bottom:20px;">
-                        <label style="font-family:'Space Mono'; font-size:11px; color:var(--primary);">PORTFOLIO_LINK / GITHUB</label>
-                        <input type="url" id="app-portfolio" class="form-input" placeholder="https://..." required style="width:100%; box-sizing:border-box;">
-                    </div>
+                    <div id="app-error" style="color:var(--accent); font-size:12px; margin-bottom:15px; display:none; padding:10px; border:1px solid var(--accent); background:rgba(255,62,0,0.05);"></div>
                     
-                    <div class="form-group" style="margin-bottom:25px;">
-                        <label style="font-family:'Space Mono'; font-size:11px; color:var(--primary);">PITCH_MESSAGE (WHY YOU?)</label>
-                        <textarea id="app-message" class="form-input" placeholder="Briefly describe your experience and why you're a good fit..." required style="width:100%; min-height:100px; box-sizing:border-box;"></textarea>
-                    </div>
-                    
-                    <div id="app-error" style="color:var(--accent); font-size:12px; margin-bottom:15px; display:none;"></div>
-                    
-                    <div style="display:flex; gap:15px;">
-                        <button type="button" class="btn btn-white" onclick="location.reload()" style="flex:1;">Cancel</button>
-                        <button type="submit" id="app-submit-btn" class="btn btn-primary" style="flex:2;">Submit Application &rarr;</button>
+                    <div style="display:flex; gap:15px; margin-top:10px; position:sticky; bottom:0; background:var(--white); padding:15px 0;">
+                        <button type="button" class="btn btn-white" onclick="location.reload()" style="flex:1;">CANCEL</button>
+                        <button type="submit" id="app-submit-btn" class="btn btn-primary" style="flex:2; font-weight:900; letter-spacing:1px;">EXECUTE_SUBMISSION &rarr;</button>
                     </div>
                 </form>
             </div>
@@ -1675,15 +1710,38 @@
         e.preventDefault();
         const btn = document.getElementById('app-submit-btn');
         const errEl = document.getElementById('app-error');
+        
+        // Final sanity checks for "No" answers on mandatory items
+        const mention = document.querySelector('input[name="app-mention"]:checked')?.value;
+        const follow = document.querySelector('input[name="app-follow"]:checked')?.value;
+        const retweet = document.querySelector('input[name="app-retweet"]:checked')?.value;
+        const rights = document.querySelector('input[name="app-rights"]:checked')?.value;
+
+        if (rights === 'no') {
+            errEl.style.display = 'block';
+            errEl.textContent = 'ERROR: You must agree to the usage rights to participate.';
+            return;
+        }
+
+        if (mention === 'no' || follow === 'no' || retweet === 'no') {
+            errEl.style.display = 'block';
+            errEl.textContent = 'WARNING: All mandatory tasks must be completed (Yes) before submitting.';
+            return;
+        }
+
         btn.disabled = true;
-        btn.textContent = 'SUBMITTING...';
+        btn.textContent = 'SYNCING_WITH_CORE...';
         
         try {
             const application = {
                 opportunity_id: oppId,
                 user_id: document.getElementById('app-wallet').value,
                 portfolio_links: document.getElementById('app-portfolio').value,
-                message: `[X: ${document.getElementById('app-x').value}] ${document.getElementById('app-message').value}`,
+                message: JSON.stringify({
+                    telegram: document.getElementById('app-telegram').value,
+                    verifications: { mention, follow, retweet },
+                    rights_agreed: rights === 'yes'
+                }),
                 created_at: new Date().toISOString()
             };
 
