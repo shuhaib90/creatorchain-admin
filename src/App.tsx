@@ -81,6 +81,32 @@ const Dashboard = () => {
 const EditListingModal = ({ listing, onClose, onSave }: { listing: any, onClose: () => void, onSave: (updated: any) => void }) => {
   const [formData, setFormData] = useState({ ...listing });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'logo' | 'share_image') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `public/ed_${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('logos')
+        .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('logos').getPublicUrl(filePath);
+      setFormData({ ...formData, [field]: data.publicUrl });
+    } catch (err: any) {
+      alert('Upload Failed: ' + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,8 +189,20 @@ const EditListingModal = ({ listing, onClose, onSave }: { listing: any, onClose:
           </div>
 
           <div className="form-group">
-            <label>LOGO_CDN_URL</label>
-            <input className="form-input" value={formData.logo || ''} onChange={e => setFormData({...formData, logo: e.target.value})} placeholder="https://..." />
+            <label>LOGO_CDN_URL / UPLOAD</label>
+            <div style={{ display: 'flex', gap: '15px' }}>
+              <input className="form-input" value={formData.logo || ''} onChange={e => setFormData({...formData, logo: e.target.value})} placeholder="https://..." style={{ flex: 1 }} />
+              <button 
+                type="button" 
+                className="btn btn-outline" 
+                onClick={() => document.getElementById('edit-logo-upload')?.click()}
+                disabled={uploading}
+                style={{ fontSize: '10px' }}
+              >
+                {uploading ? '...' : '📁 UPLOAD'}
+              </button>
+              <input id="edit-logo-upload" type="file" accept="image/*" onChange={e => handleImageUpload(e, 'logo')} style={{ display: 'none' }} />
+            </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '24px', alignItems: 'center' }}>
@@ -317,6 +355,11 @@ const Listings = () => {
     if (item) notifySubmitterOfStatus('listing', item, 'rejected', reason);
   };
 
+  const handleClose = async (id: string) => {
+    await supabase.from('listings').update({ approval_status: 'closed' }).eq('id', id);
+    setListings(listings.map(l => l.id === id ? { ...l, approval_status: 'closed' } : l));
+  };
+
   const notifySubmitterOfStatus = async (type: 'opportunity' | 'listing', item: any, status: string, reason?: string) => {
     const contactInfo = type === 'opportunity' ? item.team_contact : item.submitted_by;
     if (!contactInfo) return;
@@ -427,6 +470,12 @@ const Listings = () => {
                         <button className="btn btn-primary" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={() => handleApprove(l.id)}>APPROVE</button>
                         <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '11px', color: 'var(--accent)', borderColor: 'rgba(255,62,0,0.3)' }} onClick={() => handleReject(l.id)}>REJECT</button>
                       </>
+                    )}
+                    {l.approval_status === 'approved' && (
+                      <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={() => handleClose(l.id)}>CLOSE</button>
+                    )}
+                    {l.approval_status === 'closed' && (
+                      <button className="btn btn-primary" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={() => handleApprove(l.id)}>RE-OPEN</button>
                     )}
                     <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '11px' }} onClick={() => setEditingListing(l)}>EDIT</button>
                     <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '11px', color: 'var(--accent)', borderColor: 'rgba(255,62,0,0.2)' }} onClick={() => handleDelete(l.id)}>DELETE</button>
@@ -612,6 +661,32 @@ const UsersPage = () => {
 const EditOpportunityModal = ({ opportunity, onClose, onSave }: { opportunity: any, onClose: () => void, onSave: (updated: any) => void }) => {
   const [formData, setFormData] = useState({ ...opportunity });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'logo' | 'share_image') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `public/ed_${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('logos')
+        .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('logos').getPublicUrl(filePath);
+      setFormData({ ...formData, [field]: data.publicUrl });
+    } catch (err: any) {
+      alert('Upload Failed: ' + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -706,12 +781,24 @@ const EditOpportunityModal = ({ opportunity, onClose, onSave }: { opportunity: a
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             <div className="form-group">
-              <label>LOGO_URL</label>
-              <input className="form-input" value={formData.logo || ''} onChange={e => setFormData({...formData, logo: e.target.value})} placeholder="https://..." />
+              <label>LOGO_URL / UPLOAD</label>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <input className="form-input" value={formData.logo || ''} onChange={e => setFormData({...formData, logo: e.target.value})} placeholder="https://..." style={{ flex: 1 }} />
+                <button type="button" className="btn btn-outline" onClick={() => document.getElementById('opp-logo-upload')?.click()} disabled={uploading} style={{ fontSize: '9px' }}>
+                  {uploading ? '...' : '📁'}
+                </button>
+                <input id="opp-logo-upload" type="file" accept="image/*" onChange={e => handleImageUpload(e, 'logo')} style={{ display: 'none' }} />
+              </div>
             </div>
             <div className="form-group">
-              <label>BANNER_URL (SHARE_IMAGE)</label>
-              <input className="form-input" value={formData.share_image || ''} onChange={e => setFormData({...formData, share_image: e.target.value})} placeholder="https://..." />
+              <label>BANNER_URL / UPLOAD</label>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <input className="form-input" value={formData.share_image || ''} onChange={e => setFormData({...formData, share_image: e.target.value})} placeholder="https://..." style={{ flex: 1 }} />
+                <button type="button" className="btn btn-outline" onClick={() => document.getElementById('opp-banner-upload')?.click()} disabled={uploading} style={{ fontSize: '9px' }}>
+                  {uploading ? '...' : '📁'}
+                </button>
+                <input id="opp-banner-upload" type="file" accept="image/*" onChange={e => handleImageUpload(e, 'share_image')} style={{ display: 'none' }} />
+              </div>
             </div>
           </div>
 
