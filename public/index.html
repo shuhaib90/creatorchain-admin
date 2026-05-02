@@ -1241,7 +1241,8 @@
             apply_url: o.external_link,
             logo: '/logo.png', // Default for exclusive launches
             urgency: 'HIGH',   // Exclusive roles are prioritized
-            is_exclusive: true
+            is_exclusive: true,
+            post_link: o.post_link // For retweet task
         }));
 
         const allData = [...normalizedOpps, ...(listings || [])];
@@ -1631,9 +1632,10 @@
         copyLink(e, id);
     }
 
-    function openApplicationForm(oppId, projectName, twitterUrl) {
+    function openApplicationForm(oppId, projectName, twitterUrl, postLink) {
         const handle = twitterUrl ? '@' + twitterUrl.split('/').pop() : '@PROJECT';
         const projectLink = twitterUrl || '#';
+        const retweetLink = postLink || projectLink;
         
         const content = `
             <div style="padding:10px; max-height:80vh; overflow-y:auto; scrollbar-width:thin;">
@@ -1681,7 +1683,7 @@
 
                     <!-- X RETWEET CHECK -->
                     <div class="form-group">
-                        <label style="display:block; font-weight:900; margin-bottom:8px; font-size:14px;">Have you retweeted this post: "dropping soon" ( 🚨 Mandatory ) <span style="color:var(--accent)">*</span></label>
+                        <label style="display:block; font-weight:900; margin-bottom:8px; font-size:14px;">Have you retweeted this post: <a href="${retweetLink}" target="_blank" style="color:var(--primary); text-decoration:underline;">View Post</a> ( 🚨 Mandatory ) <span style="color:var(--accent)">*</span></label>
                         <div style="display:flex; gap:15px;">
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="app-retweet" value="yes" required> Yes</label>
                             <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="radio" name="app-retweet" value="no"> No, doing it now</label>
@@ -1806,7 +1808,7 @@
                     <div class="btn btn-white" style="flex:1; padding:20px; font-size:18px; text-align:center; background:#eee; color:#999; cursor:not-allowed; border-color:#ccc;">OPPORTUNITY CLOSED</div>
                 ` : `
                     ${item.is_exclusive ? `
-                        <button class="btn btn-primary" onclick="openApplicationForm('${item.id}', '${item.project.replace(/'/g, "\\'")}', '${item.twitter_url}')" style="flex:1; padding:20px; font-size:18px; text-align:center;">SUBMISSION &rarr;</button>
+                        <button class="btn btn-primary" onclick="openApplicationForm('${item.id}', '${item.project.replace(/'/g, "\\'")}', '${item.twitter_url}', '${item.post_link || ''}')" style="flex:1; padding:20px; font-size:18px; text-align:center;">SUBMISSION &rarr;</button>
                     ` : `
                         <a href="${item.apply_url}" target="_blank" class="btn btn-primary" style="flex:1; padding:20px; font-size:18px; text-align:center;">APPLY NOW &rarr;</a>
                     `}

@@ -166,6 +166,17 @@
                 <input type="url" id="external_link" class="form-input" placeholder="https://docs.yourproject.com">
             </div>
 
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Project X (Twitter) URL</label>
+                    <input type="url" id="twitter_url" class="form-input" placeholder="https://x.com/yourproject" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Specific Post Link (Optional)</label>
+                    <input type="url" id="post_link" class="form-input" placeholder="https://x.com/yourproject/status/...">
+                </div>
+            </div>
+
             <div class="form-group">
                 <label class="form-label">Your Contact (Email or X Handle)</label>
                 <input type="text" id="team_contact" class="form-input" placeholder="@yourhandle" required>
@@ -202,8 +213,11 @@
                 reward: document.getElementById('reward').value,
                 deadline: document.getElementById('deadline').value || null,
                 external_link: document.getElementById('external_link').value,
+                twitter_url: document.getElementById('twitter_url').value,
+                post_link: document.getElementById('post_link').value,
                 team_contact: document.getElementById('team_contact').value,
-                status: 'pending'
+                status: 'pending',
+                created_at: new Date().toISOString()
             };
 
             try {
