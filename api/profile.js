@@ -1,5 +1,5 @@
 import axios from 'axios';
-// Build Trigger: 2026-05-02
+// Build Retry Trigger: 2026-05-02 - v2
 
 // Config
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://mwefmtmcljdsptcgowmb.supabase.co';
