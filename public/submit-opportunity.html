@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Opportunity | CreatorChain</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --orange: #FF4D00;
+            --black: #000000;
+            --white: #FFFFFF;
+            --font-mono: 'Space Mono', monospace;
+        }
+
+        body { background: #fafafa; font-family: 'Inter', sans-serif; }
+        
+        .submit-container { max-width: 800px; margin: 80px auto; padding: 20px; }
+        
+        .brutal-header {
+            background: var(--black);
+            color: var(--white);
+            padding: 40px;
+            border: 4px solid var(--black);
+            box-shadow: 15px 15px 0 var(--orange);
+            margin-bottom: 50px;
+        }
+        .brutal-header h1 { font-size: 48px; font-weight: 900; margin: 0; text-transform: uppercase; letter-spacing: -2px; }
+        .brutal-header p { font-family: var(--font-mono); font-size: 14px; opacity: 0.8; margin-top: 10px; }
+
+        .brutal-card {
+            background: var(--white);
+            border: 4px solid var(--black);
+            padding: 40px;
+            box-shadow: 15px 15px 0 var(--black);
+        }
+
+        .form-group { margin-bottom: 30px; }
+        .form-label { display: block; font-weight: 900; text-transform: uppercase; font-size: 13px; margin-bottom: 10px; color: var(--black); letter-spacing: 1px; }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 15px;
+            border: 3px solid var(--black);
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 600;
+            background: #fff;
+            transition: 0.1s;
+            outline: none;
+        }
+        .form-input:focus, .form-textarea:focus { box-shadow: 6px 6px 0 var(--black); transform: translate(-2px, -2px); }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        .submit-btn {
+            background: var(--orange);
+            color: white;
+            border: 4px solid var(--black);
+            padding: 20px 40px;
+            font-size: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 8px 8px 0 var(--black);
+            transition: 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        .submit-btn:hover { transform: translate(-2px, -2px); box-shadow: 10px 10px 0 var(--black); }
+        .submit-btn:active { transform: translate(2px, 2px); box-shadow: 4px 4px 0 var(--black); }
+
+        #success-msg {
+            display: none;
+            background: #00E676;
+            color: #000;
+            padding: 30px;
+            border: 4px solid #000;
+            box-shadow: 10px 10px 0 #000;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        #success-msg h2 { margin: 0; font-weight: 900; text-transform: uppercase; }
+
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .brutal-header h1 { font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="submit-container">
+        <div id="success-msg">
+            <h2>Submission Received!</h2>
+            <p>Our admin will review your opportunity and make it live soon.</p>
+            <a href="index.html" style="font-weight:900; text-decoration:underline; color:#000; margin-top:15px; display:inline-block;">RETURN HOME</a>
+        </div>
+
+        <div class="brutal-header">
+            <h1>Pitch Your Project</h1>
+            <p>// ATTRACT TOP BUILDERS TO YOUR ECOSYSTEM</p>
+        </div>
+
+        <form id="opportunity-form" class="brutal-card">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Project Name</label>
+                    <input type="text" id="project_name" class="form-input" placeholder="e.g. CreatorChain" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Opportunity Title</label>
+                    <input type="text" id="title" class="form-input" placeholder="e.g. Senior Smart Contract Auditor" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Type of Opportunity</label>
+                <select id="type" class="form-select" required>
+                    <option value="developer_bounty">Developer Bounty</option>
+                    <option value="content_bounty">Content Bounty</option>
+                    <option value="ambassador">Ambassador Role</option>
+                    <option value="full_time">Full-time Role</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Detailed Description</label>
+                <textarea id="description" class="form-textarea" rows="6" placeholder="Describe the scope, requirements, and what you're looking for..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Required Skills</label>
+                <input type="text" id="skills" class="form-input" placeholder="Solidity, Rust, Video Editing, etc (comma separated)">
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Reward (Optional)</label>
+                    <input type="text" id="reward" class="form-input" placeholder="e.g. $500 / 1000 STRK">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Deadline (Optional)</label>
+                    <input type="date" id="deadline" class="form-input">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">External / Portfolio Link</label>
+                <input type="url" id="external_link" class="form-input" placeholder="https://docs.yourproject.com">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Your Contact (Email or X Handle)</label>
+                <input type="text" id="team_contact" class="form-input" placeholder="@yourhandle" required>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit-btn">
+                <i data-lucide="send"></i>
+                SUBMIT FOR REVIEW
+            </button>
+        </form>
+    </div>
+
+    <script type="module">
+        // Import existing config if possible, or use defaults
+        const supabaseUrl = 'https://mwefmtmcljdsptcgowmb.supabase.co';
+        // We'll try to get the key from localStorage or a global config if it exists
+        const supabaseKey = localStorage.getItem('supabase_anon_key') || ''; 
+
+        // For this demo, we'll try to use the global client if it exists
+        let supabase;
+        try {
+            // Check if supabase is already globally available (some of your other scripts might have initialized it)
+            if (window.supabase) {
+                supabase = window.supabase;
+            } else {
+                // Fallback or initialization logic
+                // supabase = supabase.createClient(supabaseUrl, supabaseKey);
+            }
+        } catch(e) {}
+
+        document.getElementById('opportunity-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Re-fetch key if missing (user might have it in a separate script)
+            const anonKey = localStorage.getItem('supabase_anon_key');
+            if (!anonKey) {
+                alert("Supabase config missing. Please ensure you are logged in.");
+                return;
+            }
+            
+            const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+            const supabase = createClient(supabaseUrl, anonKey);
+
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = 'SUBMITTING...';
+
+            const formData = {
+                project_name: document.getElementById('project_name').value,
+                title: document.getElementById('title').value,
+                type: document.getElementById('type').value,
+                description: document.getElementById('description').value,
+                skills: document.getElementById('skills').value,
+                reward: document.getElementById('reward').value,
+                deadline: document.getElementById('deadline').value || null,
+                external_link: document.getElementById('external_link').value,
+                team_contact: document.getElementById('team_contact').value,
+                status: 'pending'
+            };
+
+            try {
+                const { data, error } = await supabase
+                    .from('opportunities')
+                    .insert([formData]);
+
+                if (error) throw error;
+
+                document.getElementById('opportunity-form').style.display = 'none';
+                document.getElementById('success-msg').style.display = 'block';
+                window.scrollTo(0,0);
+            } catch (err) {
+                alert('Error submitting: ' + err.message);
+                btn.disabled = false;
+                btn.innerHTML = 'SUBMIT FOR REVIEW';
+            }
+        });
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

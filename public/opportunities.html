@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opportunities | CreatorChain</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --orange: #FF4D00;
+            --black: #000000;
+            --white: #FFFFFF;
+            --font-mono: 'Space Mono', monospace;
+        }
+
+        body { background: #fafafa; font-family: 'Inter', sans-serif; margin: 0; }
+        
+        .nav-header { 
+            background: #fff; 
+            border-bottom: 4px solid #000; 
+            padding: 20px 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100;
+        }
+        .logo { font-weight: 900; font-size: 24px; text-transform: uppercase; letter-spacing: -1px; }
+
+        .container { max-width: 1200px; margin: 60px auto; padding: 0 20px; }
+        
+        .page-header { margin-bottom: 50px; }
+        .page-header h1 { font-size: 56px; font-weight: 900; text-transform: uppercase; margin: 0; letter-spacing: -2px; }
+        
+        .opportunity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 30px; }
+        
+        .opp-card {
+            background: #fff;
+            border: 4px solid #000;
+            padding: 30px;
+            box-shadow: 10px 10px 0 #000;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .opp-card:hover { transform: translate(-4px, -4px); box-shadow: 14px 14px 0 var(--orange); }
+
+        .opp-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border: 2px solid #000;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-family: var(--font-mono);
+            background: #f0f0f0;
+        }
+        .opp-badge.dev { background: #E3F2FD; }
+        .opp-badge.content { background: #F3E5F5; }
+        .opp-badge.ambassador { background: #E8F5E9; }
+
+        .opp-project { font-family: var(--font-mono); font-size: 12px; color: #666; font-weight: 700; text-transform: uppercase; }
+        .opp-title { font-size: 24px; font-weight: 900; margin: 0; color: #000; line-height: 1.1; }
+        .opp-desc { font-size: 14px; color: #444; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .opp-meta { display: flex; gap: 15px; font-size: 12px; font-weight: 700; color: #888; border-top: 1px solid #eee; pt: 15px; padding-top: 15px; }
+        .opp-meta span { display: flex; align-items: center; gap: 5px; }
+
+        .apply-btn {
+            background: #000;
+            color: #fff;
+            border: 3px solid #000;
+            padding: 15px;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: auto;
+            transition: 0.1s;
+            text-align: center;
+        }
+        .apply-btn:hover { background: var(--orange); color: #fff; box-shadow: 5px 5px 0 #000; }
+
+        /* MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-content {
+            background: #fff;
+            border: 5px solid #000;
+            width: 100%;
+            max-width: 600px;
+            padding: 40px;
+            position: relative;
+            box-shadow: 20px 20px 0 var(--orange);
+        }
+        .modal-close { position: absolute; top: 20px; right: 20px; border: none; background: none; font-size: 24px; font-weight: 900; cursor: pointer; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-weight: 900; text-transform: uppercase; font-size: 12px; margin-bottom: 8px; }
+        .form-input, .form-textarea { width: 100%; padding: 12px; border: 3px solid #000; font-weight: 600; outline: none; }
+
+        @media (max-width: 600px) {
+            .page-header h1 { font-size: 36px; }
+            .opportunity-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="nav-header">
+        <div class="logo">CREATORCHAIN</div>
+        <a href="submit-opportunity.html" class="opp-badge" style="background: var(--orange); color:#fff; border-color: #000;">+ SUBMIT OPPORTUNITY</a>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Active Projects</h1>
+            <p style="font-weight:700; color:#666;">Bounties, Grants, and Roles for the CreatorChain Community.</p>
+        </div>
+
+        <div id="opp-grid" class="opportunity-grid">
+            <!-- Loading state -->
+            <div style="font-family: var(--font-mono);">SYNCHRONIZING OPPORTUNITIES...</div>
+        </div>
+    </div>
+
+    <!-- Apply Modal -->
+    <div id="apply-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <h2 id="modal-title" style="font-size: 32px; font-weight: 900; text-transform: uppercase; margin: 0 0 10px 0;">Apply Now</h2>
+            <p id="modal-project" style="font-family: var(--font-mono); font-size: 12px; margin-bottom: 30px;"></p>
+            
+            <form id="apply-form">
+                <input type="hidden" id="opportunity_id">
+                <div class="form-group">
+                    <label class="form-label">Why are you the best fit?</label>
+                    <textarea id="apply-message" class="form-textarea" rows="5" placeholder="Share your experience and how you can help..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Portfolio / Relevant Links</label>
+                    <input type="text" id="apply-links" class="form-input" placeholder="GitHub, Behance, X, etc.">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Your Wallet Address</label>
+                    <input type="text" id="apply-wallet" class="form-input" placeholder="0x..." required>
+                </div>
+                <button type="submit" class="apply-btn" style="width: 100%; font-size: 18px; margin-top: 20px;">SUBMIT APPLICATION &rarr;</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        const supabaseUrl = 'https://mwefmtmcljdsptcgowmb.supabase.co';
+        const anonKey = localStorage.getItem('supabase_anon_key');
+
+        let supabase;
+        if (anonKey) {
+            const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+            supabase = createClient(supabaseUrl, anonKey);
+            loadOpportunities();
+        } else {
+            document.getElementById('opp-grid').innerHTML = 'Please log in to view opportunities.';
+        }
+
+        async function loadOpportunities() {
+            const { data, error } = await supabase
+                .from('opportunities')
+                .select('*')
+                .eq('status', 'live')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            const grid = document.getElementById('opp-grid');
+            grid.innerHTML = '';
+
+            if (data.length === 0) {
+                grid.innerHTML = '<div style="font-family: var(--font-mono);">NO LIVE OPPORTUNITIES AT THE MOMENT. CHECK BACK SOON!</div>';
+                return;
+            }
+
+            data.forEach(opp => {
+                const card = document.createElement('div');
+                card.className = 'opp-card';
+                card.innerHTML = `
+                    <div class="opp-badge ${opp.type}">${opp.type.replace('_', ' ')}</div>
+                    <div>
+                        <div class="opp-project">${opp.project_name}</div>
+                        <h3 class="opp-title">${opp.title}</h3>
+                    </div>
+                    <p class="opp-desc">${opp.description}</p>
+                    <div class="opp-meta">
+                        ${opp.reward ? `<span><i data-lucide="award"></i> ${opp.reward}</span>` : ''}
+                        ${opp.deadline ? `<span><i data-lucide="calendar"></i> ${opp.deadline}</span>` : ''}
+                    </div>
+                    <button class="apply-btn" onclick="openModal('${opp.id}', '${opp.title.replace(/'/g, "\\'")}', '${opp.project_name.replace(/'/g, "\\'")}')">APPLY DIRECTLY</button>
+                `;
+                grid.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        window.openModal = (id, title, project) => {
+            document.getElementById('opportunity_id').value = id;
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-project').innerText = `FOR ${project.toUpperCase()}`;
+            document.getElementById('apply-modal').style.display = 'flex';
+        };
+
+        window.closeModal = () => {
+            document.getElementById('apply-modal').style.display = 'none';
+        };
+
+        document.getElementById('apply-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+            btn.innerHTML = 'SUBMITTING...';
+
+            const application = {
+                opportunity_id: document.getElementById('opportunity_id').value,
+                user_id: document.getElementById('apply-wallet').value,
+                message: document.getElementById('apply-message').value,
+                portfolio_links: document.getElementById('apply-links').value,
+                created_at: new Date()
+            };
+
+            const { data, error } = await supabase
+                .from('applications')
+                .insert([application]);
+
+            if (error) {
+                alert('Error: ' + error.message);
+                btn.disabled = false;
+                btn.innerHTML = 'SUBMIT APPLICATION &rarr;';
+            } else {
+                alert('Application sent successfully!');
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

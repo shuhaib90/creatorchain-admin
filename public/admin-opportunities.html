@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opportunity Admin | CreatorChain</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --orange: #FF4D00;
+            --black: #000000;
+            --white: #FFFFFF;
+            --font-mono: 'Space Mono', monospace;
+        }
+
+        body { background: #fafafa; font-family: 'Inter', sans-serif; margin: 0; padding-bottom: 100px; }
+        
+        .admin-nav { background: #000; color: #fff; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .admin-nav h1 { font-size: 18px; font-weight: 900; text-transform: uppercase; margin: 0; }
+
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+
+        .dashboard-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
+        .dashboard-header h2 { font-size: 40px; font-weight: 900; text-transform: uppercase; margin: 0; }
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 30px; }
+        .tab-btn {
+            background: #fff;
+            border: 3px solid #000;
+            padding: 10px 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .tab-btn.active { background: #000; color: #fff; box-shadow: 4px 4px 0 var(--orange); }
+
+        .admin-section { display: none; }
+        .admin-section.active { display: block; }
+
+        /* OPPORTUNITY TABLE */
+        .brutal-table { width: 100%; border-collapse: collapse; border: 4px solid #000; background: #fff; box-shadow: 10px 10px 0 #000; }
+        .brutal-table th { background: #f0f0f0; border-bottom: 4px solid #000; padding: 15px; text-align: left; font-weight: 900; text-transform: uppercase; font-size: 11px; }
+        .brutal-table td { border-bottom: 1px solid #eee; padding: 15px; font-size: 13px; }
+        .brutal-table tr:last-child td { border-bottom: none; }
+
+        .status-badge {
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            border: 1px solid #000;
+        }
+        .status-pending { background: #FFF9C4; }
+        .status-live { background: #C8E6C9; }
+        .status-rejected { background: #FFCDD2; }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: 2px solid #000;
+            font-weight: 900;
+            font-size: 10px;
+            text-transform: uppercase;
+            cursor: pointer;
+            background: #fff;
+            margin-right: 5px;
+        }
+        .btn-approve { background: #00E676; }
+        .btn-reject { background: #FF5252; color: #fff; }
+        .btn-view { background: #000; color: #fff; }
+
+        /* APPLICANT CARDS */
+        .applicant-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .applicant-card {
+            background: #fff;
+            border: 3px solid #000;
+            padding: 25px;
+            box-shadow: 8px 8px 0 #000;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .applicant-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .applicant-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; background: #f9f9f9; padding: 15px; border: 1px solid #eee; }
+        .meta-item { display: flex; flex-direction: column; }
+        .meta-label { font-size: 9px; font-weight: 900; color: #888; text-transform: uppercase; }
+        .meta-val { font-size: 12px; font-weight: 700; color: #000; word-break: break-all; }
+
+        .hire-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .contact-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #000;
+            font-weight: 900;
+            font-size: 11px;
+            text-transform: uppercase;
+            text-align: center;
+            text-decoration: none;
+            color: #000;
+            background: #fff;
+        }
+        .contact-btn:hover { background: #f0f0f0; }
+        .contact-btn.x { background: #000; color: #fff; }
+
+        @media (max-width: 800px) {
+            .brutal-table { display: block; overflow-x: auto; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="admin-nav">
+        <h1>CREATORCHAIN // OPS CENTER</h1>
+        <div style="font-family: var(--font-mono); font-size: 11px;">ADMIN AUTHORIZED</div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <div>
+                <h2>Opportunity Hub</h2>
+                <p style="font-weight:700; color:#666;">Manage submissions and review talent pipeline.</p>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showSection('pending-sec')">Pending Requests</button>
+            <button class="tab-btn" onclick="showSection('live-sec')">Live Opps</button>
+            <button class="tab-btn" onclick="showSection('applicants-sec')">All Applicants</button>
+        </div>
+
+        <!-- PENDING SECTION -->
+        <div id="pending-sec" class="admin-section active">
+            <table class="brutal-table">
+                <thead>
+                    <tr>
+                        <th>Project</th>
+                        <th>Opportunity</th>
+                        <th>Type</th>
+                        <th>Contact</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="pending-list">
+                    <!-- Dynamic content -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- LIVE SECTION -->
+        <div id="live-sec" class="admin-section">
+            <table class="brutal-table">
+                <thead>
+                    <tr>
+                        <th>Project</th>
+                        <th>Opportunity</th>
+                        <th>Type</th>
+                        <th>Applicants</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="live-list">
+                    <!-- Dynamic content -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- APPLICANTS SECTION -->
+        <div id="applicants-sec" class="admin-section">
+            <div id="applicant-list" class="applicant-grid">
+                <!-- Dynamic cards -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        const supabaseUrl = 'https://mwefmtmcljdsptcgowmb.supabase.co';
+        const anonKey = localStorage.getItem('supabase_anon_key');
+
+        let supabase;
+        if (anonKey) {
+            const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+            supabase = createClient(supabaseUrl, anonKey);
+            loadData();
+        }
+
+        async function loadData() {
+            loadPending();
+            loadLive();
+            loadApplicants();
+        }
+
+        async function loadPending() {
+            const { data, error } = await supabase
+                .from('opportunities')
+                .select('*')
+                .eq('status', 'pending');
+
+            const list = document.getElementById('pending-list');
+            list.innerHTML = data.length ? '' : '<tr><td colspan="5">No pending requests</td></tr>';
+            
+            data.forEach(opp => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight:900;">${opp.project_name}</td>
+                    <td>${opp.title}</td>
+                    <td><span class="status-badge">${opp.type}</span></td>
+                    <td>${opp.team_contact}</td>
+                    <td>
+                        <button class="action-btn btn-approve" onclick="updateStatus('${opp.id}', 'live')">Approve</button>
+                        <button class="action-btn btn-reject" onclick="updateStatus('${opp.id}', 'rejected')">Reject</button>
+                    </td>
+                `;
+                list.appendChild(tr);
+            });
+        }
+
+        async function loadLive() {
+            const { data, error } = await supabase
+                .from('opportunities')
+                .select('*, applications(id)')
+                .eq('status', 'live');
+
+            const list = document.getElementById('live-list');
+            list.innerHTML = data.length ? '' : '<tr><td colspan="6">No live opportunities</td></tr>';
+            
+            data.forEach(opp => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight:900;">${opp.project_name}</td>
+                    <td>${opp.title}</td>
+                    <td>${opp.type}</td>
+                    <td style="font-weight:900;">${opp.applications ? opp.applications.length : 0}</td>
+                    <td><span class="status-badge status-live">Live</span></td>
+                    <td>
+                        <button class="action-btn btn-reject" onclick="updateStatus('${opp.id}', 'pending')">Pause</button>
+                    </td>
+                `;
+                list.appendChild(tr);
+            });
+        }
+
+        async function loadApplicants() {
+            // Join with user_profiles if needed, but for now we'll show raw data as requested
+            const { data, error } = await supabase
+                .from('applications')
+                .select('*, opportunities(project_name, title)');
+
+            const list = document.getElementById('applicant-list');
+            list.innerHTML = data.length ? '' : '<div>No applications yet.</div>';
+            
+            data.forEach(app => {
+                const card = document.createElement('div');
+                card.className = 'applicant-card';
+                card.innerHTML = `
+                    <div class="applicant-header">
+                        <div>
+                            <div class="meta-label">APPLYING FOR</div>
+                            <div style="font-weight:900; font-size:16px;">${app.opportunities.project_name} - ${app.opportunities.title}</div>
+                        </div>
+                        <div style="font-family: var(--font-mono); font-size:10px;">${new Date(app.created_at).toLocaleDateString()}</div>
+                    </div>
+                    
+                    <div class="meta-item">
+                        <div class="meta-label">PITCH MESSAGE</div>
+                        <p style="margin:5px 0; font-size:14px; line-height:1.4;">${app.message}</p>
+                    </div>
+
+                    <div class="applicant-meta">
+                        <div class="meta-item">
+                            <div class="meta-label">WALLET ADDRESS</div>
+                            <div class="meta-val">${app.user_id}</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">PORTFOLIO / LINKS</div>
+                            <div class="meta-val">${app.portfolio_links || 'N/A'}</div>
+                        </div>
+                    </div>
+
+                    <div class="hire-actions">
+                        <a href="mailto:?subject=Regarding your application for ${app.opportunities.title}" class="contact-btn">EMAIL APPLICANT</a>
+                        <a href="#" class="contact-btn x">CONTACT VIA X</a>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        window.updateStatus = async (id, status) => {
+            const { data, error } = await supabase
+                .from('opportunities')
+                .update({ status: status })
+                .eq('id', id);
+
+            if (error) alert(error.message);
+            else loadData();
+        };
+
+        window.showSection = (id) => {
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+        };
+
+        window.showSection = (id) => {
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            // Re-finding the button because global event is tricky with modules
+            const btns = document.querySelectorAll('.tab-btn');
+            btns.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(id)) btn.classList.add('active');
+            });
+        };
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>
