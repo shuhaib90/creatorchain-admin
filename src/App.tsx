@@ -1,4 +1,4 @@
-// CreatorChain Admin Terminal v2.1.7 - UI Refinement Force
+// CreatorChain Admin Terminal v2.1.8 - Database Sync Force
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { 
