@@ -246,9 +246,15 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Your Contact (Email or X Handle)</label>
-                <input type="text" id="team_contact" class="form-input" placeholder="@yourhandle" required>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Contact Email <span class="req">*</span></label>
+                    <input type="email" id="submitter_email" class="form-input" placeholder="For status updates" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Telegram Username (Optional)</label>
+                    <input type="text" id="submitter_telegram" class="form-input" placeholder="@username">
+                </div>
             </div>
 
             <button type="submit" class="submit-btn" id="submit-btn">
@@ -316,7 +322,8 @@
                     external_link: document.getElementById('external_link').value,
                     twitter_url: document.getElementById('twitter_url').value,
                     post_link: document.getElementById('post_link').value,
-                    team_contact: document.getElementById('team_contact').value,
+                    submitter_email: document.getElementById('submitter_email').value,
+                    team_contact: document.getElementById('submitter_telegram').value || '',
                     status: 'pending',
                     created_at: new Date().toISOString()
                 };
