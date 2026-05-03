@@ -441,7 +441,7 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
                 return;
             }
 
-            await fetch('/api/send-telegram', {
+            await fetch('https://creatorchain.site/api/send-telegram', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -509,6 +509,10 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
     }
 
     async function approveListing(id) {
+        // Fetch the listing first so we have the submitter's info
+        const { data: listing } = await db.from('listings').select('*').eq('id', id).single();
+        if (!listing) return;
+
         await db.from('listings').update({ 
             approval_status: 'approved', 
             reviewed_at: new Date().toISOString() 
@@ -516,6 +520,47 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
         
         showToast('✓ Listing Approved!');
         
+        // Send Submitter Notification
+        try {
+            if (listing.submitter_email && listing.submitter_email.includes('@')) {
+                await fetch('https://creatorchain.site/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'opportunity_approved',
+                        payload: {
+                            to: listing.submitter_email,
+                            project_name: listing.project,
+                            title: listing.title
+                        }
+                    })
+                });
+                console.log("Sent approval email to:", listing.submitter_email);
+            } else if (listing.submitted_by) {
+                // Try to find telegram ID based on username
+                const handle = listing.submitted_by.replace('@', '').trim();
+                const { data: profiles } = await db.from('user_profiles').select('telegram_id, username');
+                const submitterProfile = (profiles || []).find(p => p.username && p.username.toLowerCase() === handle.toLowerCase());
+                
+                if (submitterProfile && submitterProfile.telegram_id) {
+                    await fetch('https://creatorchain.site/api/send-telegram', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'opportunity_approved',
+                            payload: {
+                                chat_ids: [submitterProfile.telegram_id],
+                                project_name: listing.project
+                            }
+                        })
+                    });
+                    console.log("Sent approval telegram to:", submitterProfile.telegram_id);
+                }
+            }
+        } catch (err) {
+            console.error('Submitter Notification Error:', err);
+        }
+
         // Automatically trigger broadcast to matching builders
         notifyMatchingBuilders(id);
         
@@ -631,7 +676,7 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
             // 4. Send Email Broadcast to ALL
             if (emailRecipients.length > 0) {
                 try {
-                    await fetch('/api/send-email', {
+                    await fetch('https://creatorchain.site/api/send-email', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -649,7 +694,7 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
 
             if (tgRecipients.length > 0) {
                 try {
-                    const tgResp = await fetch('/api/send-telegram', {
+                    const tgResp = await fetch('https://creatorchain.site/api/send-telegram', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -728,7 +773,7 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
         // Send Telegram Notification if badge is set and user has Telegram connected
         if (newBadge && profile.telegram_id) {
             try {
-                await fetch('/api/send-telegram', {
+                await fetch('https://creatorchain.site/api/send-telegram', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
