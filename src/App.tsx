@@ -1,4 +1,4 @@
-// CreatorChain Admin Terminal v2.1.6 - Final Syntax Verification
+// CreatorChain Admin Terminal v2.1.7 - UI Refinement Force
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { 
