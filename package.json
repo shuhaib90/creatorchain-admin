@@ -20,6 +20,7 @@
   "homepage": "https://github.com/shuhaib90/creatorchain-job-board#readme",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@supabase/supabase-js": "^2.105.1",
     "@vercel/analytics": "^2.0.1",
     "axios": "^1.14.0",
     "resend": "^6.12.2"
