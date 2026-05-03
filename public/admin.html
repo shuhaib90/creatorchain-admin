@@ -115,6 +115,7 @@
         <div class="admin-tab active" onclick="switchTab('tab-pending')">PENDING REVIEW (<span id="pending-count">0</span>)</div>
         <div class="admin-tab" onclick="switchTab('tab-exclusives')">EXCLUSIVES (<span id="exclusive-pending-count">0</span>)</div>
         <div class="admin-tab" onclick="switchTab('tab-all')">ALL LISTINGS</div>
+        <div class="admin-tab" onclick="switchTab('tab-users')">USER MANAGEMENT</div>
         <div class="admin-tab" onclick="switchTab('tab-add')">ADD / EDIT</div>
     </div>
 
@@ -140,6 +141,25 @@
         <div id="admin-list">
             <!-- Dynamic Table -->
         </div>
+    </div>
+
+    <!-- USERS TAB -->
+    <div id="tab-users" class="tab-content">
+        <h3 class="mono" style="margin-bottom:20px;">BUILDER NETWORK DIRECTORY</h3>
+        <table class="listings-table">
+            <thead>
+                <tr>
+                    <th>BUILDER</th>
+                    <th>HANDLE</th>
+                    <th>BADGE</th>
+                    <th>VERIFIED</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody id="users-list">
+                <!-- Dynamic Content -->
+            </tbody>
+        </table>
     </div>
 
     <!-- ADD/EDIT TAB -->
@@ -252,9 +272,11 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        // Find tab by text content to set active
-        const tabMap = {'tab-pending':0, 'tab-exclusives':1, 'tab-all':2, 'tab-add':3};
+        // Find tab by ID map
+        const tabMap = {'tab-pending':0, 'tab-exclusives':1, 'tab-all':2, 'tab-users':3, 'tab-add':4};
         document.querySelectorAll('.admin-tab')[tabMap[id]].classList.add('active');
+        
+        if (id === 'tab-users') loadUsers();
     }
 
     function showToast(msg, type='success') {
@@ -287,6 +309,7 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
         loadPendingListings();
         loadExclusives();
         loadAllListings();
+        loadUsers();
         subscribeRealtime();
     }
 
@@ -652,6 +675,90 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
             console.error('Broadcast Error:', err);
             showToast('Broadcast failed: ' + err.message, 'error');
         }
+    }
+    
+    async function loadUsers() {
+        const { data: users, error } = await db.from('user_profiles').select('*').order('created_at', { ascending: false });
+        if (error) {
+            console.error('Fetch Users Error:', error);
+            return;
+        }
+
+        const list = document.getElementById('users-list');
+        list.innerHTML = users.map(u => `
+            <tr>
+                <td><strong>${u.username || 'Anonymous'}</strong><br><small>${u.user_id.substring(0,8)}...</small></td>
+                <td><span class="mono">${u.telegram || '—'}</span></td>
+                <td>
+                    <select onchange="updateUserBadge('${u.id}', this.value)" class="btn btn-sm" style="background:#fff;">
+                        <option value="" ${!u.badge_level ? 'selected' : ''}>None</option>
+                        <option value="verified" ${u.badge_level === 'verified' ? 'selected' : ''}>Verified</option>
+                        <option value="pro" ${u.badge_level === 'pro' ? 'selected' : ''}>Pro</option>
+                        <option value="legend" ${u.badge_level === 'legend' ? 'selected' : ''}>Legend</option>
+                    </select>
+                </td>
+                <td>
+                    <button onclick="toggleUserVerification('${u.id}', ${u.is_verified})" class="btn btn-sm ${u.is_verified ? 'btn-primary' : 'btn-white'}">
+                        ${u.is_verified ? 'VERIFIED' : 'UNVERIFIED'}
+                    </button>
+                </td>
+                <td>
+                    <div style="display:flex; gap:5px;">
+                         <button class="btn btn-sm" onclick="alert('User ID: ${u.id}\\nAuth ID: ${u.user_id}')">INFO</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function updateUserBadge(profileId, newBadge) {
+        const { data: profile, error } = await db.from('user_profiles')
+            .update({ badge_level: newBadge })
+            .eq('id', profileId)
+            .select()
+            .single();
+
+        if (error) {
+            showToast('Update Failed: ' + error.message, 'error');
+            return;
+        }
+
+        showToast(`✓ Badge updated to ${newBadge || 'None'}`);
+
+        // Send Telegram Notification if badge is set and user has Telegram connected
+        if (newBadge && profile.telegram_id) {
+            try {
+                await fetch('/api/send-telegram', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'badge_update',
+                        payload: {
+                            chat_ids: [profile.telegram_id],
+                            badge_level: newBadge,
+                            username: profile.username || 'builder'
+                        }
+                    })
+                });
+                showToast('🚀 Telegram Alert Sent!');
+            } catch (tgErr) {
+                console.error('Badge Alert Error:', tgErr);
+            }
+        }
+    }
+
+    async function toggleUserVerification(profileId, currentStatus) {
+        const { error } = await db.from('user_profiles')
+            .update({ is_verified: !currentStatus })
+            .eq('id', profileId);
+
+        if (error) {
+            showToast('Update Failed: ' + error.message, 'error');
+            return;
+        }
+
+        showToast(`✓ Verification status updated`);
+        loadUsers();
     }
 
     function subscribeRealtime() {

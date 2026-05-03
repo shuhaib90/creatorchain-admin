@@ -89,6 +89,14 @@ export default async (req, res) => {
                 `${payload.telegram ? `<b>Telegram:</b> ${payload.telegram}\n` : ''}` +
                 `\n<b>Message:</b>\n<i>${payload.message}</i>\n\n` +
                 `🤝 <a href="https://creatorchain.site/talent.html">Go to CreatorChain</a>`;
+    } else if (type === 'badge_update') {
+      const badge = payload.badge_level || 'Verified';
+      const isPro = badge.toLowerCase() === 'pro';
+      const icon = isPro ? '💎' : '✅';
+      message = `${icon} <b>LEVEL UP: ACHIEVEMENT UNLOCKED</b> ${icon}\n\n` +
+                `Congratulations! Your profile has been upgraded to <b>${badge.toUpperCase()}</b> status.\n\n` +
+                `Your new status is now visible to all teams and employers on the network. Keep building!\n\n` +
+                `🚀 <a href="https://creatorchain.site/profile.html?u=${payload.username}">VIEW YOUR PROFILE</a>`;
     } else if (type === 'custom') {
       message = payload.message;
     } else {
