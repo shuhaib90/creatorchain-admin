@@ -8,11 +8,13 @@
     <link rel="icon" type="image/png" href="/logo.png">
     <link rel="apple-touch-icon" href="/logo.png">
     <meta name="description" content="The unfiltered aggregator for the best roles in the decentralized economy. Built for creators, community leads, and devs.">
-    <meta property="og:title" content="CreatorChain | Web3 Job Aggregator">
+    <meta property="og:title" content="CreatorChain | Web3 Aggregator">
     <meta property="og:description" content="Find bounties, jobs, and paid campaigns in Web3.">
-    <meta property="og:image" content="/logo.png">
+    <meta property="og:image" content="/social-preview.png">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="/logo.png">
+    <meta name="twitter:title" content="CreatorChain | Web3 Aggregator">
+    <meta name="twitter:description" content="Find bounties, jobs, and paid campaigns in Web3.">
+    <meta name="twitter:image" content="/social-preview.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -2467,24 +2469,23 @@
 
         const payload = {
             user_id: currentUserProfileId,
-            username: document.getElementById('p-twitter').value.replace('@', '') || `user_${Date.now()}`,
-            name: document.getElementById('p-name').value,
+            username: document.getElementById('p-twitter').value.replace('@', '').trim() || `user_${Date.now()}`,
+            name: document.getElementById('p-name').value.trim(),
             avatar_url: finalAvatarUrl,
-            bio: bio,
-            github: document.getElementById('p-github').value,
-            twitter: document.getElementById('p-twitter').value,
-            discord: document.getElementById('p-discord').value,
-            telegram: document.getElementById('p-telegram').value,
-            linkedin: document.getElementById('p-linkedin').value,
-            website: document.getElementById('p-website').value,
+            bio: bio.trim(),
+            github: document.getElementById('p-github').value.trim(),
+            twitter: document.getElementById('p-twitter').value.trim(),
+            discord: document.getElementById('p-discord').value.trim(),
+            telegram: document.getElementById('p-telegram').value.trim(),
+            linkedin: document.getElementById('p-linkedin').value.trim(),
+            website: document.getElementById('p-website').value.trim(),
             experience_level: document.getElementById('p-exp-level').value,
             work_preference: document.getElementById('p-work-pref').value,
             interests: interestsVal,
             skills: selectedProfileSkills,
-            current_employer: document.getElementById('p-employer').value,
-            location: document.getElementById('p-location').value,
-            email: document.getElementById('p-email').value,
-            telegram: document.getElementById('p-telegram').value,
+            current_employer: document.getElementById('p-employer').value.trim(),
+            location: document.getElementById('p-location').value.trim(),
+            email: document.getElementById('p-email').value.trim(),
             available_for_work: document.getElementById('p-available').checked,
             email_notifications: document.getElementById('p-email-notif').checked,
             telegram_notifications: document.getElementById('p-tg-notif').checked,
@@ -2492,21 +2493,22 @@
         };
 
         try {
-            const resp = await fetch('/api/profile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            // Use direct Supabase upsert instead of the API to avoid hanging
+            const { data, error } = await db.from('user_profiles').upsert([payload], {
+                onConflict: 'user_id',
+                ignoreDuplicates: false
+            }).select();
 
-            if (!resp.ok) {
-                const errData = await resp.json();
-                throw new Error(errData.error || 'Failed to save profile');
-            }
+            if (error) throw error;
 
             showToast('✓ Profile saved successfully!');
             closeProfileModal();
+            
+            // Reload page or update local state
+            setTimeout(() => window.location.reload(), 1500);
         } catch (err) {
-            errEl.textContent = 'Error: ' + err.message;
+            console.error('Save error:', err);
+            errEl.textContent = 'Error: ' + (err.message || 'Failed to save profile');
             errEl.style.display = 'block';
         } finally {
             btn.textContent = 'SAVE PROFILE';

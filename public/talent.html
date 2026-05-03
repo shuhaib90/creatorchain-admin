@@ -3,7 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find Talent | CreatorChain Builders</title>
+    <title>Find Talent | CreatorChain Job Board</title>
+    
+    <!-- Social Sharing Meta Tags -->
+    <meta property="og:title" content="Find Top Web3 Talent on CreatorChain">
+    <meta property="og:description" content="Discover high-performance builders and developers in the CreatorChain network.">
+    <meta property="og:image" content="/social-preview.png">
+    <meta property="og:url" content="https://creatorchain.network/talent">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Find Top Web3 Talent on CreatorChain">
+    <meta name="twitter:description" content="Discover high-performance builders and developers in the CreatorChain network.">
+    <meta name="twitter:image" content="/social-preview.png">
     <link rel="icon" type="image/png" href="/logo.png">
     <link rel="apple-touch-icon" href="/logo.png">
     <meta name="description" content="Connect with the best creators, devs, and community leads in the Web3 ecosystem.">
@@ -209,10 +219,20 @@
             padding: 0;
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
+            height: 300px; /* FIXED HEIGHT */
+            min-height: 300px;
+            max-height: 300px;
+            overflow: hidden;
+            box-shadow: 6px 6px 0 var(--black);
+            cursor: pointer;
         }
-        .profile-card:hover { transform: translate(-4px, -4px); box-shadow: 8px 8px 0 var(--black); }
+        .profile-card:hover { 
+            transform: translate(-4px, -4px); 
+            box-shadow: 12px 12px 0 var(--primary); 
+            border-color: var(--black);
+        }
 
         .match-badge {
             position: absolute;
@@ -1133,9 +1153,6 @@
                 if (error) throw error;
 
                 const matches = users.filter(user => {
-                    // Filter out zero submission users
-                    if ((user.approved_submissions || 0) === 0) return false;
-
                     let matchedSkills = [];
                     if (selectedTMSkills.length > 0) {
                         const userSkills = user.skills || [];
@@ -1224,55 +1241,53 @@
             const isPro = p.badge_level === 'pro' || (p.approved_submissions || 0) > 5;
             card.className = 'profile-card' + (isPro ? ' is-pro-card' : '');
             card.onclick = () => openPublicProfile(p.username);
-            card.style.cssText = "cursor:pointer; border:3px solid #000; box-shadow:8px 8px 0 #000; transition:0.2s; position:relative; overflow:hidden; background:#fff; display:flex; flex-direction:column;";
             
-            const avatar = p.avatar_url || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png';
+            const avatar = p.avatar_url || `https://unavatar.io/twitter/${p.username}`;
             const userSkills = p.skills || [];
             const handle = p.username || 'builder';
+            const score = p.reputation_score || p.score || 0;
             
             const skillHtml = userSkills.length > 0 
-                ? userSkills.slice(0, 4).map(s => {
-                    const isMatch = selectedTMSkills.includes(s);
-                    const style = isMatch 
-                        ? "background:var(--primary); color:var(--black); border:2px solid #000; box-shadow: 2px 2px 0 #000;" 
-                        : "background:#fff; color:#000; border:2px solid #000; box-shadow: 2px 2px 0 #000;";
-                    return `<span style="font-size:10px; padding:4px 10px; font-weight:900; text-transform:uppercase; ${style}">${s}</span>`;
-                }).join('')
-                : '<span style="font-size:10px; color:#999; font-style:italic;">No skills listed</span>';
+                ? userSkills.slice(0, 3).map(s => `
+                    <span style="font-size:9px; padding:3px 8px; font-weight:900; text-transform:uppercase; background:#eee; border:1.5px solid #000; font-family:var(--font-mono);">${s}</span>
+                `).join('')
+                : '<span style="font-size:9px; color:#999; font-weight:700;">STAGING...</span>';
 
             card.innerHTML = `
-                ${isPro ? '<div style="position:absolute; top:12px; right:12px; background:var(--secondary); color:#000; padding:4px 8px; font-weight:900; font-size:9px; border:2px solid #000; box-shadow:3px 3px 0 #000; transform:rotate(2deg); z-index:5;">PRO</div>' : ''}
-                <div class="card-header" style="background:#fdfdfd; padding:20px; border-bottom:3px solid #000; display:flex; gap:15px; align-items:center;">
-                    <img src="${avatar}" style="width:55px; height:55px; border:3px solid #000; box-shadow:4px 4px 0 #000; object-fit:cover;">
-                    <div>
-                        <h3 style="margin:0; font-size:20px; text-transform:uppercase; font-weight:900; display:flex; align-items:center; gap:8px;">
-                            ${p.name || 'Anonymous'} ${getBadgeHtml(p)}
+                ${isPro ? '<div style="position:absolute; top:10px; right:10px; background:var(--primary); color:#000; padding:3px 8px; font-weight:900; font-size:9px; border:2px solid #000; box-shadow:3px 3px 0 #000; transform:rotate(3deg); z-index:10;">TOP TIER</div>' : ''}
+                
+                <!-- HEADER -->
+                <div style="padding:20px; border-bottom:3px solid #000; background:#fdfdfd; display:flex; align-items:center; gap:15px; flex-shrink:0;">
+                    <div style="width:55px; height:55px; border:3px solid #000; box-shadow:4px 4px 0 #000; flex-shrink:0; background:#fff; overflow:hidden;">
+                        <img src="${avatar}" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                    <div style="overflow:hidden;">
+                        <h3 style="margin:0; font-size:16px; font-weight:900; text-transform:uppercase; letter-spacing:-0.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                            ${p.name || handle}
                         </h3>
-                        <p class="mono" style="font-size:11px; color:#666; margin:3px 0 0 0; font-weight:700;">@${handle}</p>
+                        <p class="mono" style="font-size:11px; color:var(--primary); background:#000; display:inline-block; padding:1px 6px; margin-top:4px;">@${handle}</p>
                     </div>
                 </div>
-                <div class="card-body" style="padding:20px; flex:1;">
-                    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; min-height:40px;">
+
+                <!-- BODY -->
+                <div style="padding:20px; flex-grow:1; display:flex; flex-direction:column; gap:12px; background:#fff;">
+                    <div style="display:flex; flex-wrap:wrap; gap:6px; min-height:24px;">
                         ${skillHtml}
-                        ${userSkills.length > 4 ? `<span style="font-size:10px; font-weight:900; color:#888;">+${userSkills.length - 4}</span>` : ''}
                     </div>
                     
-                    <p style="font-size:14px; color:#444; line-height:1.5; height:3em; overflow:hidden; margin-bottom:20px; font-weight:500;">
-                        ${p.bio || 'Building the future of Web3 at CreatorChain.'}
+                    <p style="font-size:13px; line-height:1.4; font-weight:500; color:#444; height:3.2em; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">
+                        ${p.bio || 'Building the architecture of tomorrow.'}
                     </p>
 
-                    ${(p.score > 0 || p.location) ? `
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px; background:#f9f9f9; border:2px solid #000; box-shadow:4px 4px 0 #000;">
-                        ${p.score > 0 ? `
-                        <div>
-                            <span style="font-size:8px; font-weight:900; color:#888; text-transform:uppercase; display:block;">Trust Score</span>
-                            <span style="font-family:var(--font-mono); font-weight:900; font-size:15px; color:#00E676;">${p.score}%</span>
-                        </div>` : ''}
-                        <div>
-                            <span style="font-size:8px; font-weight:900; color:#888; text-transform:uppercase; display:block;">Location</span>
-                            <span style="font-weight:900; font-size:11px; text-transform:uppercase;">${p.location || 'GLOBAL'}</span>
+                    <div style="margin-top:auto; display:flex; justify-content:space-between; align-items:flex-end; padding-top:10px;">
+                        <div style="border:2px solid #000; background:#f5f0e8; padding:5px 10px; box-shadow:3px 3px 0 #000;">
+                            <span style="display:block; font-size:8px; font-weight:900; color:#888; text-transform:uppercase;">REPUTATION</span>
+                            <span class="mono" style="font-size:16px; font-weight:900; color:#000;">${score}</span>
                         </div>
-                    </div>` : ''}
+                        <div style="text-align:right;">
+                            <span style="font-size:9px; font-weight:900; color:var(--primary); text-transform:uppercase;">VIEW PROFILE →</span>
+                        </div>
+                    </div>
                 </div>
             `;
             return card;
@@ -1283,6 +1298,11 @@
             document.getElementById('hire-target-name').textContent = name;
             document.getElementById('hire-modal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
+        }
+
+        function openPublicProfile(handle) {
+            const cleanHandle = handle.replace('@', '').trim();
+            window.location.href = `/profile.html?u=${cleanHandle}`;
         }
 
         function closeHireModal() {
@@ -1321,7 +1341,7 @@
                 // 2. Fetch builder profile to get their email and telegram info
                 const { data: profile } = await db.from('user_profiles')
                     .select('email, email_notifications, telegram_id, telegram_notifications')
-                    .eq('user_id', receiverId)
+                    .eq('id', receiverId)
                     .single();
                 
                 // 3. Trigger email if builder has an email and notifications enabled
@@ -1384,170 +1404,21 @@
             showToast(`💬 Chat feature coming soon! You can reach @${handle} via Hire Request for now.`);
         }
 
-        async function openPublicProfile(handle) {
-            const modal = document.getElementById('profile-card-modal');
-            const content = document.getElementById('profile-card-content');
-            modal.style.display = 'flex';
-            content.innerHTML = '<div style="padding:40px; text-align:center;"><p class="mono">🔍 FETCHING PROFILE...</p></div>';
-
-            try {
-                const h = handle.replaceAll('@','').trim();
-                const { data, error } = await db.from('user_profiles')
-                    .select('*')
-                    .or(`username.eq.${h},twitter.ilike.%${h}%`)
-                    .maybeSingle();
-                if (error || !data) throw new Error('Profile not found.');
-                
-                // Robust Avatar Logic
-                let avatarToUse = data.avatar_url;
-                if (!avatarToUse) {
-                    avatarToUse = `https://unavatar.io/twitter/${data.username}`;
-                }
-                
-                renderProfileCard(data, avatarToUse);
-            } catch (err) {
-                content.innerHTML = `<div style="padding:40px; text-align:center;"><p class="mono" style="color:red;">${err.message.toUpperCase()}</p></div>`;
+        function openPublicProfile(handle) {
+            if (!handle) {
+                console.warn("Cannot open profile: Handle is undefined.");
+                return;
             }
-        }
-
-        function renderProfileCard(profile, avatar) {
-            const content = document.getElementById('profile-card-content');
-            const skills = profile.skills || [];
-            const handle = (profile.username || 'anonymous').replace('@','');
-            const avatarToUse = profile.avatar_url || avatar || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png';
-            const isPro = profile.badge_level === 'pro' || (profile.approved_submissions || 0) > 5;
-            
-            const icon = (path) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18">${path}</svg>`;
-            const icons = {
-                level: icon('<path d="M6 18h12M6 14h12M6 10h12M6 6h12"/>'),
-                work: icon('<rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>'),
-                location: icon('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'),
-                company: icon('<path d="M3 21h18M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7M4 21V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v17"/>')
-            };
-
-            content.innerHTML = `
-                <div class="p-card ${isPro ? 'is-pro-card' : ''}">
-                    <button class="p-card-close" onclick="closeProfileCard()">✕</button>
-                    
-                    <div class="p-card-grid">
-                        <!-- LEFT COLUMN -->
-                        <div class="p-card-left">
-                            <div class="p-card-avatar-wrap">
-                                <img src="${avatarToUse}" class="p-card-avatar">
-                            </div>
-                            
-                            <div class="p-card-info">
-                                <h2>
-                                    ${(profile.name || 'Anonymous Builder').toUpperCase()}
-                                    <span style="transform: scale(0.8); display: inline-block;">${getBadgeHtml(profile, 'medium')}</span>
-                                </h2>
-                                <div class="p-card-handle">@${handle}</div>
-                            </div>
-
-                            <div class="p-card-bio ${!profile.bio ? 'placeholder' : ''}">
-                                ${profile.bio || 'Add a bio to boost your profile and attract more opportunities.'}
-                            </div>
-
-                            <div class="p-card-section">
-                                <div class="p-card-section-title">Identity Links</div>
-                                <div class="p-card-socials">
-                                    ${profile?.twitter ? `<a href="https://x.com/${profile.twitter.replace('@','')}" target="_blank" class="p-card-social-btn" title="X (Twitter)">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#000"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                                    </a>` : ''}
-                                    ${profile?.github ? `<a href="${profile.github.startsWith('http')?profile.github:'https://github.com/'+profile.github.replace('@','')}" target="_blank" class="p-card-social-btn" title="GitHub">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#000"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.041-1.416-4.041-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                                    </a>` : ''}
-                                    ${profile?.linkedin ? `<a href="${profile.linkedin.startsWith('http')?profile.linkedin:'https://linkedin.com/in/'+profile.linkedin.replace('@','')}" target="_blank" class="p-card-social-btn" title="LinkedIn">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#0077B5"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                                    </a>` : ''}
-                                </div>
-                            </div>
-
-                            <div style="margin-top: auto; padding-top: 20px;">
-                                <button class="p-card-primary-btn" onclick="openHireModal('${profile.user_id}', '${(profile.name || handle).replace(/'/g, "\\'")}')">
-                                    DEPLOY COLLABORATION
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- RIGHT COLUMN -->
-                        <div class="p-card-right">
-                            <!-- REPUTATION -->
-                            <div class="p-card-section">
-                                <div class="p-card-section-title">Reputation & Stats</div>
-                                <div class="p-stats-row">
-                                    <div class="p-stat-card">
-                                        <span class="p-card-label">TRUST SCORE</span>
-                                        <span class="p-stat-val score">${profile.score || 0}/100</span>
-                                    </div>
-                                    <div class="p-stat-card">
-                                        <span class="p-card-label">APPROVED</span>
-                                        <span class="p-stat-val">${profile.approved_submissions || 0}</span>
-                                    </div>
-                                    <div class="p-stat-card">
-                                        <span class="p-card-label">SUBMISSIONS</span>
-                                        <span class="p-stat-val">${profile.total_submissions || 0}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- SKILLS -->
-                            <div class="p-card-section">
-                                <div class="p-card-section-title">Technical Mastery</div>
-                                <div class="p-skills-wrap">
-                                    ${skills.length ? skills.map(s => `<span class="p-skill-tag">${s}</span>`).join('') : '<span class="mono" style="font-size:12px; color:#ccc;">NO EXPERTISE CONNECTED</span>'}
-                                </div>
-                            </div>
-
-                            <!-- WORK CONTEXT -->
-                            <div class="p-card-section">
-                                <div class="p-card-section-title">Work Context</div>
-                                <div class="p-work-grid">
-                                    <div class="p-work-card">
-                                        <div class="p-work-icon">${icons.level}</div>
-                                        <div class="p-work-info">
-                                            <span class="p-card-label" style="margin:0">LEVEL</span>
-                                            <span class="p-work-val">${profile.experience_level || 'BEGINNER'}</span>
-                                        </div>
-                                    </div>
-                                    <div class="p-work-card">
-                                        <div class="p-work-icon">${icons.work}</div>
-                                        <div class="p-work-info">
-                                            <span class="p-card-label" style="margin:0">PREFERENCE</span>
-                                            <span class="p-work-val">${profile.work_preference || 'PART-TIME'}</span>
-                                        </div>
-                                    </div>
-                                    <div class="p-work-card">
-                                        <div class="p-work-icon">${icons.location}</div>
-                                        <div class="p-work-info">
-                                            <span class="p-card-label" style="margin:0">LOCATION</span>
-                                            <span class="p-work-val">${profile.location || 'GLOBAL'}</span>
-                                        </div>
-                                    </div>
-                                    <div class="p-work-card">
-                                        <div class="p-work-icon">${icons.company}</div>
-                                        <div class="p-work-info">
-                                            <span class="p-card-label" style="margin:0">COMPANY</span>
-                                            <span class="p-work-val">${profile.company || 'FREELANCE'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            lucide.createIcons();
-        }
-
-        function closeProfileCard() {
-            document.getElementById('profile-card-modal').style.display = 'none';
+            const cleanHandle = handle.replace('@', '').trim();
+            // Use extension-less path to avoid Vercel query-stripping redirects
+            window.location.href = `/profile?u=${cleanHandle}`;
         }
 
         function shareProfile(handle) {
-            const url = `${window.location.origin}/?u=${handle}`;
-            navigator.clipboard.writeText(url);
-            showToast('Profile link copied! 📋');
+            const url = `${window.location.origin}/profile?u=${handle}`;
+            navigator.clipboard.writeText(url).then(() => {
+            showToast('Link copied! Optimized for X sharing 🚀');
+            });
         }
 
         function showToast(msg, isError = false) {
