@@ -20,7 +20,7 @@ export default async (req, res) => {
     let subject, html, to;
 
     // Default "from" email - Resend onboarding email
-    // NOTE: For production, use a verified domain email like 'notifications@creatorchain.network'
+    // NOTE: For production, use a verified domain email like 'notifications@creatorchain.site'
     const fromEmail = 'CreatorChain <onboarding@resend.dev>';
 
     if (type === 'hire_request') {
@@ -69,7 +69,7 @@ export default async (req, res) => {
             <p style="margin: 10px 0; color: #555;">${payload.description}</p>
             <p style="margin: 10px 0;"><strong>BUDGET:</strong> ${payload.budget}</p>
           </div>
-          <a href="https://creatorchain-web3-jobs.vercel.app/" style="display: inline-block; background: #000; color: #fff; padding: 15px 30px; text-decoration: none; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; border: 2px solid #000;">
+          <a href="https://creatorchain.site/" style="display: inline-block; background: #000; color: #fff; padding: 15px 30px; text-decoration: none; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; border: 2px solid #000;">
             VIEW PROJECT DETAILS
           </a>
           <div style="margin-top: 30px; border-top: 2px solid #000; padding-top: 20px; text-align: center;">

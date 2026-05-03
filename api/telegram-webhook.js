@@ -120,7 +120,7 @@ export default async (req, res) => {
         });
 
         if (allItems.length === 0) {
-            await sendSimpleMessage(chatId, `📭 <b>No active opportunities found at the moment.</b>\n\nCheck back later or visit <a href="https://creatorchain-web3-jobs.vercel.app/">CreatorChain</a>.`);
+            await sendSimpleMessage(chatId, `📭 <b>No active opportunities found at the moment.</b>\n\nCheck back later or visit <a href="https://creatorchain.site/">CreatorChain</a>.`);
             return res.status(200).send('OK');
         }
 
@@ -134,7 +134,7 @@ export default async (req, res) => {
             const project = item.project_name || item.project || 'Web3 Project';
             const reward = item.reward || 'TBA';
             const id = item.id;
-            const url = `https://creatorchain-web3-jobs.vercel.app/opportunity.html?id=${id}`;
+            const url = `https://creatorchain.site/opportunity.html?id=${id}`;
             const exclusiveTag = item.is_exclusive ? '⭐️ <b>EXCLUSIVE</b>\n' : '';
             
             responseText += `${index + 1}. ${exclusiveTag}<b>${project}</b>\n`;
@@ -144,7 +144,7 @@ export default async (req, res) => {
         });
 
         if (allItems.length > 10) {
-            responseText += `...and ${allItems.length - 10} more! View all at <a href="https://creatorchain-web3-jobs.vercel.app/">CreatorChain</a>.`;
+            responseText += `...and ${allItems.length - 10} more! View all at <a href="https://creatorchain.site/">CreatorChain</a>.`;
         }
 
         await sendSimpleMessage(chatId, responseText);
@@ -162,7 +162,7 @@ export default async (req, res) => {
                       `/opportunities - View all live Web3 opportunities\n` +
                       `/chatid - Get your Telegram Chat ID\n` +
                       `/help - Show this help message\n\n` +
-                      `Visit <a href="https://creatorchain-web3-jobs.vercel.app/">CreatorChain</a> for the full experience.`;
+                      `Visit <a href="https://creatorchain.site/">CreatorChain</a> for the full experience.`;
      await sendSimpleMessage(chatId, helpText);
   } else {
       // Default response for unknown commands

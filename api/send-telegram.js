@@ -63,7 +63,7 @@ export default async (req, res) => {
     } else if (type === 'new_opportunity' || type === 'exclusive_opportunity') {
       const reward = payload.reward || payload.budget || 'TBA';
       const id = payload.id;
-      const url = id ? `https://creatorchain-web3-jobs.vercel.app/opportunity.html?id=${id}` : `https://creatorchain-web3-jobs.vercel.app/`;
+      const url = id ? `https://creatorchain.site/opportunity.html?id=${id}` : `https://creatorchain.site/`;
       const isExclusive = type === 'exclusive_opportunity' || (payload.project_name && payload.project_name.toLowerCase().includes('creatorchain'));
       
       const header = isExclusive ? `✨ <b>EXCLUSIVE LAUNCH OPPORTUNITY</b> ✨` : `🔥 <b>NEW OPPORTUNITY</b>`;
@@ -89,7 +89,7 @@ export default async (req, res) => {
                 `<b>Contact Email:</b> ${payload.sender_email}\n` +
                 `${payload.telegram ? `<b>Telegram:</b> ${payload.telegram}\n` : ''}` +
                 `\n<b>Message:</b>\n<i>${payload.message}</i>\n\n` +
-                `🤝 <a href="https://creatorchain-web3-jobs.vercel.app/talent.html">Go to CreatorChain</a>`;
+                `🤝 <a href="https://creatorchain.site/talent.html">Go to CreatorChain</a>`;
     } else if (type === 'custom') {
       message = payload.message;
     } else {
