@@ -1621,17 +1621,109 @@ function App() {
           <Route path="/users" element={<UsersPage />} />
           <Route path="/broadcast" element={<Broadcast />} />
           <Route path="/opportunities" element={<Opportunities />} />
-          <Route path="/settings" element={
-            <div className="fade-in">
-              <header style={{ marginBottom: '40px' }}>
-                <h1 style={{ fontSize: '36px' }}>System <span className="text-gradient">Settings</span></h1>
-                <p style={{ color: 'var(--text-muted)' }}>Configure terminal behavior and platform parameters.</p>
-              </header>
-              <div className="card">
-                <p style={{ color: 'var(--text-muted)' }}>Configuration modules encrypted. Decryption key required.</p>
-              </div>
+const SettingsPage = () => {
+  const [broadcastEnabled, setBroadcastEnabled] = useState<boolean | null>(null);
+  const [devMode, setDevMode] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data } = await supabase.from('system_settings').select('*');
+      if (data) {
+        data.forEach(s => {
+          if (s.key === 'broadcast_enabled') setBroadcastEnabled(s.value);
+          if (s.key === 'developer_mode') setDevMode(s.value);
+        });
+      }
+      setLoading(false);
+    };
+    fetchSettings();
+
+    const channel = supabase.channel('settings_sync').on('postgres_changes', { event: '*', schema: 'public', table: 'system_settings' }, fetchSettings).subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  const toggleSetting = async (key: string, currentValue: boolean) => {
+    const newValue = !currentValue;
+    const { error } = await supabase
+      .from('system_settings')
+      .update({ value: newValue, updated_at: new Date().toISOString() })
+      .eq('key', key);
+    
+    if (error) alert('Critical Update Failed: ' + error.message);
+  };
+
+  if (loading) return <div className="fade-in mono" style={{ color: 'var(--text-muted)', padding: '40px' }}>ACCESSING_ENCRYPTED_STORAGE...</div>;
+
+  return (
+    <div className="fade-in">
+      <header style={{ marginBottom: '40px' }}>
+        <h1 style={{ fontSize: '36px' }}>Mission <span className="text-gradient">Control</span></h1>
+        <p style={{ color: 'var(--text-muted)' }}>Platform safety protocols and global system overrides.</p>
+      </header>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '24px' }}>
+        <motion.div whileHover={{ y: -5 }} className="card" style={{ borderLeft: `4px solid ${broadcastEnabled ? 'var(--primary)' : 'var(--accent)'}`, position: 'relative', overflow: 'hidden' }}>
+          {!broadcastEnabled && <div style={{ position: 'absolute', top: 0, right: 0, background: 'var(--accent)', color: 'white', padding: '4px 12px', fontSize: '10px', fontWeight: 'bold' }}>SYSTEM_SHUTDOWN</div>}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+            <div>
+              <h3 className="mono" style={{ fontSize: '16px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Radio size={18} /> BROADCAST_KILL_SWITCH
+              </h3>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+                Immediately halts ALL outgoing Telegram notifications. Use this in case of bot malfunction or security breach.
+              </p>
             </div>
-          } />
+          </div>
+          <div style={{ marginTop: '24px' }}>
+            <button 
+              className={`btn ${broadcastEnabled ? 'btn-outline' : 'btn-primary'}`} 
+              style={{ width: '100%', padding: '16px', color: broadcastEnabled ? 'var(--accent)' : 'white', borderColor: broadcastEnabled ? 'rgba(255,62,0,0.3)' : '' }}
+              onClick={() => toggleSetting('broadcast_enabled', !!broadcastEnabled)}
+            >
+              {broadcastEnabled ? '🛑 TERMINATE ALL BROADCASTS' : '⚡ RESTORE SYSTEM COMMS'}
+            </button>
+          </div>
+        </motion.div>
+
+        <motion.div whileHover={{ y: -5 }} className="card" style={{ borderLeft: `4px solid ${devMode ? 'var(--secondary)' : 'var(--border)'}` }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+            <div>
+              <h3 className="mono" style={{ fontSize: '16px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ShieldCheck size={18} /> DEVELOPER_SANDBOX
+              </h3>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+                When active, Telegram messages are redirected to internal logs. Real users will NOT be notified.
+              </p>
+            </div>
+          </div>
+          <div style={{ marginTop: '24px' }}>
+            <button 
+              className={`btn ${devMode ? 'btn-primary' : 'btn-outline'}`} 
+              style={{ width: '100%', padding: '16px', color: devMode ? 'black' : 'white' }}
+              onClick={() => toggleSetting('developer_mode', !!devMode)}
+            >
+              {devMode ? 'DISABLE_SANDBOX_MODE' : 'ENABLE_TESTING_MODE'}
+            </button>
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="card" style={{ marginTop: '40px', background: 'rgba(255,255,255,0.01)', border: '1px dashed var(--border)' }}>
+        <h4 className="mono" style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '10px' }}>SYSTEM_LOGS</h4>
+        <div className="mono" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', lineHeight: '1.6' }}>
+          [INFO] System initialized at {new Date().toLocaleTimeString()}<br/>
+          [INFO] Authentication layer verified<br/>
+          {broadcastEnabled ? '[OK] Broadcast cluster active' : '[WARN] BROADCAST_CLUSTER_OFFLINE'}<br/>
+          {devMode && '[DEBUG] Sandbox mode engaged'}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ... in App routes ...
+          <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </Layout>
     </Router>
