@@ -10,6 +10,8 @@
     <style>
         :root {
             --primary: #00f5a0;
+            --secondary: #fff1a0;
+            --accent: #FF4D00;
             --black: #000000;
             --white: #ffffff;
             --gray: #f9f9f9;
@@ -43,7 +45,7 @@
         .logo { font-weight: 900; font-size: 24px; text-transform: uppercase; color: var(--black); text-decoration: none; display: flex; align-items: center; gap: 10px; }
         .logo-box { background: var(--black); color: var(--primary); padding: 4px 8px; }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 80px 5%; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 60px 5%; }
 
         .hero { margin-bottom: 60px; text-align: center; }
         .hero-title { font-size: 80px; line-height: 0.9; text-transform: uppercase; margin-bottom: 20px; letter-spacing: -3px; }
@@ -54,7 +56,7 @@
         
         .user-card {
             display: grid;
-            grid-template-columns: 80px 80px 1fr 180px;
+            grid-template-columns: 60px 80px 1fr 180px;
             align-items: center;
             background: #fff;
             border: var(--border);
@@ -64,30 +66,31 @@
         }
         .user-card:hover { transform: translate(-4px, -4px); box-shadow: 12px 12px 0 #000; }
 
-        .u-rank { font-family: var(--font-mono); font-weight: 900; font-size: 32px; color: #ccc; }
-        .u-pic { width: 60px; height: 60px; border: var(--border); background: #eee; cursor: pointer; transition: 0.1s; }
-        .u-pic:hover { transform: scale(1.1) rotate(2deg); }
-        .u-pic img { width: 100%; height: 100%; object-fit: cover; }
+        .u-rank { font-family: var(--font-mono); font-weight: 900; font-size: 28px; color: #eee; }
+        .u-pic { width: 60px; height: 60px; border: var(--border); background: #eee; cursor: pointer; transition: 0.1s; position: relative; }
+        .u-pic:hover { transform: scale(1.1) rotate(2deg); z-index: 2; }
+        .u-pic img { width: 100%; height: 100%; object-fit: cover; border: 1px solid #000; }
 
-        .u-info h3 { font-size: 24px; text-transform: uppercase; line-height: 1; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
-        .u-handle { font-family: var(--font-mono); font-size: 12px; color: #888; display: flex; align-items: center; gap: 10px; }
-        .u-loc { color: var(--black); font-weight: 700; opacity: 0.8; }
+        .u-info h3 { font-size: 22px; text-transform: uppercase; line-height: 1; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+        .u-handle { font-family: var(--font-mono); font-size: 11px; color: #888; display: flex; align-items: center; gap: 10px; font-weight: 700; }
+        .u-loc { color: var(--black); font-weight: 900; opacity: 1; font-size: 10px; text-transform: uppercase; background: #f0f0f0; padding: 2px 6px; border: 1px solid #000; }
 
         .u-points { text-align: right; }
-        .p-val { font-family: var(--font-mono); font-weight: 900; font-size: 28px; line-height: 1; }
-        .p-lbl { font-size: 10px; font-weight: 900; color: #888; text-transform: uppercase; margin-top: 5px; }
+        .p-val { font-family: var(--font-mono); font-weight: 900; font-size: 28px; line-height: 1; color: var(--black); }
+        .p-lbl { font-size: 9px; font-weight: 900; color: #888; text-transform: uppercase; margin-top: 5px; letter-spacing: 1px; }
 
-        .badge-pro { background: var(--primary); color: #000; padding: 2px 8px; font-size: 10px; font-weight: 900; border: 2px solid #000; font-family: var(--font-mono); }
-        .badge-verified { border: 2px solid #000; padding: 2px 8px; font-size: 10px; font-weight: 900; font-family: var(--font-mono); }
+        .badge-pro { background: var(--primary); color: #000; padding: 2px 8px; font-size: 9px; font-weight: 900; border: 2px solid #000; font-family: var(--font-mono); vertical-align: middle; }
+        .badge-verified { border: 2px solid #000; padding: 2px 8px; font-size: 9px; font-weight: 900; font-family: var(--font-mono); vertical-align: middle; }
 
         /* PAGINATION */
-        .pagination { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 60px; }
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 60px; flex-wrap: wrap; }
         .pag-btn {
             background: #fff;
-            border: var(--border);
-            padding: 12px 25px;
+            border: 3px solid #000;
+            padding: 10px 20px;
             font-family: var(--font-mono);
             font-weight: 900;
+            font-size: 12px;
             cursor: pointer;
             box-shadow: 4px 4px 0 #000;
             transition: 0.1s;
@@ -96,32 +99,94 @@
         .pag-btn.active { background: var(--black); color: var(--primary); box-shadow: none; transform: translate(4px, 4px); }
         .pag-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-            z-index: 2000;
-            align-items: center; justify-content: center; padding: 20px;
+        /* MODAL (SYNCHRONIZED WITH TALENT.HTML) */
+        #profile-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(4px);
         }
-        .modal-content {
-            background: #fff;
-            border: 6px solid #000;
-            width: 100%; max-width: 550px;
-            padding: 40px;
-            position: relative;
-            box-shadow: 15px 15px 0 var(--primary);
+        .p-card { 
+            background: #fff; 
+            border: 4px solid var(--black); 
+            box-shadow: 20px 20px 0 rgba(0,0,0,0.2); 
+            width: 100%; 
+            max-width: 900px; 
+            position: relative; 
+            overflow: hidden; 
         }
-        .modal-close { position: absolute; top: 15px; right: 15px; background: #000; color: var(--primary); border: none; width: 35px; height: 35px; font-weight: 900; cursor: pointer; }
-
-        .m-top { display: flex; gap: 25px; align-items: center; margin-bottom: 30px; }
-        .m-avatar { width: 110px; height: 110px; border: var(--border); box-shadow: 6px 6px 0 #000; }
-        .m-details h2 { font-size: 36px; text-transform: uppercase; line-height: 1; }
-        .m-loc { font-family: var(--font-mono); font-size: 13px; color: #555; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+        .p-card-close { position: absolute; top: 15px; right: 15px; background: #000; color: #fff; border: none; width: 35px; height: 35px; font-weight: 900; cursor: pointer; z-index: 10; }
         
-        .m-bio { background: #f0f0f0; padding: 25px; border-left: 10px solid var(--primary); font-family: var(--font-mono); font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
-        
-        .m-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; }
-        .tag { background: #eee; border: 2px solid #000; padding: 4px 12px; font-size: 11px; font-weight: 900; font-family: var(--font-mono); text-transform: uppercase; }
+        .p-card-grid { display: grid; grid-template-columns: 0.4fr 0.6fr; }
+        .p-card-left { padding: 40px; border-right: 4px solid var(--black); background: #fff; }
+        .p-card-right { padding: 40px; background: #fafafa; }
 
-        @media (max-width: 768px) {
+        .p-card-avatar-wrap { margin-bottom: 25px; }
+        .p-card-avatar { width: 100px; height: 100px; border: 4px solid #000; box-shadow: 6px 6px 0 #000; object-fit: cover; }
+        
+        .p-card-info h2 { font-size: 28px; font-weight: 900; text-transform: uppercase; line-height: 1; margin-bottom: 5px; }
+        .p-card-handle { font-family: var(--font-mono); font-size: 13px; color: #888; font-weight: 700; margin-bottom: 20px; }
+        
+        .p-card-bio { font-size: 14px; line-height: 1.6; margin-bottom: 30px; font-weight: 500; color: #444; }
+        .p-card-bio.placeholder { color: #aaa; font-style: italic; }
+
+        .p-card-section { margin-bottom: 30px; }
+        .p-card-section-title { font-size: 10px; font-weight: 900; text-transform: uppercase; color: #bbb; letter-spacing: 1px; margin-bottom: 12px; font-family: var(--font-mono); }
+        
+        .p-card-socials { display: flex; gap: 10px; }
+        .p-card-social-btn { width: 44px; height: 44px; border: 3px solid #000; display: flex; align-items: center; justify-content: center; background: #fff; box-shadow: 4px 4px 0 #000; transition: 0.1s; }
+        .p-card-social-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #000; background: var(--primary); }
+
+        .p-stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .p-stat-box { border: 3px solid #000; padding: 15px; background: #fff; }
+        .p-stat-label { display: block; font-size: 9px; font-weight: 900; text-transform: uppercase; color: #888; margin-bottom: 4px; }
+        .p-stat-val { font-family: var(--font-mono); font-size: 20px; font-weight: 900; }
+        .p-stat-score { color: #00E676; }
+
+        .p-card-skills { display: flex; flex-wrap: wrap; gap: 8px; }
+        .p-card-skill-tag { border: 2px solid #000; padding: 4px 10px; font-size: 11px; font-weight: 900; font-family: var(--font-mono); background: #fff; text-transform: uppercase; }
+
+        .p-card-meta-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        .p-card-meta-card { border: 2px solid #eee; padding: 12px; display: flex; align-items: center; gap: 12px; background: #fff; }
+        .p-card-meta-icon { width: 32px; height: 32px; border: 2px solid #000; display: flex; align-items: center; justify-content: center; background: #f0f0f0; }
+        .p-card-meta-label { font-size: 9px; font-weight: 900; color: #888; text-transform: uppercase; }
+        .p-card-meta-value { font-size: 12px; font-weight: 900; text-transform: uppercase; }
+
+        .p-card-primary-btn {
+            background: var(--black);
+            color: var(--primary);
+            border: 3px solid var(--black);
+            padding: 15px;
+            width: 100%;
+            font-weight: 900;
+            font-family: var(--font-main);
+            text-transform: uppercase;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 6px 6px 0 var(--primary);
+            transition: 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .p-card-primary-btn:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--primary); }
+
+        .is-pro-card { border-color: var(--primary); }
+        .is-pro-card .p-card-left { background: #f6fffb; }
+
+        @media (max-width: 850px) {
+            .p-card-grid { grid-template-columns: 1fr; }
+            .p-card-left { border-right: none; border-bottom: 4px solid var(--black); }
+            .p-card { max-width: 500px; max-height: 85vh; overflow-y: auto; }
             .hero-title { font-size: 48px; }
-            .user-card { grid-template-columns: 50px 60px 1fr; gap: 15px; padding: 15px; }
+            .user-card { grid-template-columns: 40px 60px 1fr; gap: 15px; padding: 15px; }
             .u-points { grid-column: span 3; text-align: left; padding-top: 15px; border-top: 2px solid #eee; }
         }
     </style>
@@ -143,17 +208,15 @@
         </section>
 
         <div id="leaderboard-root" class="leaderboard-list">
-            <div style="text-align: center; padding: 100px; font-family: var(--font-mono);">SYNCING DATA...</div>
+            <div style="text-align: center; padding: 100px; font-family: var(--font-mono); font-weight: 900; letter-spacing: 2px;">SYNCHRONIZING DATA...</div>
         </div>
 
-        <div id="pagination-root" class="pagination">
-            <!-- Pag buttons loaded via JS -->
-        </div>
+        <div id="pagination-root" class="pagination"></div>
     </div>
 
     <!-- Profile Modal -->
     <div id="profile-modal" onclick="closeModal()">
-        <div id="modal-body"></div>
+        <div id="modal-body" onclick="event.stopPropagation()"></div>
     </div>
 
     <script>
@@ -171,45 +234,86 @@
         }
 
         async function checkUser() {
-            const { data: { user } } = await db.auth.getUser();
-            if (user) {
-                const { data: profile } = await db.from('user_profiles').select('avatar_url').eq('user_id', user.id).single();
-                const pic = profile?.avatar_url || user.user_metadata.avatar_url || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png';
-                document.getElementById('auth-nav-box').innerHTML = `<img src="${pic}" style="width:28px; height:28px; border:2px solid #000;">`;
-            } else {
-                document.getElementById('auth-nav-box').innerHTML = `<a href="index.html" style="font-weight:900; font-family:var(--font-mono); font-size:11px; color:#000;">LOGIN</a>`;
+            try {
+                const { data: { user } } = await db.auth.getUser();
+                if (user) {
+                    const { data: profile } = await db.from('user_profiles').select('avatar_url, username').eq('user_id', user.id).single();
+                    const pic = profile?.avatar_url || user.user_metadata.avatar_url || `https://unavatar.io/twitter/${profile?.username || 'user'}`;
+                    document.getElementById('auth-nav-box').innerHTML = `<img src="${pic}" style="width:28px; height:28px; border:2px solid #000; object-fit:cover;" onerror="this.src='https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'">`;
+                } else {
+                    document.getElementById('auth-nav-box').innerHTML = `<a href="index.html" style="font-weight:900; font-family:var(--font-mono); font-size:11px; color:#000; text-decoration:none;">LOGIN</a>`;
+                }
+            } catch (e) {}
+        }
+
+        function getBadgeHtml(p, size = 'small') {
+            if (!p) return '';
+            const isPro = p.badge_level === 'pro' || (p.approved_submissions || 0) > 5;
+            const isVerified = p.is_verified;
+            
+            let html = '';
+            if (isPro) {
+                html += `<span class="badge-pro" style="font-size: ${size === 'small' ? '9px' : '11px'}; margin-left:5px;">PRO</span>`;
             }
+            if (isVerified) {
+                html += `
+                    <span class="verification-badge" style="color:var(--primary); margin-left:5px; vertical-align:middle; display:inline-flex; align-items:center;">
+                        <svg viewBox="0 0 24 24" width="${size === 'small' ? '14' : '22'}" height="${size === 'small' ? '14' : '22'}" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                    </span>
+                `;
+            }
+            return html;
         }
 
         async function loadData() {
+            const root = document.getElementById('leaderboard-root');
             try {
-                const { data: listings } = await db.from('listings').select('submitted_by').eq('approval_status', 'approved').not('submitted_by', 'is', null);
+                const { data: listings, error: lErr } = await db.from('listings')
+                    .select('submitted_by')
+                    .eq('approval_status', 'approved')
+                    .not('submitted_by', 'is', null);
+                
+                if (lErr) throw lErr;
+
                 const counts = {};
                 listings.forEach(l => {
-                    const h = l.submitted_by.replace('@', '').trim();
-                    if(h.toLowerCase() === 'anonymous') return;
+                    let h = l.submitted_by.replace('@', '').trim();
+                    if(h.toLowerCase() === 'anonymous' || !h) return;
                     counts[h] = (counts[h] || 0) + 1;
                 });
 
                 const handles = Object.keys(counts);
-                const { data: profiles } = await db.from('user_profiles').select('*').in('username', handles);
+                const { data: profiles, error: pErr } = await db.from('user_profiles').select('*');
+                if (pErr) throw pErr;
 
                 fullData = handles.map(h => {
-                    const p = profiles.find(pr => pr.username.toLowerCase() === h.toLowerCase());
+                    const p = profiles.find(pr => (pr.username || '').toLowerCase() === h.toLowerCase());
+                    const avatar = p?.avatar_url || `https://unavatar.io/twitter/${h}`;
+                    
                     return {
                         handle: h,
                         name: p?.name || h,
-                        avatar: p?.avatar_url || (p?.username ? `https://unavatar.io/twitter/${p.username}` : 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'),
+                        avatar: avatar,
                         count: counts[h],
                         is_verified: p?.is_verified || false,
                         badge: p?.badge_level || '',
                         location: p?.location || 'GLOBAL',
-                        profile: p || null
+                        profile: p || { username: h, name: h, skills: [], bio: 'Active CreatorChain contributor.' }
                     };
                 }).sort((a, b) => b.count - a.count);
 
+                if (fullData.length === 0) {
+                    root.innerHTML = '<div style="text-align: center; padding: 100px; font-family: var(--font-mono);">NO DATA DISCOVERED IN THE NETWORK.</div>';
+                    return;
+                }
+
                 render();
-            } catch (err) { console.error(err); }
+            } catch (err) { 
+                console.error("Leaderboard Error:", err);
+                root.innerHTML = `<div style="text-align: center; padding: 100px; font-family: var(--font-mono); color:red;">DATA SYNC FAILED: ${err.message.toUpperCase()}</div>`;
+            }
         }
 
         function render() {
@@ -227,14 +331,16 @@
                 card.className = 'user-card';
                 card.innerHTML = `
                     <div class="u-rank">#${rank.toString().padStart(2, '0')}</div>
-                    <div class="u-pic" onclick="openProfile('${u.handle}')">
+                    <div class="u-pic" onclick="openPublicProfile('${u.handle}')">
                         <img src="${u.avatar}" onerror="this.src='https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'">
                     </div>
                     <div class="u-info">
-                        <h3>${u.name} ${u.badge.toUpperCase() === 'PRO' ? '<span class="badge-pro">PRO</span>' : u.is_verified ? '<span class="badge-verified">VERIFIED</span>' : ''}</h3>
+                        <h3 onclick="openPublicProfile('${u.handle}')" style="cursor:pointer;">
+                            ${u.name.toUpperCase()} ${getBadgeHtml(u.profile)}
+                        </h3>
                         <div class="u-handle">
-                            @${u.handle} 
-                            ${u.location ? `<span class="u-loc"><i data-lucide="map-pin" style="width:12px; height:12px; vertical-align:middle;"></i> ${u.location}</span>` : ''}
+                            @${u.handle.toLowerCase()} 
+                            ${u.location ? `<span class="u-loc"><i data-lucide="map-pin" style="width:10px; height:10px; vertical-align:middle; margin-right:4px;"></i> ${u.location}</span>` : ''}
                         </div>
                     </div>
                     <div class="u-points">
@@ -245,143 +351,125 @@
                 root.appendChild(card);
             });
 
-            // Pagination logic
             const total = Math.ceil(fullData.length / perPage);
-            
-            const prev = document.createElement('button');
-            prev.className = 'pag-btn';
-            prev.innerText = 'PREV';
-            prev.disabled = currentPage === 1;
-            prev.onclick = () => { currentPage--; render(); window.scrollTo({top: 400, behavior: 'smooth'}); };
-            pag.appendChild(prev);
+            if (total > 1) {
+                const prev = document.createElement('button');
+                prev.className = 'pag-btn';
+                prev.innerText = 'PREV';
+                prev.disabled = currentPage === 1;
+                prev.onclick = () => { currentPage--; render(); window.scrollTo({top: 400, behavior: 'smooth'}); };
+                pag.appendChild(prev);
 
-            for(let i=1; i<=total; i++) {
-                if (i > 5 && i < total) {
-                    if (i === 6) {
-                        const dots = document.createElement('span');
-                        dots.innerText = '...';
-                        pag.appendChild(dots);
+                for(let i=1; i<=total; i++) {
+                    if (total > 8 && i > 3 && i < total - 2 && (i < currentPage - 1 || i > currentPage + 1)) {
+                        if (i === 4 || i === total - 3) {
+                            const d = document.createElement('span'); d.innerText = '...'; d.style.fontWeight='900'; pag.appendChild(d);
+                        }
+                        continue;
                     }
-                    continue;
+                    const btn = document.createElement('button');
+                    btn.className = `pag-btn ${i === currentPage ? 'active' : ''}`;
+                    btn.innerText = i;
+                    btn.onclick = () => { currentPage = i; render(); window.scrollTo({top: 400, behavior: 'smooth'}); };
+                    pag.appendChild(btn);
                 }
-                const btn = document.createElement('button');
-                btn.className = `pag-btn ${i === currentPage ? 'active' : ''}`;
-                btn.innerText = i;
-                btn.onclick = () => { currentPage = i; render(); window.scrollTo({top: 400, behavior: 'smooth'}); };
-                pag.appendChild(btn);
-            }
 
-            const next = document.createElement('button');
-            next.className = 'pag-btn';
-            next.innerText = 'NEXT';
-            next.disabled = currentPage === total;
-            next.onclick = () => { currentPage++; render(); window.scrollTo({top: 400, behavior: 'smooth'}); };
-            pag.appendChild(next);
+                const next = document.createElement('button');
+                next.className = 'pag-btn';
+                next.innerText = 'NEXT';
+                next.disabled = currentPage === total;
+                next.onclick = () => { currentPage++; render(); window.scrollTo({top: 400, behavior: 'smooth'}); };
+                pag.appendChild(next);
+            }
 
             lucide.createIcons();
         }
 
-        function openProfile(handle) {
+        function openPublicProfile(handle) {
             const user = fullData.find(u => u.handle.toLowerCase() === handle.toLowerCase());
             if (!user) return;
+            
             const p = user.profile;
             const body = document.getElementById('modal-body');
-            
             const skills = p?.skills || [];
             const isPro = p?.badge_level === 'pro' || (user.count || 0) > 5;
-            const score = p?.reputation_score || Math.floor(Math.random() * 20) + 75;
-            const approved = user.count || 0;
-            const total = approved + (Math.floor(Math.random() * 2));
+            const score = p?.reputation_score || Math.floor(Math.random() * 20) + 80;
             
-            const avatarToUse = user.avatar;
-
             body.innerHTML = `
-                <div class="p-card ${isPro ? 'is-pro-card' : ''}" onclick="event.stopPropagation()">
+                <div class="p-card ${isPro ? 'is-pro-card' : ''}">
                     <button class="p-card-close" onclick="closeModal()">✕</button>
                     
                     <div class="p-card-grid">
                         <div class="p-card-left">
-                            <div class="p-card-header">
-                                <div class="p-card-avatar-wrap">
-                                    <img src="${avatarToUse}" class="p-card-avatar" onerror="this.src='https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'">
-                                </div>
-                                <div class="p-card-info">
-                                    <h2>
-                                        ${user.name}
-                                        ${isPro ? '<span class="badge-pro" style="margin-left:10px; vertical-align:middle;">PRO</span>' : ''}
-                                        ${user.is_verified ? `
-                                        <span class="verification-badge" style="color:var(--primary); margin-left:10px;">
-                                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                                        </span>` : ''}
-                                    </h2>
-                                    <div class="p-card-handle">@${handle}</div>
-                                </div>
+                            <div class="p-card-avatar-wrap">
+                                <img src="${user.avatar}" class="p-card-avatar" onerror="this.src='https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'">
+                            </div>
+                            <div class="p-card-info">
+                                <h2>
+                                    ${user.name.toUpperCase()}
+                                    ${getBadgeHtml(p, 'medium')}
+                                </h2>
+                                <div class="p-card-handle">@${user.handle.toLowerCase()}</div>
                             </div>
 
                             <div class="p-card-bio ${!p?.bio ? 'placeholder' : ''}">
-                                ${p?.bio || 'Verified ecosystem contributor. Dedicated to building the future of CreatorChain.'}
+                                ${p?.bio || 'Verified ecosystem contributor. Actively participating in community projects and technical development within the CreatorChain network.'}
                             </div>
 
                             <div class="p-card-section">
-                                <div class="p-card-section-title">Identity Links</div>
+                                <div class="p-card-section-title">Identity Protocols</div>
                                 <div class="p-card-socials">
                                     ${p?.twitter ? `<a href="https://x.com/${p.twitter.replace('@','')}" target="_blank" class="p-card-social-btn">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#000"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#000"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                                     </a>` : ''}
                                     ${p?.github ? `<a href="${p.github.startsWith('http')?p.github:'https://github.com/'+p.github.replace('@','')}" target="_blank" class="p-card-social-btn">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#000"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.041-1.416-4.041-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#000"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.041-1.416-4.041-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
                                     </a>` : ''}
                                 </div>
                             </div>
 
-                            <div class="p-card-cta-wrap">
-                                <button class="p-card-primary-btn" onclick="shareProfile('${handle}')">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
-                                    SHARE_PROFILE
-                                </button>
-                            </div>
+                            <button class="p-card-primary-btn" onclick="shareProfile('${user.handle}')">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                                COPY_PROFILE_LINK
+                            </button>
                         </div>
 
                         <div class="p-card-right">
                             <div class="p-card-section">
-                                <div class="p-card-section-title">Reputation & Stats</div>
+                                <div class="p-card-section-title">Network Reputation</div>
                                 <div class="p-stats-grid">
                                     <div class="p-stat-box">
                                         <span class="p-stat-label">Trust Score</span>
-                                        <span class="p-stat-val p-stat-score">${score}/100</span>
+                                        <span class="p-stat-val p-stat-score">${score}%</span>
                                     </div>
                                     <div class="p-stat-box">
-                                        <span class="p-stat-label">Approved</span>
-                                        <span class="p-stat-val">${approved}</span>
-                                    </div>
-                                    <div class="p-stat-box">
-                                        <span class="p-stat-label">Total Submissions</span>
-                                        <span class="p-stat-val">${total}</span>
+                                        <span class="p-stat-label">Approved Wins</span>
+                                        <span class="p-stat-val">${user.count}</span>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="p-card-section">
-                                <div class="p-card-section-title">Skills & Mastery</div>
+                                <div class="p-card-section-title">Technical Mastery</div>
                                 <div class="p-card-skills">
-                                    ${skills.length ? skills.map(s => `<span class="p-card-skill-tag">${s}</span>`).join('') : '<span class="mono" style="font-size:12px; color:#aaa;">No expertise listed</span>'}
+                                    ${skills.length ? skills.map(s => `<span class="p-card-skill-tag">${s}</span>`).join('') : '<span class="mono" style="font-size:11px; color:#aaa; font-weight:700;">NO SKILLS REGISTERED</span>'}
                                 </div>
                             </div>
 
                             <div class="p-card-section">
-                                <div class="p-card-section-title">Work Context</div>
+                                <div class="p-card-section-title">Operational Context</div>
                                 <div class="p-card-meta-grid">
                                     <div class="p-card-meta-card">
-                                        <div class="p-card-meta-icon"><i data-lucide="shield-check" style="width:18px;"></i></div>
+                                        <div class="p-card-meta-icon"><i data-lucide="shield-check" style="width:16px; color:#000;"></i></div>
                                         <div class="p-card-meta-info">
                                             <div class="p-card-meta-label">Level</div>
-                                            <div class="p-card-meta-value">${p?.experience_level || 'Builder'}</div>
+                                            <div class="p-card-meta-value">${p?.experience_level || 'BUILDER'}</div>
                                         </div>
                                     </div>
                                     <div class="p-card-meta-card">
-                                        <div class="p-card-meta-icon"><i data-lucide="map-pin" style="width:18px;"></i></div>
+                                        <div class="p-card-meta-icon"><i data-lucide="map-pin" style="width:16px; color:#000;"></i></div>
                                         <div class="p-card-meta-info">
-                                            <div class="p-card-meta-label">Location</div>
+                                            <div class="p-card-meta-label">Sector</div>
                                             <div class="p-card-meta-value">${user.location}</div>
                                         </div>
                                     </div>
@@ -398,12 +486,11 @@
         function closeModal() { document.getElementById('profile-modal').style.display = 'none'; }
         
         function shareProfile(handle) {
-            const url = `${window.location.origin}/index.html?u=${handle}`;
+            const url = `${window.location.origin}/?u=${handle}`;
             navigator.clipboard.writeText(url);
-            alert('Profile link copied to clipboard! 📋');
+            alert('LINK COPIED: ' + url);
         }
 
-        window.onclick = e => { if(e.target == document.getElementById('profile-modal')) closeModal(); }
         init();
     </script>
 </body>
