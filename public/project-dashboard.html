@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Dashboard | CreatorChain</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Include SheetJS for Excel Export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #00e87a;
+            --orange: #ff4d00;
+            --black: #0a0a0a;
+            --white: #ffffff;
+            --bg: #f8f9fa;
+        }
+
+        body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); margin: 0; display: none; }
+        
+        .header { background: #fff; border-bottom: 4px solid #000; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .logo-group { display: flex; align-items: center; gap: 15px; text-decoration: none; color: #000; }
+        .logo-group img { height: 35px; }
+        .project-name { font-weight: 900; text-transform: uppercase; font-size: 18px; letter-spacing: -1px; }
+
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        
+        .dash-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; }
+        .dash-title h2 { font-size: 32px; font-weight: 900; text-transform: uppercase; margin: 0; }
+        .dash-title p { font-family: 'Space Mono', monospace; font-size: 12px; color: #666; font-weight: 700; margin-top: 5px; }
+
+        .dash-tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 3px solid #000; padding-bottom: 10px; }
+        .dash-tab { padding: 12px 24px; background: #fff; border: 3px solid #000; font-family: 'Space Mono', monospace; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; transition: 0.1s; }
+        .dash-tab.active { background: var(--primary); box-shadow: 4px 4px 0 #000; transform: translate(-2px, -2px); }
+
+        .tab-section { display: none; }
+        .tab-section.active { display: block; }
+
+        /* DATA TOOLS */
+        .data-tools { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px; }
+        .search-wrap { flex: 1; position: relative; }
+        .search-wrap input { width: 100%; padding: 12px 15px 12px 45px; border: 3px solid #000; font-family: 'Space Mono', monospace; font-size: 13px; outline: none; }
+        .search-wrap i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); }
+
+        .export-btn { background: #000; color: #fff; padding: 12px 20px; border: 3px solid #000; font-family: 'Space Mono', monospace; font-weight: 900; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .export-btn:hover { background: var(--orange); transform: translate(-3px, -3px); box-shadow: 5px 5px 0 #000; }
+
+        /* BRUTAL TABLE */
+        .brutal-table { width: 100%; border-collapse: collapse; border: 4px solid #000; background: #fff; box-shadow: 10px 10px 0 #000; margin-bottom: 40px; }
+        .brutal-table th { background: #f0f0f0; border-bottom: 4px solid #000; padding: 15px; text-align: left; font-weight: 900; text-transform: uppercase; font-size: 11px; }
+        .brutal-table td { border-bottom: 1px solid #eee; padding: 15px; font-size: 13px; }
+        .brutal-table tr:hover td { background: #fafafa; }
+
+        .status-badge { padding: 4px 8px; font-size: 9px; font-weight: 900; text-transform: uppercase; border: 1.5px solid #000; }
+        .status-pending { background: #FFF9C4; }
+        .status-reviewed { background: #E3F2FD; }
+        .status-shortlisted { background: #C8E6C9; }
+
+        /* INFO GRID */
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .info-card { background: #fff; border: 3px solid #000; padding: 30px; box-shadow: 8px 8px 0 #000; }
+        .info-label { font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 900; color: #888; text-transform: uppercase; margin-bottom: 8px; }
+        .info-val { font-size: 15px; font-weight: 700; line-height: 1.6; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: #fff; border: 5px solid #000; width: 100%; max-width: 700px; padding: 40px; box-shadow: 15px 15px 0 var(--primary); max-height: 90vh; overflow-y: auto; }
+
+        .logout-btn { background: none; border: 2px solid #000; padding: 8px 15px; font-family: 'Space Mono', monospace; font-weight: 900; font-size: 10px; cursor: pointer; }
+        .logout-btn:hover { background: #000; color: #fff; }
+
+        .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        .page-btn { padding: 8px 15px; border: 2px solid #000; background: #fff; font-family: 'Space Mono', monospace; font-weight: 900; font-size: 12px; cursor: pointer; }
+        .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .page-btn.active { background: #000; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <a href="#" class="logo-group">
+            <img src="/logo.png" alt="CC">
+            <span class="project-name" id="display-project-name">PROJECT TERMINAL</span>
+        </a>
+        <div style="display:flex; gap:20px; align-items:center;">
+            <div style="font-family:'Space Mono', monospace; font-size:10px; font-weight:900; padding:5px 10px; background:#eee; border:1px solid #000;">READ-ONLY SESSION</div>
+            <button class="logout-btn" onclick="handleLogout()">TERMINATE SESSION</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="dash-header">
+            <div class="dash-title">
+                <h2 id="opportunity-title">...</h2>
+                <p>PROJECT SCOPE: <span id="opportunity-type">...</span></p>
+            </div>
+            <div class="stats-mini" style="display:flex; gap:15px;">
+                <div style="text-align:right;">
+                    <div style="font-size:10px; font-weight:900; color:#888;">TOTAL APPLICATIONS</div>
+                    <div style="font-size:24px; font-weight:900;" id="stat-total">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dash-tabs">
+            <button class="dash-tab active" onclick="switchTab('apps')">Applications</button>
+            <button class="dash-tab" onclick="switchTab('info')">Opportunity Info</button>
+        </div>
+
+        <!-- APPLICATIONS SECTION -->
+        <div id="apps-sec" class="tab-section active">
+            <div class="data-tools">
+                <div class="search-wrap">
+                    <i data-lucide="search" style="width:18px;"></i>
+                    <input type="text" id="app-search" placeholder="Search by Wallet, Bio, or Message..." oninput="handleSearch()">
+                </div>
+                <button class="export-btn" onclick="exportToExcel()">
+                    <i data-lucide="download"></i> EXPORT TO EXCEL
+                </button>
+            </div>
+
+            <table class="brutal-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Applicant (Wallet)</th>
+                        <th>Message Preview</th>
+                        <th>Links</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="apps-list">
+                    <!-- Dynamic -->
+                </tbody>
+            </table>
+            
+            <div class="pagination" id="pagination"></div>
+        </div>
+
+        <!-- INFO SECTION -->
+        <div id="info-sec" class="tab-section">
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-label">Title</div>
+                    <div class="info-val" id="info-title">...</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Reward</div>
+                    <div class="info-val" id="info-reward">...</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Deadline</div>
+                    <div class="info-val" id="info-deadline">...</div>
+                </div>
+                <div class="info-card" style="grid-column: span 2;">
+                    <div class="info-label">Description</div>
+                    <div class="info-val" id="info-desc">...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div id="details-modal" class="modal-overlay" onclick="if(event.target === this) closeDetails()">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; border-bottom:4px solid #000; padding-bottom:15px;">
+                <h2 style="margin:0; text-transform:uppercase; font-weight:900;">Application Details</h2>
+                <button onclick="closeDetails()" style="background:none; border:none; font-size:24px; cursor:pointer;">✕</button>
+            </div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        const supabaseUrl = 'https://mwefmtmcljdsptcgowmb.supabase.co';
+        const supabaseKey = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
+        
+        let supabase;
+        let allApps = [];
+        let filteredApps = [];
+        let currentPage = 1;
+        const perPage = 10;
+
+        const accessKey = localStorage.getItem('prj_access_key');
+        const prjId = localStorage.getItem('prj_id');
+
+        async function init() {
+            if (!accessKey || !prjId) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+            supabase = createClient(supabaseUrl, supabaseKey);
+
+            // Verify key is still active
+            const { data: keyValid, error: keyErr } = await supabase
+                .from('project_access_keys')
+                .select('status')
+                .eq('access_key', accessKey)
+                .eq('project_id', prjId)
+                .maybeSingle();
+
+            if (keyErr || !keyValid || keyValid.status !== 'active') {
+                handleLogout();
+                return;
+            }
+
+            document.body.style.display = 'block';
+            loadProjectData();
+        }
+
+        async function loadProjectData() {
+            // Fetch Opportunity Details
+            const { data: opp, error: oppErr } = await supabase
+                .from('opportunities')
+                .select('*')
+                .eq('id', prjId)
+                .single();
+
+            if (opp) {
+                document.getElementById('display-project-name').textContent = opp.project_name.toUpperCase();
+                document.getElementById('opportunity-title').textContent = opp.title;
+                document.getElementById('opportunity-type').textContent = opp.type.toUpperCase();
+                
+                document.getElementById('info-title').textContent = opp.title;
+                document.getElementById('info-reward').textContent = opp.reward || 'TBA';
+                document.getElementById('info-deadline').textContent = opp.deadline || 'NO DEADLINE';
+                document.getElementById('info-desc').textContent = opp.description;
+            }
+
+            // Fetch Applications
+            const { data: apps, error: appsErr } = await supabase
+                .from('applications')
+                .select('*')
+                .eq('opportunity_id', prjId)
+                .order('created_at', { ascending: false });
+
+            if (apps) {
+                allApps = apps;
+                filteredApps = [...apps];
+                document.getElementById('stat-total').textContent = apps.length;
+                renderApps();
+            }
+        }
+
+        window.renderApps = () => {
+            const list = document.getElementById('apps-list');
+            list.innerHTML = '';
+
+            const start = (currentPage - 1) * perPage;
+            const end = start + perPage;
+            const paginated = filteredApps.slice(start, end);
+
+            if (paginated.length === 0) {
+                list.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:50px; color:#888;">No applications found.</td></tr>';
+                return;
+            }
+
+            paginated.forEach(app => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-family:'Space Mono', monospace; font-size:11px;">${new Date(app.created_at).toLocaleDateString()}</td>
+                    <td style="font-weight:700;">${app.user_id.substring(0,6)}...${app.user_id.substring(38)}</td>
+                    <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${app.message}</td>
+                    <td><div style="max-width:150px; overflow:hidden; text-overflow:ellipsis;">${app.portfolio_links || '-'}</div></td>
+                    <td><span class="status-badge status-${app.status}">${app.status}</span></td>
+                    <td>
+                        <button class="logout-btn" onclick="openDetails('${app.id}')">VIEW DETAILS</button>
+                    </td>
+                `;
+                list.appendChild(tr);
+            });
+
+            renderPagination();
+            lucide.createIcons();
+        };
+
+        window.renderPagination = () => {
+            const wrap = document.getElementById('pagination');
+            wrap.innerHTML = '';
+            const totalPages = Math.ceil(filteredApps.length / perPage);
+            
+            if (totalPages <= 1) return;
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                btn.textContent = i;
+                btn.onclick = () => { currentPage = i; renderApps(); };
+                wrap.appendChild(btn);
+            }
+        };
+
+        window.handleSearch = () => {
+            const q = document.getElementById('app-search').value.toLowerCase();
+            filteredApps = allApps.filter(a => 
+                a.user_id.toLowerCase().includes(q) || 
+                a.message.toLowerCase().includes(q) ||
+                (a.portfolio_links && a.portfolio_links.toLowerCase().includes(q))
+            );
+            currentPage = 1;
+            renderApps();
+        };
+
+        window.openDetails = (id) => {
+            const app = allApps.find(a => a.id === id);
+            if (!app) return;
+
+            const modal = document.getElementById('details-modal');
+            const body = document.getElementById('modal-body');
+
+            body.innerHTML = `
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:30px;">
+                    <div>
+                        <div class="info-label">Submission Date</div>
+                        <div class="info-val">${new Date(app.created_at).toLocaleString()}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Applicant Wallet</div>
+                        <div class="info-val" style="word-break:break-all;">${app.user_id}</div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom:30px;">
+                    <div class="info-label">Pitch / Message</div>
+                    <div class="info-val" style="background:#f9f9f9; padding:20px; border:1px solid #eee;">${app.message.replace(/\n/g, '<br>')}</div>
+                </div>
+
+                <div style="margin-bottom:30px;">
+                    <div class="info-label">Portfolio & Proof of Work</div>
+                    <div class="info-val">${app.portfolio_links ? app.portfolio_links.split(',').map(l => `<a href="${l.trim()}" target="_blank" style="display:block; color:var(--orange);">${l.trim()}</a>`).join('') : 'None provided'}</div>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        };
+
+        window.closeDetails = () => {
+            document.getElementById('details-modal').style.display = 'none';
+        };
+
+        window.switchTab = (tab) => {
+            document.querySelectorAll('.dash-tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+            
+            document.getElementById(`${tab}-sec`).classList.add('active');
+            event.target.classList.add('active');
+        };
+
+        window.exportToExcel = () => {
+            const data = filteredApps.map(a => ({
+                'Date': new Date(a.created_at).toLocaleString(),
+                'Wallet Address': a.user_id,
+                'Message': a.message,
+                'Portfolio Links': a.portfolio_links,
+                'Status': a.status
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Applications");
+            
+            const filename = `${localStorage.getItem('prj_name').replace(/\s+/g, '_')}_Applications.xlsx`;
+            XLSX.writeFile(wb, filename);
+        };
+
+        window.handleLogout = () => {
+            localStorage.removeItem('prj_access_key');
+            localStorage.removeItem('prj_id');
+            localStorage.removeItem('prj_name');
+            window.location.href = '/login.html';
+        };
+
+        init();
+        lucide.createIcons();
+    </script>
+</body>
+</html>

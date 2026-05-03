@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Terminal | CreatorChain</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #00e87a;
+            --orange: #ff4d00;
+            --black: #0a0a0a;
+            --white: #ffffff;
+            --bg: #f5f0e8;
+        }
+
+        body {
+            background-color: var(--bg);
+            background-image: radial-gradient(var(--black) 1px, transparent 1px);
+            background-size: 25px 25px;
+            font-family: 'Space Grotesk', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: #fff;
+            border: 4px solid var(--black);
+            width: 100%;
+            max-width: 450px;
+            padding: 50px;
+            box-shadow: 20px 20px 0 var(--black);
+            position: relative;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-wrap {
+            width: 60px;
+            height: 60px;
+            background: var(--black);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--primary);
+            transform: rotate(-5deg);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .auth-toggle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border: 3px solid var(--black);
+            margin-bottom: 30px;
+        }
+
+        .toggle-btn {
+            padding: 12px;
+            background: #fff;
+            border: none;
+            font-family: 'Space Mono', monospace;
+            font-weight: 900;
+            font-size: 11px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .toggle-btn.active {
+            background: var(--black);
+            color: #fff;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 3px solid var(--black);
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            background: #f0fff8;
+            box-shadow: inset 4px 4px 0 #eee;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--black);
+            color: #fff;
+            border: none;
+            font-family: 'Space Mono', monospace;
+            font-weight: 900;
+            font-size: 14px;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: 0.2s;
+        }
+
+        .action-btn:hover {
+            background: var(--primary);
+            color: #000;
+            transform: translate(-4px, -4px);
+            box-shadow: 6px 6px 0 var(--black);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .error-msg {
+            background: #ffebee;
+            color: #c62828;
+            border: 2px solid #c62828;
+            padding: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        #project-form {
+            display: none;
+        }
+
+        .corner-badge {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            background: var(--orange);
+            color: #fff;
+            padding: 5px 10px;
+            font-size: 10px;
+            font-weight: 900;
+            border: 3px solid var(--black);
+            transform: rotate(5deg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="corner-badge">SECURE ACCESS</div>
+        <div class="login-header">
+            <div class="logo-wrap">
+                <img src="/logo.png" alt="C" style="height:35px;">
+            </div>
+            <h1>TERMINAL LOGIN</h1>
+            <p class="subtitle">CreatorChain // Authorized Personnel Only</p>
+        </div>
+
+        <div class="auth-toggle">
+            <button class="toggle-btn active" id="tab-project" onclick="switchTab('project')">Project Access</button>
+            <button class="toggle-btn" id="tab-admin" onclick="switchTab('admin')">Admin Hub</button>
+        </div>
+
+        <div id="error-box" class="error-msg"></div>
+
+        <!-- Project Login -->
+        <form id="project-form" style="display: block;" onsubmit="handleProjectLogin(event)">
+            <div class="input-group">
+                <label>ENTER PROJECT ACCESS KEY</label>
+                <input type="text" id="access-key" placeholder="PRJ-XXXXXX" required autocomplete="off" style="text-transform: uppercase;">
+            </div>
+            <button type="submit" class="action-btn" id="project-btn">
+                ACCESS DASHBOARD <i data-lucide="shield-check"></i>
+            </button>
+            <p style="text-align:center; font-size:11px; margin-top:20px; color:#888; line-height:1.4;">
+                Access keys are provided by the CreatorChain administration team for specific campaign management.
+            </p>
+        </form>
+
+        <!-- Admin Login (Redirects to Admin Dashboard which has its own Auth check) -->
+        <div id="admin-form" style="display: none;">
+            <p style="text-align:center; font-size:13px; font-weight:700; margin-bottom:25px; line-height:1.6;">
+                Administrative access requires standard credentials or Web3 wallet authentication via the main Admin Hub.
+            </p>
+            <button class="action-btn" onclick="location.href='/admin.html'">
+                OPEN ADMIN HUB <i data-lucide="external-link"></i>
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        const supabaseUrl = 'https://mwefmtmcljdsptcgowmb.supabase.co';
+        const supabaseKey = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
+        
+        let supabase;
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+        supabase = createClient(supabaseUrl, supabaseKey);
+
+        window.switchTab = (type) => {
+            document.getElementById('tab-project').classList.toggle('active', type === 'project');
+            document.getElementById('tab-admin').classList.toggle('active', type === 'admin');
+            document.getElementById('project-form').style.display = type === 'project' ? 'block' : 'none';
+            document.getElementById('admin-form').style.display = type === 'admin' ? 'block' : 'none';
+            document.getElementById('error-box').style.display = 'none';
+        };
+
+        window.handleProjectLogin = async (e) => {
+            e.preventDefault();
+            const keyInput = document.getElementById('access-key').value.trim().toUpperCase();
+            const btn = document.getElementById('project-btn');
+            const errorBox = document.getElementById('error-box');
+
+            if (!keyInput) return;
+
+            btn.disabled = true;
+            btn.innerHTML = 'VERIFYING KEY... <i data-lucide="loader" class="spin"></i>';
+            lucide.createIcons();
+            errorBox.style.display = 'none';
+
+            try {
+                // Verify the key
+                const { data, error } = await supabase
+                    .from('project_access_keys')
+                    .select('*, opportunities(project_name)')
+                    .eq('access_key', keyInput)
+                    .eq('status', 'active')
+                    .maybeSingle();
+
+                if (error) throw error;
+
+                if (!data) {
+                    throw new Error('INVALID OR REVOKED ACCESS KEY');
+                }
+
+                // Success! Store key and project ID in localStorage
+                localStorage.setItem('prj_access_key', keyInput);
+                localStorage.setItem('prj_id', data.project_id);
+                localStorage.setItem('prj_name', data.opportunities.project_name);
+
+                btn.style.background = 'var(--primary)';
+                btn.style.color = '#000';
+                btn.innerHTML = 'ACCESS GRANTED! <i data-lucide="check-circle"></i>';
+                lucide.createIcons();
+
+                setTimeout(() => {
+                    window.location.href = '/project-dashboard.html';
+                }, 1000);
+
+            } catch (err) {
+                console.error(err);
+                errorBox.textContent = err.message.toUpperCase();
+                errorBox.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = 'ACCESS DASHBOARD <i data-lucide="shield-check"></i>';
+                lucide.createIcons();
+            }
+        };
+
+        lucide.createIcons();
+    </script>
+
+    <style>
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</body>
+</html>

@@ -168,6 +168,7 @@
                         <th>Type</th>
                         <th>Applicants</th>
                         <th>Status</th>
+                        <th>Access</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -175,6 +176,24 @@
                     <!-- Dynamic content -->
                 </tbody>
             </table>
+        </div>
+
+        <!-- KEY MANAGEMENT MODAL -->
+        <div id="key-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center;">
+            <div style="background:#fff; border:4px solid #000; padding:40px; width:100%; max-width:500px; box-shadow:20px 20px 0 var(--orange);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+                    <h3 style="margin:0; text-transform:uppercase; font-weight:900;">Project Access Keys</h3>
+                    <button onclick="closeKeyModal()" style="background:none; border:none; font-size:24px; cursor:pointer;">✕</button>
+                </div>
+                
+                <div id="keys-loading" style="text-align:center; padding:20px;">LOADING...</div>
+                <div id="keys-list" style="display:flex; flex-direction:column; gap:15px; margin-bottom:30px; max-height:300px; overflow-y:auto;"></div>
+
+                <div id="key-gen-zone" style="border-top:2px solid #eee; padding-top:20px;">
+                    <p style="font-size:11px; font-weight:900; color:#888; text-transform:uppercase; margin-bottom:15px;">Generate New Access Key for this project</p>
+                    <button class="action-btn btn-view" onclick="generateNewKey()" id="gen-btn" style="width:100%; padding:15px;">GENERATE KEY</button>
+                </div>
+            </div>
         </div>
 
         <!-- APPLICANTS SECTION -->
@@ -190,6 +209,8 @@
         const anonKey = localStorage.getItem('supabase_anon_key');
 
         let supabase;
+        let activeProjectId = null;
+
         if (anonKey) {
             const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
             supabase = createClient(supabaseUrl, anonKey);
@@ -253,6 +274,9 @@
                     <td>${opp.type}</td>
                     <td style="font-weight:900;">${opp.applications ? opp.applications.length : 0}</td>
                     <td><span class="status-badge ${isLive ? 'status-live' : 'status-closed'}">${opp.status}</span></td>
+                    <td>
+                        <button class="action-btn" onclick="openKeyModal('${opp.id}')" style="background:#f0f0f0;">🔑 Manage Access</button>
+                    </td>
                     <td>
                         <button class="action-btn" onclick="updateStatus('${opp.id}', '${isLive ? 'closed' : 'live'}')">
                             ${isLive ? 'Close' : 'Open'}
@@ -470,6 +494,107 @@
             const btns = document.querySelectorAll('.tab-btn');
             btns.forEach(btn => {
                 if (btn.getAttribute('onclick').includes(id)) btn.classList.add('active');
+            });
+        };
+
+        // ACCESS KEY MANAGEMENT
+        window.openKeyModal = async (id) => {
+            activeProjectId = id;
+            document.getElementById('key-modal').style.display = 'flex';
+            loadProjectKeys();
+        };
+
+        window.closeKeyModal = () => {
+            document.getElementById('key-modal').style.display = 'none';
+            activeProjectId = null;
+        };
+
+        window.loadProjectKeys = async () => {
+            const loading = document.getElementById('keys-loading');
+            const list = document.getElementById('keys-list');
+            loading.style.display = 'block';
+            list.innerHTML = '';
+
+            const { data, error } = await supabase
+                .from('project_access_keys')
+                .select('*')
+                .eq('project_id', activeProjectId)
+                .order('created_at', { ascending: false });
+
+            loading.style.display = 'none';
+            
+            if (data && data.length > 0) {
+                data.forEach(key => {
+                    const div = document.createElement('div');
+                    div.style = 'padding:15px; border:2px solid #000; display:flex; justify-content:space-between; align-items:center;';
+                    div.innerHTML = `
+                        <div>
+                            <div style="font-family:var(--font-mono); font-weight:900; font-size:14px; ${key.status === 'revoked' ? 'text-decoration:line-through; opacity:0.5;' : ''}">${key.access_key}</div>
+                            <div style="font-size:9px; color:#888;">${key.status.toUpperCase()} • ${new Date(key.created_at).toLocaleDateString()}</div>
+                        </div>
+                        <div style="display:flex; gap:5px;">
+                            ${key.status === 'active' ? `
+                                <button class="action-btn" onclick="copyToClipboard('${key.access_key}')">COPY</button>
+                                <button class="action-btn btn-reject" onclick="revokeKey('${key.id}')">REVOKE</button>
+                            ` : ''}
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            } else {
+                list.innerHTML = '<p style="text-align:center; font-size:12px; color:#888;">No access keys generated yet.</p>';
+            }
+        };
+
+        window.generateNewKey = async () => {
+            const btn = document.getElementById('gen-btn');
+            btn.disabled = true;
+            btn.textContent = 'GENERATING...';
+
+            // Generate unique PRJ-XXXXXX key
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let randomStr = '';
+            for (let i = 0; i < 6; i++) {
+                randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            const newKey = `PRJ-${randomStr}`;
+
+            const { error } = await supabase
+                .from('project_access_keys')
+                .insert([{
+                    project_id: activeProjectId,
+                    access_key: newKey,
+                    status: 'active'
+                }]);
+
+            btn.disabled = false;
+            btn.textContent = 'GENERATE KEY';
+
+            if (error) {
+                alert('Generation failed: ' + error.message);
+            } else {
+                loadProjectKeys();
+            }
+        };
+
+        window.revokeKey = async (id) => {
+            if (!confirm('Are you sure you want to revoke this access key? This action cannot be undone.')) return;
+            
+            const { error } = await supabase
+                .from('project_access_keys')
+                .update({ status: 'revoked' })
+                .eq('id', id);
+
+            if (error) {
+                alert('Revoke failed: ' + error.message);
+            } else {
+                loadProjectKeys();
+            }
+        };
+
+        window.copyToClipboard = (text) => {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Key copied to clipboard!');
             });
         };
 
