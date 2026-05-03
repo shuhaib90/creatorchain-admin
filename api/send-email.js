@@ -77,6 +77,35 @@ export default async (req, res) => {
           </div>
         </div>
       `;
+    } else if (type === 'opportunity_approved') {
+      to = payload.to;
+      if (!to) return res.status(400).json({ error: 'Recipient email is required' });
+
+      subject = `✅ Your Opportunity is LIVE on CreatorChain: ${payload.project_name}`;
+      html = `
+        <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; border: 4px solid #000; padding: 30px; background: #fff; box-shadow: 10px 10px 0 #000;">
+          <h1 style="font-size: 28px; font-weight: 900; margin-top: 0; color: #000; text-transform: uppercase; letter-spacing: -1px;">
+            Submission <span style="background: #00f5a0; padding: 0 5px;">Approved</span>
+          </h1>
+          <p style="font-size: 16px; line-height: 1.6; color: #333;">
+            Great news! The opportunity you submitted for <strong>${payload.project_name}</strong> has been reviewed and approved by the admin team.
+          </p>
+          <div style="background: #f0f0f0; padding: 20px; border: 2px solid #000; margin: 20px 0;">
+            <p style="margin: 5px 0;"><strong>PROJECT:</strong> ${payload.project_name}</p>
+            <p style="margin: 5px 0;"><strong>TITLE:</strong> ${payload.title}</p>
+            <p style="margin: 5px 0;"><strong>STATUS:</strong> LIVE 🟢</p>
+          </div>
+          <p style="font-size: 14px; color: #666;">
+            We've just broadcasted this opportunity to our entire network of builders and community leads. You can expect applicants to reach out via your specified contact method shortly!
+          </p>
+          <a href="https://creatorchain.site/" style="display: inline-block; background: #000; color: #fff; padding: 15px 30px; margin-top: 10px; text-decoration: none; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; border: 2px solid #000;">
+            VIEW IT LIVE
+          </a>
+          <div style="margin-top: 30px; border-top: 2px solid #000; padding-top: 20px; text-align: center;">
+            <p style="font-weight: 800; font-size: 12px; text-transform: uppercase;">CreatorChain Admin Team</p>
+          </div>
+        </div>
+      `;
     } else {
       return res.status(400).json({ error: 'Invalid notification type' });
     }

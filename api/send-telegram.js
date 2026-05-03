@@ -97,6 +97,11 @@ export default async (req, res) => {
                 `Congratulations! Your profile has been upgraded to <b>${badge.toUpperCase()}</b> status.\n\n` +
                 `Your new status is now visible to all teams and employers on the network. Keep building!\n\n` +
                 `🚀 <a href="https://creatorchain.site/profile.html?u=${payload.username}">VIEW YOUR PROFILE</a>`;
+    } else if (type === 'opportunity_approved') {
+      message = `✅ <b>SUBMISSION APPROVED</b>\n\n` +
+                `Great news! The opportunity you submitted for <b>${payload.project_name}</b> has been reviewed and approved.\n\n` +
+                `It is now LIVE on CreatorChain and has been broadcasted to our network of builders.\n\n` +
+                `🚀 <a href="https://creatorchain.site/">VIEW IT LIVE</a>`;
     } else if (type === 'custom') {
       message = payload.message;
     } else {

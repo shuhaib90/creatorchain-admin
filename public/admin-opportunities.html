@@ -317,7 +317,7 @@
 
             try {
                 const [{ data: profiles }, { data: tgSubscribers }, { data: emailSubscribers }] = await Promise.all([
-                    supabase.from('user_profiles').select('telegram_id, telegram_notifications, email, email_notifications, skills'),
+                    supabase.from('user_profiles').select('telegram_id, telegram_notifications, email, email_notifications, skills, username'),
                     supabase.from('telegram_subscribers').select('chat_id'),
                     supabase.from('subscribers').select('email')
                 ]);
@@ -394,6 +394,40 @@
                 }
 
                 alert(`🚀 Broadcast sent! Telegram: ${tgRecipients.length} | Email: ${emailRecipients.length}`);
+
+                // 5. Notify Submitter (Email & Telegram)
+                if (item.submitter_email) {
+                    await fetch('/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'opportunity_approved',
+                            payload: {
+                                to: item.submitter_email,
+                                project_name: item.project_name,
+                                title: item.title
+                            }
+                        })
+                    }).catch(e => console.error('Submitter email failed:', e));
+                }
+
+                if (item.submitted_by) {
+                    const submitterProfile = (profiles || []).find(p => p.username && p.username.toLowerCase() === item.submitted_by.toLowerCase());
+                    if (submitterProfile && submitterProfile.telegram_id) {
+                        await fetch('/api/send-telegram', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                type: 'opportunity_approved',
+                                payload: {
+                                    chat_ids: [submitterProfile.telegram_id],
+                                    project_name: item.project_name
+                                }
+                            })
+                        }).catch(e => console.error('Submitter telegram failed:', e));
+                    }
+                }
+
             } catch (err) {
                 console.error('Broadcast Error:', err);
                 alert('Broadcast failed: ' + err.message);
