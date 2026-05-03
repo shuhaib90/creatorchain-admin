@@ -1,4 +1,4 @@
-// CreatorChain Admin Terminal v2.1.9 - Optimistic State Overhaul
+// CreatorChain Admin Terminal v2.2.0 - Multimedia Broadcast Overhaul
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { 
