@@ -982,6 +982,7 @@ const Opportunities = () => {
             chat_ids: tgRecipients,
             id: item.id,
             project_name: item.project_name,
+            logo_url: item.logo,
             category: item.type,
             reward: item.reward || 'TBA',
             description: item.title
