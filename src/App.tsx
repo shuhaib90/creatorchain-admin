@@ -1650,14 +1650,19 @@ const SettingsPage = () => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const toggleSetting = async (key: string, currentValue: boolean) => {
-    const newValue = !currentValue;
+  const toggleSetting = async (key: string, currentValue: boolean | null) => {
+    const newValue = currentValue === null ? true : !currentValue;
+    console.log(`[System] Toggling ${key} to ${newValue}`);
+    
     const { error } = await supabase
       .from('system_settings')
       .update({ value: newValue, updated_at: new Date().toISOString() })
       .eq('key', key);
     
-    if (error) alert('Critical Update Failed: ' + error.message);
+    if (error) {
+      console.error(`[System] Update failed:`, error);
+      alert(`SYSTEM_ERROR: ${error.message}\nCode: ${error.code}`);
+    }
   };
 
   if (loading) return <div className="fade-in mono" style={{ color: 'var(--text-muted)', padding: '40px' }}>ACCESSING_ENCRYPTED_STORAGE...</div>;
