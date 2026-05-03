@@ -1621,6 +1621,13 @@ function App() {
           <Route path="/users" element={<UsersPage />} />
           <Route path="/broadcast" element={<Broadcast />} />
           <Route path="/opportunities" element={<Opportunities />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Routes>
+      </Layout>
+    </Router>
+  );
+}
+
 const SettingsPage = () => {
   const [broadcastEnabled, setBroadcastEnabled] = useState<boolean | null>(null);
   const [devMode, setDevMode] = useState<boolean | null>(null);
@@ -1721,14 +1728,7 @@ const SettingsPage = () => {
     </div>
   );
 };
-
-// ... in App routes ...
-          <Route path="/settings" element={<SettingsPage />} />
-        </Routes>
-      </Layout>
-    </Router>
-  );
-}
+};
 
 export default App;
 
