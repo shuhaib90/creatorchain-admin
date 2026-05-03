@@ -334,6 +334,38 @@
 
                 if (error) throw error;
 
+                // Notify Admin via Email and Telegram
+                try {
+                    fetch('/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'admin_alert',
+                            payload: {
+                                project_name: formData.project_name,
+                                submitted_by: formData.submitter_email,
+                                submitter_email: formData.submitter_email,
+                                submitter_telegram: formData.team_contact,
+                                category: formData.type
+                            }
+                        })
+                    });
+                    
+                    fetch('/api/send-telegram', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'admin_alert',
+                            payload: {
+                                project_name: formData.project_name,
+                                submitted_by: formData.submitter_email,
+                                category: formData.type,
+                                chat_ids: '2127320399' // Verified admin chat_id
+                            }
+                        })
+                    });
+                } catch (notifyErr) { console.warn('Admin alert failed:', notifyErr); }
+
                 document.getElementById('opportunity-form').style.display = 'none';
                 document.getElementById('success-msg').style.display = 'block';
                 window.scrollTo(0,0);

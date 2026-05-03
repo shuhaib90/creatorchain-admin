@@ -1839,8 +1839,23 @@
             const { error } = await db.from('listings').insert([item]);
             if (error) throw error;
 
-            // Notify Admin via Telegram
+            // Notify Admin via Email and Telegram
             try {
+                fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'admin_alert',
+                        payload: {
+                            project_name: item.project,
+                            submitted_by: item.submitted_by,
+                            submitter_email: item.submitter_email,
+                            submitter_telegram: item.submitter_telegram,
+                            category: item.section
+                        }
+                    })
+                });
+
                 fetch('/api/send-telegram', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1854,7 +1869,7 @@
                         }
                     })
                 });
-            } catch (tgErr) { console.warn('Admin TG alert failed:', tgErr); }
+            } catch (tgErr) { console.warn('Admin alert failed:', tgErr); }
 
             if (window.va) window.va('track', 'Project_Submitted', { category: item.section, project: item.project });
 

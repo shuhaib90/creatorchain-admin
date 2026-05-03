@@ -116,8 +116,34 @@ export default async (req, res) => {
           </div>
         </div>
       `;
-    } else {
-      return res.status(400).json({ error: 'Invalid notification type' });
+    } else if (type === 'admin_alert') {
+      to = payload.to || 'shuhaibvlogs0@gmail.com'; // Default admin email
+      if (!to) return res.status(400).json({ error: 'Recipient email is required' });
+
+      subject = `🚨 New Submission: ${payload.project_name}`;
+      html = `
+        <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; border: 4px solid #000; padding: 30px; background: #fff; box-shadow: 10px 10px 0 #000;">
+          <h1 style="font-size: 28px; font-weight: 900; margin-top: 0; color: #000; text-transform: uppercase; letter-spacing: -1px;">
+            New <span style="background: #00f5a0; padding: 0 5px;">Submission</span>
+          </h1>
+          <p style="font-size: 16px; line-height: 1.6; color: #333;">
+            A new opportunity has been submitted by <strong>${payload.submitted_by}</strong> and is awaiting your review.
+          </p>
+          <div style="background: #f0f0f0; padding: 20px; border: 2px solid #000; margin: 20px 0;">
+            <p style="margin: 5px 0;"><strong>PROJECT:</strong> ${payload.project_name}</p>
+            <p style="margin: 5px 0;"><strong>CATEGORY:</strong> ${payload.category || 'General'}</p>
+            <p style="margin: 5px 0;"><strong>SUBMITTER EMAIL:</strong> ${payload.submitter_email || 'N/A'}</p>
+            <p style="margin: 5px 0;"><strong>TELEGRAM:</strong> ${payload.submitter_telegram || 'N/A'}</p>
+          </div>
+          <a href="https://creatorchain-admin-fo2n.vercel.app/" style="display: inline-block; background: #000; color: #fff; padding: 15px 30px; margin-top: 10px; text-decoration: none; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; border: 2px solid #000;">
+            OPEN ADMIN TERMINAL
+          </a>
+        </div>
+      `;
+    }
+    
+    if (!to || !subject || !html) {
+      return res.status(400).json({ error: 'Failed to prepare email content for this type' });
     }
 
     const { data, error } = await resend.emails.send({
