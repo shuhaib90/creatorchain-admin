@@ -536,9 +536,12 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
                     })
                 });
                 console.log("Sent approval email to:", listing.submitter_email);
-            } else if (listing.submitted_by) {
-                // Try to find telegram ID based on username
-                const handle = listing.submitted_by.replace('@', '').trim();
+            }
+            
+            // Try to find telegram ID either by explicitly provided submitter_telegram or by submitted_by handle
+            let tgHandle = listing.submitter_telegram || listing.submitted_by;
+            if (tgHandle) {
+                const handle = tgHandle.replace('@', '').trim();
                 const { data: profiles } = await db.from('user_profiles').select('telegram_id, username');
                 const submitterProfile = (profiles || []).find(p => p.username && p.username.toLowerCase() === handle.toLowerCase());
                 
