@@ -396,25 +396,25 @@
                 alert(`🚀 Broadcast sent! Telegram: ${tgRecipients.length} | Email: ${emailRecipients.length}`);
 
                 // 5. Notify Submitter (Email & Telegram)
-                const contact = item.team_contact || '';
-                const isEmail = contact.includes('@') && contact.includes('.');
-                const isHandle = contact.startsWith('@') && !contact.includes('.');
-
-                if (isEmail) {
+                // 5. Notify Submitter (Email & Telegram)
+                if (item.submitter_email && item.submitter_email.includes('@')) {
                     await fetch('https://creatorchain.site/api/send-email', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             type: 'opportunity_approved',
                             payload: {
-                                to: contact.trim(),
+                                to: item.submitter_email.trim(),
                                 project_name: item.project_name,
                                 title: item.title
                             }
                         })
                     }).catch(e => console.error('Submitter email failed:', e));
-                } else if (isHandle || contact) {
-                    const handle = contact.replace('@', '').trim();
+                }
+
+                const tgHandle = item.team_contact || '';
+                if (tgHandle) {
+                    const handle = tgHandle.replace('@', '').trim();
                     const submitterProfile = (profiles || []).find(p => p.username && p.username.toLowerCase() === handle.toLowerCase());
                     if (submitterProfile && submitterProfile.telegram_id) {
                         await fetch('https://creatorchain.site/api/send-telegram', {
