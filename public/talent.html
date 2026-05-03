@@ -814,7 +814,7 @@
         const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
         
-        let db;
+        let db, currentProfile = null;
 
         // BADGE LOGIC & SVG GENERATOR
         function getBadgeHtml(profile, size = 'small') {
@@ -906,6 +906,7 @@
         async function updateUIForUser(user) {
             // Try to fetch custom profile data first
             const { data: dbProfile } = await db.from('user_profiles').select('*').eq('user_id', user.id).single();
+            currentProfile = dbProfile;
             
             // Auto-prompt to complete profile if it doesn't exist
             if (!dbProfile) {
@@ -969,9 +970,23 @@
             if (!user) return;
 
             try {
+                // Fetch profile if not already loaded to get the internal ID
+                if (!currentProfile) {
+                    const { data: profile } = await db.from('user_profiles')
+                        .select('id')
+                        .eq('user_id', user.id)
+                        .single();
+                    currentProfile = profile;
+                }
+                
+                if (!currentProfile) {
+                    content.innerHTML = '<div style="padding:60px; text-align:center;"><p class="mono">⚠️ PROFILE_NOT_FOUND. PLEASE COMPLETE SETUP.</p></div>';
+                    return;
+                }
+
                 const { data, error } = await db.from('hire_requests')
                     .select('*')
-                    .eq('receiver_id', user.id)
+                    .eq('receiver_id', currentProfile.id)
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
@@ -1021,17 +1036,18 @@
         function timeAgo(date) {
             const seconds = Math.floor((new Date() - new Date(date)) / 1000);
             let interval = seconds / 31536000;
-            if (interval > 1) return Math.floor(interval) + " years ago";
+            if (interval > 1) return Math.floor(interval) + "Y AGO";
             interval = seconds / 2592000;
-            if (interval > 1) return Math.floor(interval) + " months ago";
+            if (interval > 1) return Math.floor(interval) + "M AGO";
             interval = seconds / 86400;
-            if (interval > 1) return Math.floor(interval) + " days ago";
+            if (interval > 1) return Math.floor(interval) + "D AGO";
             interval = seconds / 3600;
-            if (interval > 1) return Math.floor(interval) + " hours ago";
+            if (interval > 1) return Math.floor(interval) + "H AGO";
             interval = seconds / 60;
-            if (interval > 1) return Math.floor(interval) + " minutes ago";
-            return Math.floor(seconds) + " seconds ago";
+            if (interval > 1) return Math.floor(interval) + "M AGO";
+            return Math.floor(seconds) + "S AGO";
         }
+
 
         const GLOBAL_SKILLS = [
             'Frontend', 'Backend', 'Fullstack', 'Blockchain', 'Solidity', 'Rust', 'Cairo', 'Python', 'Javascript',
@@ -1261,8 +1277,8 @@
                         <img src="${avatar}" style="width:100%; height:100%; object-fit:cover;">
                     </div>
                     <div style="overflow:hidden;">
-                        <h3 style="margin:0; font-size:16px; font-weight:900; text-transform:uppercase; letter-spacing:-0.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                            ${p.name || handle}
+                        <h3 style="margin:0; font-size:16px; font-weight:900; text-transform:uppercase; letter-spacing:-0.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:5px;">
+                            ${p.name || handle} ${getBadgeHtml(p)}
                         </h3>
                         <p class="mono" style="font-size:11px; color:var(--primary); background:#000; display:inline-block; padding:1px 6px; margin-top:4px;">@${handle}</p>
                     </div>
@@ -1277,6 +1293,12 @@
                     <p style="font-size:13px; line-height:1.4; font-weight:500; color:#444; height:3.2em; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">
                         ${p.bio || 'Building the architecture of tomorrow.'}
                     </p>
+
+                    <div style="display:flex; gap:10px; margin-top:5px;">
+                        <a href="https://x.com/${handle}" target="_blank" onclick="event.stopPropagation()" style="color:#000;"><i data-lucide="twitter" style="width:14px; height:14px;"></i></a>
+                        ${p.github ? `<a href="${p.github.startsWith('http') ? p.github : 'https://github.com/' + p.github.replace('@', '')}" target="_blank" onclick="event.stopPropagation()" style="color:#000;"><i data-lucide="github" style="width:14px; height:14px;"></i></a>` : ''}
+                        ${p.website ? `<a href="${p.website.startsWith('http') ? p.website : 'https://' + p.website}" target="_blank" onclick="event.stopPropagation()" style="color:#000;"><i data-lucide="globe" style="width:14px; height:14px;"></i></a>` : ''}
+                    </div>
 
                     <div style="margin-top:auto; display:flex; justify-content:space-between; align-items:flex-end; padding-top:10px;">
                         <div style="border:2px solid #000; background:#f5f0e8; padding:5px 10px; box-shadow:3px 3px 0 #000;">

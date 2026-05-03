@@ -1274,7 +1274,7 @@
 <script>
     const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
-    let db, currentUser = null;
+    let db, currentUser = null, currentProfile = null;
 
     // ─── Mobile Restriction ───────────────────────────────
     (function() {
@@ -1406,6 +1406,7 @@
     async function updateUIForUser(user) {
         // Try to fetch custom profile data first
         const { data: dbProfile } = await db.from('user_profiles').select('*').eq('user_id', user.id).single();
+        currentProfile = dbProfile;
         
         // Auto-prompt to complete profile if it doesn't exist
         if (!dbProfile) {
@@ -2846,6 +2847,97 @@
             if (menu && menu.classList.contains('show')) menu.classList.remove('show');
         }
     });
+
+    async function openInbox() {
+        const modal = document.getElementById('inbox-modal');
+        const content = document.getElementById('inbox-content');
+        if (!modal || !content) return;
+
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        content.innerHTML = '<div style="padding:60px; text-align:center;"><p class="mono">🔍 SCANNING INBOX...</p></div>';
+        
+        const { data: { user } } = await db.auth.getUser();
+        if (!user) return;
+
+        try {
+            // Fetch profile if not already loaded to get the internal ID
+            if (!currentProfile) {
+                const { data: profile } = await db.from('user_profiles')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .single();
+                currentProfile = profile;
+            }
+            
+            if (!currentProfile) {
+                content.innerHTML = '<div style="padding:60px; text-align:center;"><p class="mono">⚠️ PROFILE_NOT_FOUND. PLEASE COMPLETE SETUP.</p></div>';
+                return;
+            }
+
+            const { data, error } = await db.from('hire_requests')
+                .select('*')
+                .eq('receiver_id', currentProfile.id)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                content.innerHTML = `
+                    <div style="text-align:center; padding:80px 20px;">
+                        <div style="font-size:64px; margin-bottom:20px;">Empty</div>
+                        <h3 class="mono" style="font-size:18px; color:var(--black); text-transform:uppercase;">No requests yet</h3>
+                        <p class="mono" style="font-size:12px; color:#666; margin-top:10px;">Optimize your profile and share it to get discovered by teams.</p>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = data.map(req => `
+                    <div class="inbox-item" style="background:#fff; border:3px solid var(--black); padding:25px; margin-bottom:20px; box-shadow:8px 8px 0 var(--black); position:relative; text-align:left;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px;">
+                            <div>
+                                <span class="mono" style="font-size:10px; background:var(--black); color:var(--primary); padding:3px 8px; font-weight:700; display:inline-block; margin-bottom:8px;">NEW_HIRE_REQUEST</span>
+                                <h3 style="margin:0; font-size:20px; text-transform:uppercase; letter-spacing:-0.5px;">${req.sender_name}</h3>
+                                <p class="mono" style="font-size:11px; color:#888; margin:5px 0;">SENT: ${timeAgo(req.created_at)}</p>
+                            </div>
+                            <div style="font-family:var(--font-mono); font-size:11px; font-weight:900; background:var(--accent); color:#fff; border:2px solid var(--black); padding:4px 12px; box-shadow:4px 4px 0 var(--black);">${(req.status || 'pending').toUpperCase()}</div>
+                        </div>
+                        <div style="background:#fdfdfd; padding:20px; border:2px dashed #ddd; border-left:5px solid var(--black); margin-bottom:20px; font-size:14px; line-height:1.6; color:#333;">
+                            "${req.message}"
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                            <a href="mailto:${req.sender_email}" class="btn btn-white btn-sm" style="text-align:center; padding:12px;"><i data-lucide="mail" style="width:14px; height:14px; vertical-align:middle; margin-right:5px;"></i> EMAIL SENDER</a>
+                            ${req.telegram ? `<a href="${req.telegram}" target="_blank" class="btn btn-white btn-sm" style="text-align:center; padding:12px;"><i data-lucide="send" style="width:14px; height:14px; vertical-align:middle; margin-right:5px;"></i> TELEGRAM DM</a>` : ''}
+                            ${req.form_url ? `<a href="${req.form_url}" target="_blank" class="btn btn-black btn-sm" style="grid-column: span 2; text-align:center; padding:15px; margin-top:5px;"><i data-lucide="external-link" style="width:14px; height:14px; vertical-align:middle; margin-right:5px;"></i> VIEW FULL APPLICATION / FORM &rarr;</a>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            if (window.lucide) lucide.createIcons();
+        } catch (err) {
+            console.error(err);
+            content.innerHTML = '<div style="padding:60px; text-align:center; color:red;"><p class="mono">ERROR LOADING INBOX. PLEASE RETRY.</p></div>';
+        }
+    }
+
+    function closeInbox() {
+        document.getElementById('inbox-modal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function timeAgo(date) {
+        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+        let interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + "Y AGO";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + "M AGO";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + "D AGO";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + "H AGO";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + "M AGO";
+        return Math.floor(seconds) + "S AGO";
+    }
     </script>
     <!-- AUTH MODAL -->
     <div id="auth-modal" class="auth-modal">
@@ -2863,6 +2955,24 @@
             </div>
             <div style="margin-top:30px; padding-top:20px; border-top:2px dashed #eee;">
                 <p class="mono" style="font-size:10px; color:#888;">By signing in, you agree to our Terms of Service.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inbox Modal -->
+    <div id="inbox-modal" class="project-modal" onclick="if(event.target === this) closeInbox()" style="cursor:pointer; z-index: 10020; display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center;">
+        <div class="submit-card" style="max-width: 700px; cursor:default; background: var(--white); border: 4px solid var(--black); box-shadow: 15px 15px 0 var(--black); width: 90%; position: relative;" onclick="event.stopPropagation()">
+            <div class="submit-header" style="background:var(--primary); border-bottom: 4px solid var(--black); padding: 30px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <h2 style="color:var(--black); margin:0; font-size: 32px;">Your <span class="outline" style="-webkit-text-stroke: 1.5px var(--black); color: transparent;">Inbox</span></h2>
+                        <p style="color:rgba(0,0,0,0.6); margin: 5px 0 0 0;">Incoming hire requests and collaboration opportunities.</p>
+                    </div>
+                    <button onclick="closeInbox()" style="background:none; border:none; color:var(--black); font-size:24px; cursor:pointer; font-weight: 900;">✕</button>
+                </div>
+            </div>
+            <div class="submit-body" id="inbox-content" style="max-height: 70vh; overflow-y: auto; background:#f5f5f5; padding: 30px;">
+                <!-- Requests rendered here -->
             </div>
         </div>
     </div>

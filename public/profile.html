@@ -548,9 +548,9 @@
                             
                             <div class="p-card-section-title">IDENTITY & SOCIALS</div>
                             <div class="p-socials-row">
-                                <a href="https://x.com/${p.username}" target="_blank" class="p-social-btn"><i data-lucide="twitter"></i></a>
-                                ${p.github ? `<a href="${p.github.startsWith('http') ? p.github : 'https://github.com/' + p.github.replace('@', '')}" target="_blank" class="p-social-btn"><i data-lucide="github"></i></a>` : ''}
-                                ${p.website ? `<a href="${p.website.startsWith('http') ? p.website : 'https://' + p.website}" target="_blank" class="p-social-btn"><i data-lucide="globe"></i></a>` : ''}
+                                <a href="https://x.com/${p.username}" target="_blank" class="p-social-btn"><i data-lucide="twitter" style="width:20px; height:20px;"></i></a>
+                                ${p.github ? `<a href="${p.github.startsWith('http') ? p.github : 'https://github.com/' + p.github.replace('@', '')}" target="_blank" class="p-social-btn"><i data-lucide="github" style="width:20px; height:20px;"></i></a>` : ''}
+                                ${p.website ? `<a href="${p.website.startsWith('http') ? p.website : 'https://' + p.website}" target="_blank" class="p-social-btn"><i data-lucide="globe" style="width:20px; height:20px;"></i></a>` : ''}
                             </div>
 
                             <button class="hire-btn" style="margin-top:40px; border:4px solid #000;" onclick="openHireModal('${p.id}', '${(p.name || p.username).replace(/'/g, "\\'")}')">
