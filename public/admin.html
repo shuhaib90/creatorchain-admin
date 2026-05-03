@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Terminal | CreatorChain</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #00f5a0;
+            --accent: #ff3e00;
+            --secondary: #ffee00;
+            --black: #000000;
+            --white: #ffffff;
+            --muted: #666666;
+            --bg: #f8f8f8;
+            --border: 3px solid #000;
+            --shadow: 6px 6px 0 #000;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-main); background: var(--bg); color: var(--black); line-height: 1.6; display: none; } /* Hidden until auth check */
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+        
+        nav { background: #fff; border-bottom: 4px solid var(--black); padding: 15px 0; position: sticky; top: 0; z-index: 100; }
+        .nav-inner { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px; text-decoration: none; color: #000; }
+        .logo img { height: 40px; }
+
+        .admin-header { background: var(--black); color: #fff; padding: 40px 0; border-bottom: 4px solid var(--primary); margin-bottom: 40px; }
+        .admin-header h1 { font-size: 42px; font-weight: 900; letter-spacing: -1.5px; color: var(--primary); }
+        .admin-header p { font-family: var(--font-mono); font-size: 14px; opacity: 0.8; }
+
+        .admin-tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 3px solid var(--black); padding-bottom: 10px; }
+        .admin-tab { padding: 12px 24px; background: #fff; border: 3px solid var(--black); font-family: var(--font-mono); font-weight: 800; cursor: pointer; transition: 0.1s; }
+        .admin-tab:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--black); }
+        .admin-tab.active { background: var(--primary); box-shadow: 4px 4px 0 var(--black); transform: translate(-2px, -2px); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* LISTINGS TABLE */
+        .listings-table { width: 100%; border-collapse: collapse; background: #fff; border: 3px solid var(--black); box-shadow: 10px 10px 0 var(--black); margin-bottom: 50px; }
+        .listings-table th { background: var(--black); color: #fff; text-align: left; padding: 15px; font-family: var(--font-mono); font-size: 12px; }
+        .listings-table td { padding: 15px; border-bottom: 2px solid #eee; }
+        .listings-table tr:last-child td { border-bottom: none; }
+        
+        .status-badge { padding: 4px 10px; border-radius: 0; font-family: var(--font-mono); font-size: 10px; font-weight: 800; border: 2px solid var(--black); }
+        .status-pending { background: var(--secondary); }
+        .status-approved { background: var(--primary); }
+        .status-rejected { background: var(--accent); color: #fff; }
+
+        /* CARDS */
+        .pending-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 30px; margin-bottom: 60px; }
+        .pending-card { background: #fff; border: 3px solid var(--black); box-shadow: 8px 8px 0 var(--black); display: flex; flex-direction: column; }
+        .pending-card-header { padding: 20px; border-bottom: 2px solid var(--black); display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
+        .pending-card-body { padding: 25px; flex-grow: 1; }
+        .pending-actions { padding: 20px; background: #f0f0f0; border-top: 2px solid var(--black); display: flex; gap: 10px; }
+        
+        .btn { padding: 10px 20px; border: 2px solid var(--black); font-family: var(--font-mono); font-weight: 800; font-size: 12px; cursor: pointer; transition: 0.1s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--black); }
+        .btn-primary { background: var(--primary); }
+        .btn-danger { background: var(--accent); color: #fff; }
+        .btn-black { background: var(--black); color: #fff; }
+
+        #toast { position: fixed; bottom: 30px; right: 30px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; }
+        .toast-item { background: var(--black); color: #fff; padding: 15px 25px; border: 3px solid var(--primary); box-shadow: 6px 6px 0 rgba(0,0,0,0.2); font-family: var(--font-mono); font-weight: 700; font-size: 13px; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* FORM */
+        .admin-form { background: #fff; border: 3px solid var(--black); padding: 40px; box-shadow: 12px 12px 0 var(--black); max-width: 800px; }
+        .field { margin-bottom: 20px; }
+        .field label { display: block; font-family: var(--font-mono); font-size: 12px; font-weight: 800; margin-bottom: 8px; }
+        .field input, .field textarea, .field select { width: 100%; padding: 12px; border: 2px solid var(--black); font-family: inherit; font-size: 14px; outline: none; }
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        @media (max-width: 768px) {
+            .pending-grid { grid-template-columns: 1fr; }
+            .field-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="container nav-inner">
+        <a href="/" class="logo">
+            <img src="/logo.png" alt="Logo">
+            ADMIN TERMINAL
+        </a>
+        <div style="display:flex; gap:15px; align-items:center;">
+            <a href="/" class="btn btn-sm">EXIT TO SITE</a>
+            <button class="btn btn-danger" onclick="signOut()">LOGOUT</button>
+        </div>
+    </div>
+</nav>
+
+<header class="admin-header">
+    <div class="container">
+        <p>SYSTEM_STATUS: ONLINE // AUTHENTICATED: @ZENVICALPHA</p>
+        <h1>CONTROL <span class="outline">CENTER</span></h1>
+    </div>
+</header>
+
+<main class="container">
+    <div class="admin-tabs">
+        <div class="admin-tab active" onclick="switchTab('tab-pending')">PENDING REVIEW (<span id="pending-count">0</span>)</div>
+        <div class="admin-tab" onclick="switchTab('tab-exclusives')">EXCLUSIVES (<span id="exclusive-pending-count">0</span>)</div>
+        <div class="admin-tab" onclick="switchTab('tab-all')">ALL LISTINGS</div>
+        <div class="admin-tab" onclick="switchTab('tab-users')">USER MANAGEMENT</div>
+        <div class="admin-tab" onclick="switchTab('tab-add')">ADD / EDIT</div>
+    </div>
+
+    <!-- PENDING TAB -->
+    <div id="tab-pending" class="tab-content active">
+        <div class="pending-grid" id="pending-list">
+            <!-- Dynamic Content -->
+        </div>
+    </div>
+
+    <!-- EXCLUSIVES TAB -->
+    <div id="tab-exclusives" class="tab-content">
+        <div class="pending-grid" id="exclusive-list">
+            <!-- Dynamic Content -->
+        </div>
+        <div id="exclusive-all-list" style="margin-top: 40px;">
+            <!-- All Exclusives Table -->
+        </div>
+    </div>
+
+    <!-- ALL TAB -->
+    <div id="tab-all" class="tab-content">
+        <div id="admin-list">
+            <!-- Dynamic Table -->
+        </div>
+    </div>
+
+    <!-- USERS TAB -->
+    <div id="tab-users" class="tab-content">
+        <h3 class="mono" style="margin-bottom:20px;">BUILDER NETWORK DIRECTORY</h3>
+        <table class="listings-table">
+            <thead>
+                <tr>
+                    <th>BUILDER</th>
+                    <th>HANDLE</th>
+                    <th>BADGE</th>
+                    <th>VERIFIED</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody id="users-list">
+                <!-- Dynamic Content -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ADD/EDIT TAB -->
+    <div id="tab-add" class="tab-content">
+        <form class="admin-form" id="listing-form">
+            <input type="hidden" id="f-id">
+            <div class="field-row">
+                <div class="field">
+                    <label>PROJECT_NAME</label>
+                    <input type="text" id="f-project" required>
+                </div>
+                <div class="field">
+                    <label>CATEGORY</label>
+                    <select id="f-section">
+                        <option value="ambassador">AMBASSADOR</option>
+                        <option value="discord">DISCORD</option>
+                        <option value="bounty">BOUNTY</option>
+                        <option value="developer">DEVELOPER</option>
+                        <option value="campaign">CAMPAIGN</option>
+                    </select>
+                </div>
+            </div>
+            <div class="field">
+                <label>ROLE_TITLE</label>
+                <input type="text" id="f-title" required>
+            </div>
+            <div class="field">
+                <label>REWARD_VALUE</label>
+                <input type="text" id="f-reward" placeholder="e.g. $500 USDC">
+            </div>
+            <div class="field">
+                <label>DESCRIPTION</label>
+                <textarea id="f-desc" rows="4"></textarea>
+            </div>
+            <div class="field">
+                <label>APPLY_URL</label>
+                <input type="url" id="f-url">
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label>DEADLINE</label>
+                    <input type="text" id="f-deadline" placeholder="YYYY-MM-DD">
+                </div>
+                <div class="field">
+                    <label>URGENCY</label>
+                    <select id="f-urgency">
+                        <option value="MEDIUM">MEDIUM</option>
+                        <option value="HIGH">HIGH</option>
+                        <option value="CRITICAL">CRITICAL</option>
+                    </select>
+                </div>
+            </div>
+            <div class="field">
+                <label>LOGO_URL</label>
+                <input type="text" id="f-logo">
+            </div>
+            <div class="field">
+                <label>PRIZE_BREAKDOWN (Optional)</label>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <input type="text" id="f-prize-1" placeholder="1st Place">
+                    <input type="text" id="f-prize-2" placeholder="2nd Place">
+                    <input type="text" id="f-prize-3" placeholder="3rd Place">
+                    <input type="text" id="f-prize-4" placeholder="4th Place">
+                    <input type="text" id="f-prize-5" placeholder="5th Place">
+                </div>
+            </div>
+            <div style="margin-top:20px;">
+                <button type="submit" class="btn btn-primary" style="width:100%; height:50px;">SAVE LISTING & GO LIVE</button>
+                <button type="button" class="btn btn-white" style="width:100%; margin-top:10px;" onclick="document.getElementById('listing-form').reset(); document.getElementById('f-id').value=''">CLEAR FORM</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+    // Config
+const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // AUTH GUARD
+    async function checkAdminAuth() {
+        const { data: { user } } = await db.auth.getUser();
+        
+        if (!user) {
+            window.location.href = '/';
+            return;
+        }
+
+        const handle = (user.user_metadata.user_name || '').toLowerCase();
+        const admins = ['zenvicalpha', 'zenvic_'];
+        
+        if (admins.includes(handle)) {
+            document.body.style.display = 'block';
+            initAdmin();
+        } else {
+            alert('UNAUTHORIZED ACCESS: This terminal is restricted to administrators.');
+            window.location.href = '/';
+        }
+    }
+
+    async function signOut() {
+        await db.auth.signOut();
+        window.location.href = '/';
+    }
+
+    function switchTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        // Find tab by ID map
+        const tabMap = {'tab-pending':0, 'tab-exclusives':1, 'tab-all':2, 'tab-users':3, 'tab-add':4};
+        document.querySelectorAll('.admin-tab')[tabMap[id]].classList.add('active');
+        
+        if (id === 'tab-users') loadUsers();
+    }
+
+    function showToast(msg, type='success') {
+        const el = document.createElement('div');
+        el.className = `toast-item ${type==='error'?'error':''}`;
+        el.textContent = msg;
+        document.getElementById('toast').appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+    }
+
+    function timeAgo(date) {
+        if(!date) return '—';
+        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+        let interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + "y ago";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + "mo ago";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + "d ago";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + "h ago";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + "m ago";
+        return "Just now";
+    }
+
+    // ADMIN LOGIC
+    async function initAdmin() {
+        lucide.createIcons();
+        loadPendingListings();
+        loadExclusives();
+        loadAllListings();
+        loadUsers();
+        subscribeRealtime();
+    }
+
+    async function loadPendingListings() {
+        const { data } = await db.from('listings').select('*').eq('approval_status','pending').order('submitted_at',{ascending:true});
+        const count = data ? data.length : 0;
+        document.getElementById('pending-count').textContent = count;
+        
+        const list = document.getElementById('pending-list');
+        if(!count) {
+            list.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:100px; border:3px dashed #ccc;"><h3>All Clear! No pending submissions.</h3></div>';
+            return;
+        }
+
+        list.innerHTML = data.map(l => `
+            <div class="pending-card" id="pc-${l.id}">
+                <div class="pending-card-header">
+                    <span class="status-badge status-pending">PENDING</span>
+                    <span class="mono" style="font-size:11px;">${timeAgo(l.submitted_at)}</span>
+                </div>
+                <div class="pending-card-body">
+                    <p class="mono" style="font-size:10px; color:var(--muted);">${l.section.toUpperCase()}</p>
+                    <h3 style="font-size:20px; margin-bottom:5px;">${l.project}</h3>
+                    <p style="font-weight:700; color:var(--black);">${l.title}</p>
+                    <p style="font-size:13px; color:#666; margin-top:10px;">${l.description || 'No description'}</p>
+                    <div style="margin-top:15px; font-weight:800; color:var(--accent);">${l.reward || 'TBA'}</div>
+                    ${l.prize_breakdown && (l.prize_breakdown.first || l.prize_breakdown.second) ? `
+                        <div style="margin-top:10px; font-size:11px; background:#f5f5f5; padding:10px; border:1px solid #eee;">
+                            <div style="font-weight:800; text-transform:uppercase; margin-bottom:5px;">Prize Breakdown:</div>
+                            ${Object.entries(l.prize_breakdown).filter(([k,v])=>v).map(([k,v])=>`<div>• ${k}: ${v}</div>`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="pending-actions">
+                    <button class="btn btn-primary" onclick="approveListing('${l.id}')">APPROVE</button>
+                    <button class="btn btn-danger" onclick="rejectListing('${l.id}')">REJECT</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function loadExclusives() {
+        const [{ data: pending }, { data: all }] = await Promise.all([
+            db.from('opportunities').select('*').eq('status','pending').order('created_at',{ascending:true}),
+            db.from('opportunities').select('*').order('created_at',{ascending:false})
+        ]);
+
+        document.getElementById('exclusive-pending-count').textContent = pending ? pending.length : 0;
+        
+        const pendingList = document.getElementById('exclusive-list');
+        if(!pending || pending.length === 0) {
+            pendingList.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:60px; border:3px dashed #ccc;"><h3>No pending exclusive opportunities.</h3></div>';
+        } else {
+            pendingList.innerHTML = pending.map(o => `
+                <div class="pending-card">
+                    <div class="pending-card-header">
+                        <span class="status-badge status-pending">EXCLUSIVE_PENDING</span>
+                        <span class="mono" style="font-size:11px;">${timeAgo(o.created_at)}</span>
+                    </div>
+                    <div class="pending-card-body">
+                        <h3 style="font-size:20px; margin-bottom:5px;">${o.project_name}</h3>
+                        <p style="font-weight:700; color:var(--black);">${o.title}</p>
+                        <p style="font-size:13px; color:#666; margin-top:10px;">${o.description || 'No description'}</p>
+                    </div>
+                    <div class="pending-actions">
+                        <button class="btn btn-primary" onclick="approveExclusive('${o.id}')">APPROVE & BROADCAST</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        const allList = document.getElementById('exclusive-all-list');
+        allList.innerHTML = `
+            <h3 class="mono" style="margin-bottom:15px;">ALL EXCLUSIVES / LAUNCH OPPORTUNITIES</h3>
+            <table class="listings-table">
+                <thead>
+                    <tr>
+                        <th>PROJECT</th>
+                        <th>TYPE</th>
+                        <th>STATUS</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${all.map(o => `
+                        <tr>
+                            <td><strong>${o.project_name}</strong><br><small>${o.title}</small></td>
+                            <td><span class="mono">${o.type.toUpperCase()}</span></td>
+                            <td><span class="status-badge status-${o.status === 'live' ? 'approved' : o.status === 'pending' ? 'pending' : 'rejected'}">${o.status.toUpperCase()}</span></td>
+                            <td>
+                                <div style="display:flex; gap:5px;">
+                                    <button class="btn btn-sm btn-black" onclick="broadcastExclusive('${o.id}')" title="Broadcast update"><i data-lucide="megaphone" style="width:12px; height:12px;"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteExclusive('${o.id}')">DEL</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+        lucide.createIcons();
+    }
+
+    async function approveExclusive(id) {
+        await db.from('opportunities').update({ status: 'live' }).eq('id', id);
+        showToast('✓ Exclusive Opportunity Approved!');
+        broadcastExclusive(id);
+        loadExclusives();
+    }
+
+    async function broadcastExclusive(id) {
+        const { data: item } = await db.from('opportunities').select('*').eq('id', id).single();
+        if (!item) return;
+
+        showToast('📣 Broadcasting Exclusive Launch...', 'info');
+
+        try {
+            const [{ data: profiles }, { data: subscribers }] = await Promise.all([
+                db.from('user_profiles').select('telegram_id, telegram_notifications'),
+                db.from('telegram_subscribers').select('chat_id')
+            ]);
+
+            const profileTgIds = (profiles || []).filter(p => p.telegram_notifications && p.telegram_id).map(p => p.telegram_id);
+            const globalTgIds = (subscribers || []).map(s => s.chat_id);
+            const tgRecipients = Array.from(new Set([...profileTgIds, ...globalTgIds]));
+
+            if (tgRecipients.length === 0) {
+                showToast('No Telegram subscribers found.', 'error');
+                return;
+            }
+
+            await fetch('https://creatorchain.site/api/send-telegram', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'exclusive_opportunity',
+                    payload: {
+                        chat_ids: tgRecipients,
+                        id: item.id,
+                        project_name: item.project_name,
+                        category: item.type,
+                        reward: item.reward || 'TBA',
+                        prize_breakdown: item.prize_breakdown,
+                        description: item.title
+                    }
+                })
+            });
+
+            showToast(`🚀 Exclusive Broadcast sent to ${tgRecipients.length} users!`);
+        } catch (err) {
+            console.error('Exclusive Broadcast Error:', err);
+            showToast('Broadcast failed: ' + err.message, 'error');
+        }
+    }
+
+    async function deleteExclusive(id) {
+        if(confirm('DELETE this exclusive?')) {
+            await db.from('opportunities').delete().eq('id', id);
+            showToast('🗑 Deleted');
+            loadExclusives();
+        }
+    }
+
+    async function loadAllListings() {
+        const { data } = await db.from('listings').select('*').order('created_at',{ascending:false});
+        const list = document.getElementById('admin-list');
+        list.innerHTML = `
+            <table class="listings-table">
+                <thead>
+                    <tr>
+                        <th>PROJECT</th>
+                        <th>CATEGORY</th>
+                        <th>REWARD</th>
+                        <th>STATUS</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.map(l => `
+                        <tr>
+                            <td><strong>${l.project}</strong><br><small>${l.title}</small></td>
+                            <td><span class="mono">${l.section.toUpperCase()}</span></td>
+                            <td>${l.reward || 'TBA'}</td>
+                            <td><span class="status-badge status-${l.approval_status}">${l.approval_status.toUpperCase()}</span></td>
+                            <td>
+                                <div style="display:flex; gap:5px;">
+                                    <button class="btn btn-sm btn-black" onclick="notifyMatchingBuilders('${l.id}')" title="Notify matching builders"><i data-lucide="megaphone" style="width:12px; height:12px;"></i></button>
+                                    <button class="btn btn-sm" onclick="editItem('${l.id}')">EDIT</button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteItem('${l.id}')">DEL</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    async function approveListing(id) {
+        // Fetch the listing first so we have the submitter's info
+        const { data: listing } = await db.from('listings').select('*').eq('id', id).single();
+        if (!listing) return;
+
+        await db.from('listings').update({ 
+            approval_status: 'approved', 
+            reviewed_at: new Date().toISOString() 
+        }).eq('id', id);
+        
+        showToast('✓ Listing Approved!');
+        
+        // Send Submitter Notification
+        try {
+            if (listing.submitter_email && listing.submitter_email.includes('@')) {
+                await fetch('https://creatorchain.site/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'opportunity_approved',
+                        payload: {
+                            to: listing.submitter_email,
+                            project_name: listing.project,
+                            title: listing.title
+                        }
+                    })
+                });
+                console.log("Sent approval email to:", listing.submitter_email);
+            } else if (listing.submitted_by) {
+                // Try to find telegram ID based on username
+                const handle = listing.submitted_by.replace('@', '').trim();
+                const { data: profiles } = await db.from('user_profiles').select('telegram_id, username');
+                const submitterProfile = (profiles || []).find(p => p.username && p.username.toLowerCase() === handle.toLowerCase());
+                
+                if (submitterProfile && submitterProfile.telegram_id) {
+                    await fetch('https://creatorchain.site/api/send-telegram', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'opportunity_approved',
+                            payload: {
+                                chat_ids: [submitterProfile.telegram_id],
+                                project_name: listing.project
+                            }
+                        })
+                    });
+                    console.log("Sent approval telegram to:", submitterProfile.telegram_id);
+                }
+            }
+        } catch (err) {
+            console.error('Submitter Notification Error:', err);
+        }
+
+        // Automatically trigger broadcast to matching builders
+        notifyMatchingBuilders(id);
+        
+        initAdmin();
+    }
+
+    async function rejectListing(id) {
+        const reason = prompt('Rejection reason:');
+        if (reason === null) return;
+        await db.from('listings').update({ 
+            approval_status: 'rejected', 
+            rejection_reason: reason || 'Not specified',
+            reviewed_at: new Date().toISOString() 
+        }).eq('id', id);
+        showToast('❌ Listing Rejected', 'error');
+        initAdmin();
+    }
+
+    async function editItem(id) {
+        const { data } = await db.from('listings').select('*').eq('id',id).single();
+        if(data) {
+            document.getElementById('f-id').value = data.id;
+            document.getElementById('f-project').value = data.project;
+            document.getElementById('f-section').value = data.section;
+            document.getElementById('f-title').value = data.title;
+            document.getElementById('f-reward').value = data.reward || '';
+            document.getElementById('f-desc').value = data.description || '';
+            document.getElementById('f-url').value = data.apply_url || '';
+            document.getElementById('f-logo').value = data.logo || '';
+            document.getElementById('f-deadline').value = data.deadline || '';
+            document.getElementById('f-urgency').value = data.urgency || 'MEDIUM';
+            
+            // Prize Breakdown
+            if (data.prize_breakdown) {
+                document.getElementById('f-prize-1').value = data.prize_breakdown.first || '';
+                document.getElementById('f-prize-2').value = data.prize_breakdown.second || '';
+                document.getElementById('f-prize-3').value = data.prize_breakdown.third || '';
+                document.getElementById('f-prize-4').value = data.prize_breakdown.fourth || '';
+                document.getElementById('f-prize-5').value = data.prize_breakdown.fifth || '';
+            }
+            
+            switchTab('tab-add');
+        }
+    }
+
+    async function deleteItem(id) {
+        if(confirm('Permanently DELETE this listing?')) {
+            await db.from('listings').delete().eq('id', id);
+            showToast('🗑 Deleted');
+            initAdmin();
+        }
+    }
+
+    document.getElementById('listing-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('f-id').value;
+        const item = {
+            project: document.getElementById('f-project').value,
+            section: document.getElementById('f-section').value,
+            title: document.getElementById('f-title').value,
+            reward: document.getElementById('f-reward').value,
+            description: document.getElementById('f-desc').value,
+            apply_url: document.getElementById('f-url').value,
+            logo: document.getElementById('f-logo').value,
+            deadline: document.getElementById('f-deadline').value,
+            urgency: document.getElementById('f-urgency').value,
+            prize_breakdown: {
+                first: document.getElementById('f-prize-1').value,
+                second: document.getElementById('f-prize-2').value,
+                third: document.getElementById('f-prize-3').value,
+                fourth: document.getElementById('f-prize-4').value,
+                fifth: document.getElementById('f-prize-5').value
+            },
+            approval_status: 'approved'
+        };
+
+        if(id) await db.from('listings').update(item).eq('id', id);
+        else await db.from('listings').insert([item]);
+
+        showToast('✓ Saved Successfully');
+        document.getElementById('listing-form').reset();
+        document.getElementById('f-id').value = '';
+        initAdmin();
+        switchTab('tab-all');
+    });
+
+    async function notifyMatchingBuilders(id) {
+        const { data: project } = await db.from('listings').select('*').eq('id', id).single();
+        if (!project) return;
+
+        showToast('📣 Initializing broadcast...', 'info');
+
+        try {
+            // 2. Fetch profiles AND global subscribers
+            const [{ data: profiles }, { data: subscribers }] = await Promise.all([
+                db.from('user_profiles').select('email, email_notifications, telegram_id, telegram_notifications'),
+                db.from('telegram_subscribers').select('chat_id')
+            ]);
+
+            // 3. Collect ALL recipients who opted-in
+            const emailRecipients = (profiles || []).filter(p => p.email_notifications && p.email && p.email.includes('@')).map(p => p.email);
+            
+            // Collect Telegram IDs from profiles AND global subscribers (unique set)
+            const profileTgIds = (profiles || []).filter(p => p.telegram_notifications && p.telegram_id).map(p => p.telegram_id);
+            const globalTgIds = (subscribers || []).map(s => s.chat_id);
+            const tgRecipients = Array.from(new Set([...profileTgIds, ...globalTgIds]));
+
+            if (emailRecipients.length === 0 && tgRecipients.length === 0) {
+                showToast('No subscribers found.', 'error');
+                return;
+            }
+
+            // 4. Send Email Broadcast to ALL
+            if (emailRecipients.length > 0) {
+                try {
+                    await fetch('https://creatorchain.site/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'new_opportunity',
+                            payload: {
+                                to: emailRecipients,
+                                project_name: project.project,
+                                description: project.title,
+                                budget: project.reward || 'TBA'
+                            }
+                        })
+                    });
+                } catch (emailErr) { console.error('Email Broadcast Error:', emailErr); }
+            }
+
+            if (tgRecipients.length > 0) {
+                try {
+                    const tgResp = await fetch('https://creatorchain.site/api/send-telegram', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'new_opportunity',
+                            payload: {
+                                chat_ids: tgRecipients,
+                                id: project.id,
+                                project_name: project.project,
+                                category: project.section,
+                                reward: project.reward || 'TBA',
+                                prize_breakdown: project.prize_breakdown,
+                                description: project.title
+                            }
+                        })
+                    });
+                    const tgData = await tgResp.json();
+                    console.log('TG Broadcast Result:', tgData);
+                } catch (tgErr) { console.error('Telegram Broadcast Error:', tgErr); }
+            }
+
+            showToast(`🚀 Broadcast sent! (Emails: ${emailRecipients.length}, Telegram: ${tgRecipients.length})`);
+        } catch (err) {
+            console.error('Broadcast Error:', err);
+            showToast('Broadcast failed: ' + err.message, 'error');
+        }
+    }
+    
+    async function loadUsers() {
+        const { data: users, error } = await db.from('user_profiles').select('*').order('created_at', { ascending: false });
+        if (error) {
+            console.error('Fetch Users Error:', error);
+            return;
+        }
+
+        const list = document.getElementById('users-list');
+        list.innerHTML = users.map(u => `
+            <tr>
+                <td><strong>${u.username || 'Anonymous'}</strong><br><small>${u.user_id.substring(0,8)}...</small></td>
+                <td><span class="mono">${u.telegram || '—'}</span></td>
+                <td>
+                    <select onchange="updateUserBadge('${u.id}', this.value)" class="btn btn-sm" style="background:#fff;">
+                        <option value="" ${!u.badge_level ? 'selected' : ''}>None</option>
+                        <option value="verified" ${u.badge_level === 'verified' ? 'selected' : ''}>Verified</option>
+                        <option value="pro" ${u.badge_level === 'pro' ? 'selected' : ''}>Pro</option>
+                        <option value="legend" ${u.badge_level === 'legend' ? 'selected' : ''}>Legend</option>
+                    </select>
+                </td>
+                <td>
+                    <button onclick="toggleUserVerification('${u.id}', ${u.is_verified})" class="btn btn-sm ${u.is_verified ? 'btn-primary' : 'btn-white'}">
+                        ${u.is_verified ? 'VERIFIED' : 'UNVERIFIED'}
+                    </button>
+                </td>
+                <td>
+                    <div style="display:flex; gap:5px;">
+                         <button class="btn btn-sm" onclick="alert('User ID: ${u.id}\\nAuth ID: ${u.user_id}')">INFO</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function updateUserBadge(profileId, newBadge) {
+        const { data: profile, error } = await db.from('user_profiles')
+            .update({ badge_level: newBadge })
+            .eq('id', profileId)
+            .select()
+            .single();
+
+        if (error) {
+            showToast('Update Failed: ' + error.message, 'error');
+            return;
+        }
+
+        showToast(`✓ Badge updated to ${newBadge || 'None'}`);
+
+        // Send Telegram Notification if badge is set and user has Telegram connected
+        if (newBadge && profile.telegram_id) {
+            try {
+                await fetch('https://creatorchain.site/api/send-telegram', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'badge_update',
+                        payload: {
+                            chat_ids: [profile.telegram_id],
+                            badge_level: newBadge,
+                            username: profile.username || 'builder'
+                        }
+                    })
+                });
+                showToast('🚀 Telegram Alert Sent!');
+            } catch (tgErr) {
+                console.error('Badge Alert Error:', tgErr);
+            }
+        }
+    }
+
+    async function toggleUserVerification(profileId, currentStatus) {
+        const { error } = await db.from('user_profiles')
+            .update({ is_verified: !currentStatus })
+            .eq('id', profileId);
+
+        if (error) {
+            showToast('Update Failed: ' + error.message, 'error');
+            return;
+        }
+
+        showToast(`✓ Verification status updated`);
+        loadUsers();
+    }
+
+    function subscribeRealtime() {
+        db.channel('admin-updates').on('postgres_changes', { event:'*', schema:'public', table:'listings' }, () => {
+            loadPendingListings();
+            loadAllListings();
+        }).subscribe();
+    }
+
+    checkAdminAuth();
+</script>
+
+</body>
+</html>
