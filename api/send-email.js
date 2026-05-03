@@ -21,7 +21,7 @@ export default async (req, res) => {
 
     // Default "from" email - Resend onboarding email
     // NOTE: For production, use a verified domain email like 'notifications@creatorchain.site'
-    const fromEmail = 'CreatorChain <onboarding@resend.dev>';
+    const fromEmail = 'CreatorChain <notifications@creatorchain.site>';
 
     if (type === 'hire_request') {
       to = payload.receiver_email;
