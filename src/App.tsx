@@ -1629,40 +1629,52 @@ function App() {
 }
 
 const SettingsPage = () => {
-  const [broadcastEnabled, setBroadcastEnabled] = useState<boolean | null>(null);
-  const [devMode, setDevMode] = useState<boolean | null>(null);
+  const [settings, setSettings] = useState<Record<string, boolean>>({
+    broadcast_enabled: true,
+    developer_mode: false
+  });
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<string | null>(null);
+
+  const fetchSettings = async () => {
+    const { data } = await supabase.from('system_settings').select('*');
+    if (data) {
+      const mapped = data.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {});
+      setSettings(mapped);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      const { data } = await supabase.from('system_settings').select('*');
-      if (data) {
-        data.forEach(s => {
-          if (s.key === 'broadcast_enabled') setBroadcastEnabled(s.value);
-          if (s.key === 'developer_mode') setDevMode(s.value);
-        });
-      }
-      setLoading(false);
-    };
     fetchSettings();
-
-    const channel = supabase.channel('settings_sync').on('postgres_changes', { event: '*', schema: 'public', table: 'system_settings' }, fetchSettings).subscribe();
+    const channel = supabase.channel('settings_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'system_settings' }, () => {
+        console.log('[System] Remote change detected, syncing...');
+        fetchSettings();
+      })
+      .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const toggleSetting = async (key: string, currentValue: boolean | null) => {
-    const newValue = currentValue === null ? true : !currentValue;
-    console.log(`[System] Toggling ${key} to ${newValue}`);
+  const handleToggle = async (key: string) => {
+    const newValue = !settings[key];
+    setUpdating(key);
     
+    // Optimistic update for responsiveness
+    setSettings(prev => ({ ...prev, [key]: newValue }));
+
     const { error } = await supabase
       .from('system_settings')
       .update({ value: newValue, updated_at: new Date().toISOString() })
       .eq('key', key);
     
     if (error) {
-      console.error(`[System] Update failed:`, error);
-      alert(`SYSTEM_ERROR: ${error.message}\nCode: ${error.code}`);
+      console.error(`[System] Failed to update ${key}:`, error);
+      alert(`SYSTEM_ERROR: ${error.message}`);
+      // Rollback on error
+      fetchSettings();
     }
+    setUpdating(null);
   };
 
   if (loading) return <div className="fade-in mono" style={{ color: 'var(--text-muted)', padding: '40px' }}>ACCESSING_ENCRYPTED_STORAGE...</div>;
@@ -1675,8 +1687,8 @@ const SettingsPage = () => {
       </header>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '24px' }}>
-        <motion.div whileHover={{ y: -5 }} className="card" style={{ borderLeft: `4px solid ${broadcastEnabled ? 'var(--primary)' : 'var(--accent)'}`, position: 'relative', overflow: 'hidden' }}>
-          {!broadcastEnabled && <div style={{ position: 'absolute', top: 0, right: 0, background: 'var(--accent)', color: 'white', padding: '4px 12px', fontSize: '10px', fontWeight: 'bold' }}>SYSTEM_SHUTDOWN</div>}
+        <motion.div whileHover={{ y: -5 }} className="card" style={{ borderLeft: `4px solid ${settings.broadcast_enabled ? 'var(--primary)' : 'var(--accent)'}`, position: 'relative' }}>
+          {!settings.broadcast_enabled && <div style={{ position: 'absolute', top: 0, right: 0, background: 'var(--accent)', color: 'white', padding: '4px 12px', fontSize: '10px', fontWeight: 'bold' }}>SYSTEM_SHUTDOWN</div>}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
             <div>
               <h3 className="mono" style={{ fontSize: '16px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1690,22 +1702,24 @@ const SettingsPage = () => {
           <div style={{ marginTop: '24px' }}>
             <button 
               className="btn" 
+              disabled={updating === 'broadcast_enabled'}
               style={{ 
                 width: '100%', 
                 padding: '16px', 
-                background: broadcastEnabled ? 'rgba(255, 62, 0, 0.1)' : 'var(--primary)',
-                color: broadcastEnabled ? 'var(--accent)' : 'var(--black)',
-                borderColor: broadcastEnabled ? 'var(--accent)' : 'var(--black)',
-                boxShadow: broadcastEnabled ? '0 0 15px rgba(255, 62, 0, 0.2)' : 'none'
+                background: settings.broadcast_enabled ? 'rgba(255, 62, 0, 0.1)' : 'var(--primary)',
+                color: settings.broadcast_enabled ? 'var(--accent)' : 'var(--black)',
+                borderColor: settings.broadcast_enabled ? 'var(--accent)' : 'var(--black)',
+                opacity: updating === 'broadcast_enabled' ? 0.5 : 1,
+                cursor: updating === 'broadcast_enabled' ? 'wait' : 'pointer'
               }}
-              onClick={() => toggleSetting('broadcast_enabled', !!broadcastEnabled)}
+              onClick={() => handleToggle('broadcast_enabled')}
             >
-              {broadcastEnabled ? '🛑 TERMINATE ALL BROADCASTS' : '⚡ RESTORE SYSTEM COMMS'}
+              {updating === 'broadcast_enabled' ? 'SYNCHRONIZING...' : (settings.broadcast_enabled ? '🛑 TERMINATE ALL BROADCASTS' : '⚡ RESTORE SYSTEM COMMS')}
             </button>
           </div>
         </motion.div>
 
-        <motion.div whileHover={{ y: -5 }} className="card" style={{ borderLeft: `4px solid ${devMode ? 'var(--secondary)' : 'var(--border)'}` }}>
+        <motion.div whileHover={{ y: -5 }} className="card" style={{ borderLeft: `4px solid ${settings.developer_mode ? 'var(--secondary)' : 'var(--border)'}` }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
             <div>
               <h3 className="mono" style={{ fontSize: '16px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1719,16 +1733,19 @@ const SettingsPage = () => {
           <div style={{ marginTop: '24px' }}>
             <button 
               className="btn" 
+              disabled={updating === 'developer_mode'}
               style={{ 
                 width: '100%', 
                 padding: '16px', 
-                background: devMode ? 'var(--secondary)' : 'transparent',
-                color: devMode ? 'var(--black)' : 'var(--white)',
-                borderColor: devMode ? 'var(--black)' : 'var(--text-muted)'
+                background: settings.developer_mode ? 'var(--secondary)' : 'transparent',
+                color: settings.developer_mode ? 'var(--black)' : 'var(--white)',
+                borderColor: settings.developer_mode ? 'var(--black)' : 'var(--text-muted)',
+                opacity: updating === 'developer_mode' ? 0.5 : 1,
+                cursor: updating === 'developer_mode' ? 'wait' : 'pointer'
               }}
-              onClick={() => toggleSetting('developer_mode', !!devMode)}
+              onClick={() => handleToggle('developer_mode')}
             >
-              {devMode ? 'DISABLE_SANDBOX_MODE' : 'ENABLE_TESTING_MODE'}
+              {updating === 'developer_mode' ? 'SYNCHRONIZING...' : (settings.developer_mode ? 'DISABLE_SANDBOX_MODE' : 'ENABLE_TESTING_MODE')}
             </button>
           </div>
         </motion.div>
@@ -1739,8 +1756,8 @@ const SettingsPage = () => {
         <div className="mono" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', lineHeight: '1.6' }}>
           [INFO] System initialized at {new Date().toLocaleTimeString()}<br/>
           [INFO] Authentication layer verified<br/>
-          {broadcastEnabled ? '[OK] Broadcast cluster active' : '[WARN] BROADCAST_CLUSTER_OFFLINE'}<br/>
-          {devMode && '[DEBUG] Sandbox mode engaged'}
+          {settings.broadcast_enabled ? '[OK] Broadcast cluster active' : '[WARN] BROADCAST_CLUSTER_OFFLINE'}<br/>
+          {settings.developer_mode && '[DEBUG] Sandbox mode engaged'}
         </div>
       </div>
     </div>
