@@ -316,38 +316,84 @@
             if (!item) return;
 
             try {
-                const [{ data: profiles }, { data: subscribers }] = await Promise.all([
-                    supabase.from('user_profiles').select('telegram_id, telegram_notifications'),
-                    supabase.from('telegram_subscribers').select('chat_id')
+                const [{ data: profiles }, { data: tgSubscribers }, { data: emailSubscribers }] = await Promise.all([
+                    supabase.from('user_profiles').select('telegram_id, telegram_notifications, email, email_notifications, skills'),
+                    supabase.from('telegram_subscribers').select('chat_id'),
+                    supabase.from('subscribers').select('email')
                 ]);
 
+                // 1. Prepare Telegram Recipients
                 const profileTgIds = (profiles || []).filter(p => p.telegram_notifications && p.telegram_id).map(p => p.telegram_id);
-                const globalTgIds = (subscribers || []).map(s => s.chat_id);
+                const globalTgIds = (tgSubscribers || []).map(s => s.chat_id);
                 const adminChatId = '2127320399';
                 const tgRecipients = Array.from(new Set([...profileTgIds, ...globalTgIds, adminChatId]));
 
-                if (tgRecipients.length === 0) {
-                    alert('No subscribers found.');
+                // 2. Prepare Email Recipients (Skill-based matching)
+                const globalEmails = (emailSubscribers || []).map(s => s.email);
+                let profileEmails = [];
+                
+                const itemSkills = Array.isArray(item.tags) ? item.tags : (typeof item.tags === 'string' ? item.tags.split(',') : []);
+                
+                (profiles || []).forEach(p => {
+                    if (p.email && p.email_notifications) {
+                        let isMatch = false;
+                        if (itemSkills.length > 0 && Array.isArray(p.skills) && p.skills.length > 0) {
+                           const pSkills = p.skills.map(s => s.toLowerCase().trim());
+                           isMatch = itemSkills.some(s => pSkills.includes(s.toLowerCase().trim()));
+                        } else {
+                           isMatch = true; // Send to all if no specific skills are required
+                        }
+                        if (isMatch) profileEmails.push(p.email);
+                    }
+                });
+
+                const emailRecipients = Array.from(new Set([...globalEmails, ...profileEmails])).filter(Boolean);
+
+                if (tgRecipients.length === 0 && emailRecipients.length === 0) {
+                    alert('No subscribers found for Telegram or Email.');
                     return;
                 }
 
-                await fetch('/api/send-telegram', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        type: 'exclusive_opportunity',
-                        payload: {
-                            chat_ids: tgRecipients,
-                            id: item.id,
-                            project_name: item.project_name,
-                            category: item.type,
-                            reward: item.reward || 'TBA',
-                            description: item.title
-                        }
-                    })
-                });
+                // 3. Send Telegram Broadcast
+                if (tgRecipients.length > 0) {
+                    await fetch('/api/send-telegram', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'exclusive_opportunity',
+                            payload: {
+                                chat_ids: tgRecipients,
+                                id: item.id,
+                                project_name: item.project_name,
+                                category: item.type,
+                                reward: item.reward || 'TBA',
+                                description: item.title
+                            }
+                        })
+                    }).catch(e => console.error('Telegram broadcast failed:', e));
+                }
 
-                alert(`🚀 Exclusive Broadcast sent to ${tgRecipients.length} users!`);
+                // 4. Send Email Broadcast (Resend limits to 50 recipients per request)
+                if (emailRecipients.length > 0) {
+                    for (let i = 0; i < emailRecipients.length; i += 50) {
+                        const batch = emailRecipients.slice(i, i + 50);
+                        await fetch('/api/send-email', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                type: 'new_opportunity',
+                                payload: {
+                                    to: batch,
+                                    project_name: item.project_name,
+                                    description: item.title,
+                                    budget: item.reward || 'TBA'
+                                }
+                            })
+                        }).catch(e => console.error('Email broadcast failed:', e));
+                    }
+                }
+
+                alert(`🚀 Broadcast sent! Telegram: ${tgRecipients.length} | Email: ${emailRecipients.length}`);
             } catch (err) {
                 console.error('Broadcast Error:', err);
                 alert('Broadcast failed: ' + err.message);
