@@ -1728,7 +1728,6 @@ const SettingsPage = () => {
     </div>
   );
 };
-};
 
 export default App;
 
