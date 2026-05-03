@@ -1691,21 +1691,51 @@ const Layout = ({ children, onLogout }: { children: React.ReactNode, onLogout: (
   );
 };
 
-function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return localStorage.getItem('admin_auth') === 'true';
   });
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loginMode, setLoginMode] = useState<'admin' | 'project'>('admin');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === '6282') {
-      setIsAuthenticated(true);
-      localStorage.setItem('admin_auth', 'true');
-      setError('');
+    if (loginMode === 'admin') {
+      if (password === '6282') {
+        setIsAuthenticated(true);
+        localStorage.setItem('admin_auth', 'true');
+        setError('');
+      } else {
+        setError('INVALID_ACCESS_KEY');
+      }
     } else {
-      setError('INVALID_ACCESS_KEY');
+      // Project Login
+      if (!password) return;
+      setLoading(true);
+      setError('');
+      try {
+        const { data, error: sbError } = await supabase
+          .from('project_access_keys')
+          .select('*, opportunities(project_name)')
+          .eq('access_key', password.trim().toUpperCase())
+          .eq('status', 'active')
+          .maybeSingle();
+
+        if (sbError) throw sbError;
+        if (!data) throw new Error('INVALID OR REVOKED ACCESS KEY');
+
+        localStorage.setItem('prj_access_key', password.trim().toUpperCase());
+        localStorage.setItem('prj_id', data.project_id);
+        localStorage.setItem('prj_name', data.opportunities.project_name);
+        
+        window.location.href = '/project-dashboard.html';
+      } catch (err: any) {
+        console.error(err);
+        setError(err.message.toUpperCase());
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -1721,22 +1751,45 @@ function App() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="card" 
-          style={{ maxWidth: '400px', width: '100%', textAlign: 'center', border: '1px solid var(--border)' }}
+          style={{ maxWidth: '400px', width: '100%', textAlign: 'center', border: '1px solid var(--border)', position: 'relative' }}
         >
+          <div style={{ position: 'absolute', top: '-15px', right: '-15px', background: 'var(--primary)', color: '#000', padding: '5px 10px', fontSize: '10px', fontWeight: '900', border: '2px solid var(--border)', transform: 'rotate(5deg)', zIndex: 10 }}>
+            {loginMode === 'project' ? 'PROJECT ACCESS' : 'SECURE SYSTEM'}
+          </div>
+
           <div style={{ marginBottom: '32px' }}>
             <ShieldCheck size={48} color="var(--primary)" style={{ margin: '0 auto 16px' }} />
             <h2 style={{ fontSize: '24px', fontWeight: '800' }}>Terminal <span className="text-gradient">Access</span></h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '8px' }}>ENTER_ADMIN_CREDENTIALS_TO_PROCEED</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '8px' }}>
+              {loginMode === 'project' ? 'ENTER_PROJECT_CREDENTIALS_TO_PROCEED' : 'ENTER_ADMIN_CREDENTIALS_TO_PROCEED'}
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', border: '1px solid var(--border)', marginBottom: '24px', borderRadius: '8px', overflow: 'hidden' }}>
+            <button 
+              type="button"
+              onClick={() => { setLoginMode('admin'); setError(''); setPassword(''); }}
+              style={{ padding: '12px', background: loginMode === 'admin' ? 'var(--primary)' : 'transparent', color: loginMode === 'admin' ? '#000' : 'var(--text-muted)', border: 'none', fontFamily: 'var(--font-mono)', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer', transition: '0.2s' }}
+            >
+              ADMIN HUB
+            </button>
+            <button 
+              type="button"
+              onClick={() => { setLoginMode('project'); setError(''); setPassword(''); }}
+              style={{ padding: '12px', background: loginMode === 'project' ? 'var(--primary)' : 'transparent', color: loginMode === 'project' ? '#000' : 'var(--text-muted)', border: 'none', borderLeft: '1px solid var(--border)', fontFamily: 'var(--font-mono)', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer', transition: '0.2s' }}
+            >
+              PROJECT ACCESS
+            </button>
           </div>
 
           <form onSubmit={handleLogin}>
             <div style={{ marginBottom: '20px', textAlign: 'left' }}>
               <label className="mono" style={{ fontSize: '11px', color: 'var(--primary)', display: 'block', marginBottom: '8px' }}>ACCESS_KEY</label>
               <input 
-                type="password" 
+                type={loginMode === 'project' ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••"
+                placeholder={loginMode === 'project' ? 'PRJ-XXXXXX' : '••••'}
                 style={{ 
                   width: '100%', 
                   background: 'rgba(255,255,255,0.03)', 
@@ -1745,22 +1798,25 @@ function App() {
                   color: 'white', 
                   borderRadius: '8px',
                   fontSize: '18px',
-                  letterSpacing: '4px',
+                  letterSpacing: loginMode === 'project' ? '1px' : '4px',
                   textAlign: 'center',
                   outline: 'none',
-                  fontFamily: 'var(--font-mono)'
+                  fontFamily: 'var(--font-mono)',
+                  textTransform: loginMode === 'project' ? 'uppercase' : 'none'
                 }}
                 autoFocus
               />
               {error && <p className="mono" style={{ color: 'var(--accent)', fontSize: '10px', marginTop: '8px', textAlign: 'center' }}>{error}</p>}
             </div>
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '16px' }}>
-              DECRYPT & ENTER
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '16px' }} disabled={loading}>
+              {loading ? 'VERIFYING...' : (loginMode === 'project' ? 'ACCESS DASHBOARD' : 'DECRYPT & ENTER')}
             </button>
           </form>
           
           <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--border)' }}>
-            <p style={{ color: 'var(--text-muted)', fontSize: '10px' }} className="mono">AUTHORIZED_PERSONNEL_ONLY</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '10px' }} className="mono">
+              {loginMode === 'project' ? 'ISSUED_BY_CREATORCHAIN_ADMIN' : 'AUTHORIZED_PERSONNEL_ONLY'}
+            </p>
           </div>
         </motion.div>
       </div>
