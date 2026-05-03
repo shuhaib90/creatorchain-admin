@@ -2938,6 +2938,31 @@
         if (interval > 1) return Math.floor(interval) + "M AGO";
         return Math.floor(seconds) + "S AGO";
     }
+
+    function getBadgeHtml(profile) {
+        if (!profile) return '';
+        const isVerified = profile.is_verified === true;
+        const isPro = profile.badge_level === 'pro' || (profile.approved_submissions || 0) > 5;
+
+        let badgeType = null;
+        if (isPro) badgeType = 'pro';
+        else if (isVerified) badgeType = 'verified';
+
+        if (!badgeType) return '';
+
+        const color = badgeType === 'pro' ? '#FFD600' : '#00E676';
+        const checkColor = badgeType === 'pro' ? '#000' : '#fff';
+        const tooltip = badgeType === 'pro' ? 'PRO BUILDER' : 'VERIFIED';
+
+        return `
+            <span title="${tooltip}" style="display:inline-flex; align-items:center; margin-left:5px;">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:14px; height:14px;">
+                    <circle cx="12" cy="12" r="11" fill="${color}"/>
+                    <path d="M17.33 8.33L10 15.67L6.67 12.33" stroke="${checkColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+        `;
+    }
     </script>
     <!-- AUTH MODAL -->
     <div id="auth-modal" class="auth-modal">
