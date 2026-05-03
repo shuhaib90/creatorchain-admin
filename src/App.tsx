@@ -511,35 +511,38 @@ const UsersPage = () => {
       return;
     }
 
-    let message = '';
+    // Prepare notification payload
+    const payload: any = {
+      chat_ids: [user.telegram_id],
+      username: user.username || 'builder'
+    };
+
+    let notificationType = 'badge_update';
+
     if (type === 'verification') {
       if (status) {
-        message = `🎊 <b>HAPPY NEWS!</b>\n\nHey @${user.username}, your builder profile has been <b>OFFICIALLY VERIFIED</b> by the CreatorChain Team! ✅\n\nYour trust badge is now live. High-performance projects can now see your verified status! Stand tall, builder! 🚀`;
+        payload.badge_level = 'Verified';
       } else {
-        return; // Don't notify on removal unless needed
+        return; // Don't notify on removal
       }
     } else {
       if (status) {
-        const level = status.toUpperCase();
-        message = `🎊 <b>LEGENDARY NEWS!</b>\n\nCongratulations @${user.username}! Admin has officially granted you the <b>${level} BADGE</b>! 🏆\n\nYour reputation within the ecosystem just leveled up. Keep building great things! 🚀`;
+        payload.badge_level = status;
       } else {
-        return;
+        return; // Don't notify on removal
       }
     }
 
     try {
-      await fetch('https://creatorchain-web3-jobs.vercel.app/api/send-telegram', {
+      await fetch('https://creatorchain.site/api/send-telegram', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: 'custom',
-          payload: {
-            chat_ids: [user.telegram_id],
-            message: message
-          }
+          type: notificationType,
+          payload: payload
         })
       });
-      console.log('Notification sent to:', user.username);
+      console.log('Badge notification sent to:', user.username);
     } catch (err) {
       console.error('Telegram notification failed:', err);
     }
