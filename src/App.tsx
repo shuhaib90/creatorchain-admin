@@ -1,4 +1,4 @@
-// CreatorChain Admin Terminal v2.2.1 - Broadcast Telemetry Overhaul
+// CreatorChain Admin Terminal v2.2.2 - Connection Stability Patch
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { 
@@ -307,7 +307,7 @@ const Listings = () => {
       const tgRecipients = Array.from(new Set([...profileTgIds, ...globalTgIds, adminChatId]));
 
       if (tgRecipients.length > 0) {
-        const response = await fetch('https://creatorchain-web3-jobs.vercel.app/api/send-telegram', {
+        const response = await fetch('https://creatorchain.site/api/send-telegram', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -973,7 +973,7 @@ const Opportunities = () => {
         return;
       }
 
-      const response = await fetch('https://creatorchain-web3-jobs.vercel.app/api/send-telegram', {
+      const response = await fetch('https://creatorchain.site/api/send-telegram', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1306,7 +1306,7 @@ const Broadcast = () => {
       }
 
       if (tgRecipients.length > 0) {
-        const response = await fetch('https://creatorchain-web3-jobs.vercel.app/api/send-telegram', {
+        const response = await fetch('https://creatorchain.site/api/send-telegram', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
