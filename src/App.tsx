@@ -1691,6 +1691,7 @@ const Layout = ({ children, onLogout }: { children: React.ReactNode, onLogout: (
   );
 };
 
+function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return localStorage.getItem('admin_auth') === 'true';
   });
