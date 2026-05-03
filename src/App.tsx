@@ -1684,8 +1684,15 @@ const SettingsPage = () => {
           </div>
           <div style={{ marginTop: '24px' }}>
             <button 
-              className={`btn ${broadcastEnabled ? 'btn-outline' : 'btn-primary'}`} 
-              style={{ width: '100%', padding: '16px', color: broadcastEnabled ? 'var(--accent)' : 'white', borderColor: broadcastEnabled ? 'rgba(255,62,0,0.3)' : '' }}
+              className="btn" 
+              style={{ 
+                width: '100%', 
+                padding: '16px', 
+                background: broadcastEnabled ? 'rgba(255, 62, 0, 0.1)' : 'var(--primary)',
+                color: broadcastEnabled ? 'var(--accent)' : 'var(--black)',
+                borderColor: broadcastEnabled ? 'var(--accent)' : 'var(--black)',
+                boxShadow: broadcastEnabled ? '0 0 15px rgba(255, 62, 0, 0.2)' : 'none'
+              }}
               onClick={() => toggleSetting('broadcast_enabled', !!broadcastEnabled)}
             >
               {broadcastEnabled ? '🛑 TERMINATE ALL BROADCASTS' : '⚡ RESTORE SYSTEM COMMS'}
@@ -1706,8 +1713,14 @@ const SettingsPage = () => {
           </div>
           <div style={{ marginTop: '24px' }}>
             <button 
-              className={`btn ${devMode ? 'btn-primary' : 'btn-outline'}`} 
-              style={{ width: '100%', padding: '16px', color: devMode ? 'black' : 'white' }}
+              className="btn" 
+              style={{ 
+                width: '100%', 
+                padding: '16px', 
+                background: devMode ? 'var(--secondary)' : 'transparent',
+                color: devMode ? 'var(--black)' : 'var(--white)',
+                borderColor: devMode ? 'var(--black)' : 'var(--text-muted)'
+              }}
               onClick={() => toggleSetting('developer_mode', !!devMode)}
             >
               {devMode ? 'DISABLE_SANDBOX_MODE' : 'ENABLE_TESTING_MODE'}
