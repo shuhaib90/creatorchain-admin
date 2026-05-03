@@ -502,6 +502,13 @@
 
                 if (error || !p) throw error || new Error('Builder not found');
 
+                // Fetch community opportunity submissions for this user
+                const { count: appCount } = await db.from('applications')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', p.id);
+                
+                p.approved_submissions = (p.approved_submissions || 0) + (appCount || 0);
+
                 const builderName = p.name || h;
                 document.title = `${builderName} | CreatorChain`;
                 document.getElementById('bg-username').textContent = h.toUpperCase();
@@ -669,7 +676,7 @@
                 // 3. Trigger email if enabled
                 if (profile && profile.email && profile.email_notifications !== false) {
                     try {
-                        await fetch('https://creatorchain.site/api/send-email', {
+                        await fetch('/api/send-email', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({

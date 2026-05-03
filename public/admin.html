@@ -441,7 +441,7 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
                 return;
             }
 
-            await fetch('https://creatorchain.site/api/send-telegram', {
+            await fetch('/api/send-telegram', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -523,7 +523,7 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
         // Send Submitter Notification
         try {
             if (listing.submitter_email && listing.submitter_email.includes('@')) {
-                await fetch('https://creatorchain.site/api/send-email', {
+                await fetch('/api/send-email', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -546,7 +546,7 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
                 const submitterProfile = (profiles || []).find(p => p.username && p.username.toLowerCase() === handle.toLowerCase());
                 
                 if (submitterProfile && submitterProfile.telegram_id) {
-                    await fetch('https://creatorchain.site/api/send-telegram', {
+                    await fetch('/api/send-telegram', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -679,7 +679,7 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
             // 4. Send Email Broadcast to ALL
             if (emailRecipients.length > 0) {
                 try {
-                    await fetch('https://creatorchain.site/api/send-email', {
+                    await fetch('/api/send-email', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -697,7 +697,7 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
 
             if (tgRecipients.length > 0) {
                 try {
-                    const tgResp = await fetch('https://creatorchain.site/api/send-telegram', {
+                    const tgResp = await fetch('/api/send-telegram', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -776,7 +776,7 @@ const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
         // Send Telegram Notification if badge is set and user has Telegram connected
         if (newBadge && profile.telegram_id) {
             try {
-                await fetch('https://creatorchain.site/api/send-telegram', {
+                await fetch('/api/send-telegram', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

@@ -416,7 +416,7 @@
 
                 // 3. Send Telegram Broadcast
                 if (tgRecipients.length > 0) {
-                    await fetch('https://creatorchain.site/api/send-telegram', {
+                    await fetch('/api/send-telegram', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -437,7 +437,7 @@
                 if (emailRecipients.length > 0) {
                     for (let i = 0; i < emailRecipients.length; i += 50) {
                         const batch = emailRecipients.slice(i, i + 50);
-                        await fetch('https://creatorchain.site/api/send-email', {
+                        await fetch('/api/send-email', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -458,7 +458,7 @@
                 // 5. Notify Submitter (Email & Telegram)
                 // 5. Notify Submitter (Email & Telegram)
                 if (item.submitter_email && item.submitter_email.includes('@')) {
-                    await fetch('https://creatorchain.site/api/send-email', {
+                    await fetch('/api/send-email', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -477,7 +477,7 @@
                     const handle = tgHandle.replace('@', '').trim();
                     const submitterProfile = (profiles || []).find(p => p.username && p.username.toLowerCase() === handle.toLowerCase());
                     if (submitterProfile && submitterProfile.telegram_id) {
-                        await fetch('https://creatorchain.site/api/send-telegram', {
+                        await fetch('/api/send-telegram', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({

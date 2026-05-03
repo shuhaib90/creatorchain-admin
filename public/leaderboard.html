@@ -419,15 +419,27 @@
         async function loadData() {
             const root = document.getElementById('leaderboard-root');
             try {
-                // Use the same logic as talent.html: Fetch directly from user_profiles
+                const { data: apps } = await db.from('applications').select('user_id');
+                const appCounts = {};
+                if (apps) {
+                    apps.forEach(a => {
+                        if (a.user_id) appCounts[a.user_id] = (appCounts[a.user_id] || 0) + 1;
+                    });
+                }
+
                 const { data: profiles, error: pErr } = await db.from('user_profiles')
                     .select('*')
-                    .order('approved_submissions', { ascending: false })
-                    .limit(100);
+                    .limit(1000);
 
                 if (pErr) throw pErr;
 
-                // Filter out users with zero approved submissions
+                // Merge app counts and sort
+                profiles.forEach(p => {
+                    p.approved_submissions = (p.approved_submissions || 0) + (appCounts[p.id] || 0);
+                });
+                profiles.sort((a, b) => b.approved_submissions - a.approved_submissions);
+
+                // Filter out users with zero submissions
                 const activeProfiles = profiles.filter(p => (p.approved_submissions || 0) > 0);
 
                 fullData = activeProfiles.map(p => {
