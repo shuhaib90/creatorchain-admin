@@ -25,6 +25,31 @@ export default async (req, res) => {
     return res.status(400).json({ error: 'Missing type or payload' });
   }
 
+  // Global Settings Logic
+  const SUPABASE_URL = process.env.SUPABASE_URL || 'https://mwefmtmcljdsptcgowmb.supabase.co';
+  const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13ZWZtdG1jbGpkc3B0Y2dvd21iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDM1MTIsImV4cCI6MjA5MDM3OTUxMn0.MWkosFtcKB5UAQGvNTB6fABEIMfkgzXgnwb_17pJabU';
+
+  try {
+    const { data: settings } = await axios.get(`${SUPABASE_URL}/rest/v1/system_settings?select=*`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    
+    const broadcastEnabled = settings?.find(s => s.key === 'broadcast_enabled')?.value !== false;
+    const devMode = settings?.find(s => s.key === 'developer_mode')?.value === true;
+
+    if (!broadcastEnabled) {
+      console.log('🔴 GLOBAL SHUTDOWN: Aborting Telegram notification.');
+      return res.status(200).json({ success: true, message: 'Broadcast system disabled' });
+    }
+
+    if (devMode && type !== 'admin_alert') {
+      console.log('🧪 DEV MODE: Skipping real send, logging message.');
+      return res.status(200).json({ success: true, message: 'Dev mode active' });
+    }
+  } catch (err) {
+    console.warn('Settings Check Bypass:', err.message);
+  }
+
   try {
     let message = '';
     let chatIds = payload.chat_ids; // Can be a string or array of strings
