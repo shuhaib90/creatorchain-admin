@@ -106,19 +106,21 @@ export default async (req, res) => {
     const results = await Promise.all(targetChatIds.map(async (chatId) => {
       try {
         let response;
-        if (type === 'custom' && payload.image_url) {
+        const photoUrl = payload.logo_url || payload.image_url;
+
+        if (photoUrl) {
           try {
-            // Attempt to Send as Photo (Manual Broadcasts)
+            // Attempt to Send as Photo
             response = await axios.post(`https://api.telegram.org/bot${TG_TOKEN}/sendPhoto`, {
               chat_id: chatId,
-              photo: payload.image_url,
+              photo: photoUrl,
               caption: message,
               parse_mode: 'HTML'
             });
           } catch (photoErr) {
             console.error(`Photo Send Failed to ${chatId}, falling back to text:`, photoErr.response?.data || photoErr.message);
             // Fallback to text message with image link
-            const fallbackMessage = `${message}\n\n🖼️ <a href="${payload.image_url}">View Image</a>`;
+            const fallbackMessage = `${message}\n\n🖼️ <a href="${photoUrl}">View Logo/Image</a>`;
             response = await axios.post(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
               chat_id: chatId,
               text: fallbackMessage,
