@@ -973,7 +973,7 @@ const Opportunities = () => {
         return;
       }
 
-      await fetch('https://creatorchain-web3-jobs.vercel.app/api/send-telegram', {
+      const response = await fetch('https://creatorchain-web3-jobs.vercel.app/api/send-telegram', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -990,10 +990,17 @@ const Opportunities = () => {
         })
       });
 
-      alert(`🚀 Exclusive Broadcast sent to ${tgRecipients.length} users!`);
+      const result = await response.json();
+      if (result.success) {
+        const successes = result.results?.filter((r: any) => r.success).length || 0;
+        const failures = result.results?.filter((r: any) => !r.success).length || 0;
+        alert(`🚀 Broadcast Status:\n✅ Success: ${successes}\n❌ Failed: ${failures}\nTotal Recipients: ${tgRecipients.length}`);
+      } else {
+        throw new Error(result.error || 'API_ERROR');
+      }
     } catch (err: any) {
       console.error('Exclusive Broadcast Error:', err);
-      alert('Broadcast failed: ' + err.message);
+      alert('Broadcast Transmission Failed: ' + err.message);
     }
   };
 
