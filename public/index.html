@@ -2794,7 +2794,11 @@
 
     async function openPublicProfile(handle) {
         try {
-            const { data, error } = await db.from('user_profiles').select('*').eq('username', handle.replace('@','')).single();
+            const h = handle.replaceAll('@','').trim();
+            const { data, error } = await db.from('user_profiles')
+                .select('*')
+                .or(`username.eq.${h},twitter.ilike.%${h}%`)
+                .maybeSingle();
             if (data) {
                 document.getElementById('profile-card-modal').style.display = 'flex';
                 renderProfileCard(data, data.avatar_url);

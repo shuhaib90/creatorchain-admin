@@ -1358,7 +1358,11 @@
             content.innerHTML = '<div style="padding:40px; text-align:center;"><p class="mono">🔍 FETCHING PROFILE...</p></div>';
 
             try {
-                const { data, error } = await db.from('user_profiles').select('*').eq('username', handle.replace('@','')).single();
+                const h = handle.replaceAll('@','').trim();
+                const { data, error } = await db.from('user_profiles')
+                    .select('*')
+                    .or(`username.eq.${h},twitter.ilike.%${h}%`)
+                    .maybeSingle();
                 if (error || !data) throw new Error('Profile not found.');
                 
                 // Robust Avatar Logic

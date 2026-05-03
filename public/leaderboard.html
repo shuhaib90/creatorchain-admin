@@ -237,7 +237,12 @@
             try {
                 const { data: { user } } = await db.auth.getUser();
                 if (user) {
-                    const { data: profile } = await db.from('user_profiles').select('avatar_url, username').eq('user_id', user.id).single();
+                    const h = (user.user_metadata?.user_name || '').replace('@','');
+                    const { data: profile } = await db.from('user_profiles')
+                        .select('*')
+                        .or(`username.eq.${h},twitter.ilike.%${h}%`)
+                        .maybeSingle();
+                    
                     const metadata = user.user_metadata;
                     
                     let pic = profile?.avatar_url || metadata.avatar_url || metadata.picture;
@@ -285,7 +290,7 @@
 
                 const counts = {};
                 listings.forEach(l => {
-                    let h = l.submitted_by.replace('@', '').trim();
+                    let h = l.submitted_by.replaceAll('@', '').trim();
                     if(h.toLowerCase() === 'anonymous' || !h) return;
                     counts[h] = (counts[h] || 0) + 1;
                 });
@@ -295,12 +300,17 @@
                 if (pErr) throw pErr;
 
                 fullData = handles.map(h => {
-                    const p = profiles.find(pr => (pr.username || '').toLowerCase() === h.toLowerCase());
+                    const hClean = h.toLowerCase().replace('@', '');
+                    const p = profiles.find(pr => {
+                        const uClean = (pr.username || '').toLowerCase().replace('@', '');
+                        const tClean = (pr.twitter || '').toLowerCase().replace('@', '');
+                        return uClean === hClean || tClean === hClean;
+                    });
                     
                     // Robust Avatar Logic
                     let avatar = p?.avatar_url;
                     if (!avatar) {
-                        avatar = `https://unavatar.io/twitter/${h}`;
+                        avatar = `https://unavatar.io/${h}`;
                     }
                     
                     return {
