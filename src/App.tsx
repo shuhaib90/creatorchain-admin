@@ -10,7 +10,8 @@ import {
   Clock,
   Radio,
   Search,
-  LogOut
+  LogOut,
+  Key
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from './lib/supabase';
@@ -935,11 +936,138 @@ const ApplicantsModal = ({ opportunity, applicants, onClose }: { opportunity: an
   );
 };
 
+const ProjectAccessModal = ({ opportunity, onClose }: { opportunity: any, onClose: () => void }) => {
+  const [keys, setKeys] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+
+  const fetchKeys = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('project_access_keys')
+      .select('*')
+      .eq('project_id', opportunity.id)
+      .order('created_at', { ascending: false });
+    
+    if (!error) setKeys(data || []);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchKeys();
+  }, [opportunity.id]);
+
+  const generateNewKey = async () => {
+    setGenerating(true);
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let randomStr = '';
+    for (let i = 0; i < 6; i++) {
+      randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const newKey = `PRJ-${randomStr}`;
+
+    const { error } = await supabase
+      .from('project_access_keys')
+      .insert([{
+        project_id: opportunity.id,
+        access_key: newKey,
+        status: 'active'
+      }]);
+
+    if (error) {
+      alert('Generation failed: ' + error.message);
+    } else {
+      fetchKeys();
+    }
+    setGenerating(false);
+  };
+
+  const revokeKey = async (id: string) => {
+    if (!confirm('Are you sure you want to revoke this access key? This action cannot be undone.')) return;
+    
+    const { error } = await supabase
+      .from('project_access_keys')
+      .update({ status: 'revoked' })
+      .eq('id', id);
+
+    if (error) {
+      alert('Revoke failed: ' + error.message);
+    } else {
+      fetchKeys();
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Key copied to clipboard!');
+    });
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="modal-content" 
+        onClick={e => e.stopPropagation()}
+        style={{ maxWidth: '500px' }}
+      >
+        <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h2 className="mono" style={{ fontSize: '18px', color: 'var(--primary)' }}>PROJECT_ACCESS_KEYS</h2>
+            <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>PROJECT: {opportunity.project_name}</div>
+          </div>
+          <button onClick={onClose} style={{ background: 'var(--border)', border: 'none', color: 'white', cursor: 'pointer', width: '32px', height: '32px', borderRadius: '50%' }}>✕</button>
+        </div>
+        
+        <div style={{ padding: '32px' }}>
+          {loading ? (
+            <div className="mono" style={{ textAlign: 'center', padding: '20px' }}>FETCHING_KEYS...</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px', maxHeight: '300px', overflowY: 'auto' }}>
+              {keys.length === 0 ? (
+                <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px' }} className="mono">NO_KEYS_GENERATED_YET</p>
+              ) : (
+                keys.map(key => (
+                  <div key={key.id} style={{ padding: '12px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div className="mono" style={{ fontSize: '14px', fontWeight: '800', textDecoration: key.status === 'revoked' ? 'line-through' : 'none', opacity: key.status === 'revoked' ? 0.4 : 1 }}>{key.access_key}</div>
+                      <div className="mono" style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{key.status.toUpperCase()} • {new Date(key.created_at).toLocaleDateString()}</div>
+                    </div>
+                    {key.status === 'active' && (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="btn btn-outline" style={{ padding: '4px 8px', fontSize: '9px' }} onClick={() => copyToClipboard(key.access_key)}>COPY</button>
+                        <button className="btn btn-outline" style={{ padding: '4px 8px', fontSize: '9px', color: 'var(--accent)', borderColor: 'rgba(255,62,0,0.2)' }} onClick={() => revokeKey(key.id)}>REVOKE</button>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          <div style={{ borderTop: '1px solid var(--border)', paddingTop: '20px' }}>
+            <button 
+              className="btn btn-primary" 
+              style={{ width: '100%', padding: '12px' }} 
+              onClick={generateNewKey}
+              disabled={generating}
+            >
+              {generating ? 'GENERATING...' : 'GENERATE_NEW_ACCESS_KEY'}
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
 const Opportunities = () => {
   const [opps, setOpps] = useState<any[]>([]);
   const [apps, setApps] = useState<any[]>([]);
   const [selectedOpp, setSelectedOpp] = useState<any | null>(null);
   const [editingOpp, setEditingOpp] = useState<any | null>(null);
+  const [accessKeyModalOpp, setAccessKeyModalOpp] = useState<any | null>(null);
 
   const fetchData = async () => {
     const [{ data: oData }, { data: aData }] = await Promise.all([
@@ -1119,6 +1247,7 @@ const Opportunities = () => {
               <th className="mono">TITLE</th>
               <th className="mono">TYPE</th>
               <th className="mono">APPLICANTS</th>
+              <th className="mono">ACCESS</th>
               <th className="mono">STATUS</th>
               <th className="mono" style={{ textAlign: 'right' }}>ACTIONS</th>
             </tr>
@@ -1149,6 +1278,15 @@ const Opportunities = () => {
                        VIEW
                      </button>
                   </div>
+                </td>
+                <td>
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ padding: '4px 8px', fontSize: '10px' }}
+                    onClick={() => setAccessKeyModalOpp(opp)}
+                  >
+                    <Key size={12} style={{ marginRight: '6px' }} /> KEYS
+                  </button>
                 </td>
                 <td><span className={`status-badge status-${opp.status}`}>{opp.status}</span></td>
                 <td style={{ textAlign: 'right' }}>
@@ -1235,6 +1373,12 @@ const Opportunities = () => {
             opportunity={editingOpp}
             onClose={() => setEditingOpp(null)}
             onSave={(updated) => setOpps(opps.map(o => o.id === updated.id ? updated : o))}
+          />
+        )}
+        {accessKeyModalOpp && (
+          <ProjectAccessModal 
+            opportunity={accessKeyModalOpp}
+            onClose={() => setAccessKeyModalOpp(null)}
           />
         )}
       </AnimatePresence>
