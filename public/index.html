@@ -1097,20 +1097,17 @@
                         Enable email notifications for opportunities matching my skills
                     </label>
                 </div>
+                <div class="field">
+                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                        <input type="checkbox" id="p-tg-notif" style="width:auto; height:18px;">
                         Enable Telegram notifications for matching opportunities
                     </label>
-                    <div style="margin: 12px 0 0 30px; background: var(--black); border: 2px solid var(--primary); padding: 12px; box-shadow: 4px 4px 0 var(--primary); position: relative; overflow: hidden;">
-                        <div style="position: absolute; top: 0; right: 0; background: var(--primary); color: var(--black); font-size: 8px; padding: 2px 5px; font-weight: 900; font-family: 'Space Mono', monospace;">REQUIRED ACTION</div>
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="background: var(--primary); color: var(--black); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                <i data-lucide="bell-ring" style="width: 18px; height: 18px;"></i>
-                            </div>
-                            <div>
-                                <p style="font-family: 'Space Mono', monospace; font-size: 11px; color: #fff; margin: 0; line-height: 1.4;">
-                                    To receive alerts, open <a href="https://t.me/creatorchainbot" target="_blank" style="color: var(--primary); font-weight: 800; text-decoration: underline;">@CREATORCHAINBOT</a> and send <span style="background: var(--primary); color: var(--black); padding: 0 4px; font-weight: 800;">/START</span>
-                                </p>
-                            </div>
+                    <div id="tg-alert-box" style="margin-top:10px; background:rgba(0,245,160,0.1); border:2px solid var(--primary); padding:12px; display:flex; align-items:center; gap:12px; position:relative;">
+                        <div style="background:var(--primary); color:#000; padding:4px; border:2px solid #000; display:flex; align-items:center; justify-content:center;">
+                            <i data-lucide="bell-ring" style="width:16px; height:16px;"></i>
                         </div>
+                        <p class="mono" style="font-size:10px; margin:0; flex:1; font-weight:700;">To receive alerts, open <a href="https://t.me/CREATORCHAINBOT" target="_blank" style="color:var(--primary);">@CREATORCHAINBOT</a> and send <span style="background:#000; color:var(--primary); padding:2px 4px;">/START</span></p>
+                        <div style="position:absolute; top:-10px; right:10px; background:#000; color:var(--primary); font-size:8px; padding:2px 6px; font-weight:900; border:1px solid var(--primary);">REQUIRED ACTION</div>
                     </div>
                 </div>
 
