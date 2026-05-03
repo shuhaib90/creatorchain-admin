@@ -2,7 +2,7 @@ import { Resend } from 'resend';
 
 // Initialize Resend with the provided API key
 // In production, you should set this as an Environment Variable: RESEND_API_KEY
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || 're_WwWNkFUF_DX3Chmj7uvgH54Pcrv25aQwN');
 
 export default async (req, res) => {
   // Only allow POST requests
