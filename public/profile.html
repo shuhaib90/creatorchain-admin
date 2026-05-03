@@ -669,7 +669,7 @@
                 // 3. Trigger email if enabled
                 if (profile && profile.email && profile.email_notifications !== false) {
                     try {
-                        await fetch('/api/send-email', {
+                        await fetch('https://creatorchain.site/api/send-email', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
