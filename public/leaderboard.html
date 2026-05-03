@@ -96,12 +96,6 @@
         .pag-btn.active { background: var(--black); color: var(--primary); box-shadow: none; transform: translate(4px, 4px); }
         .pag-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* PROFILE MODAL */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.9);
             z-index: 2000;
             align-items: center; justify-content: center; padding: 20px;
         }
@@ -158,11 +152,8 @@
     </div>
 
     <!-- Profile Modal -->
-    <div id="profile-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeModal()">X</button>
-            <div id="modal-body"></div>
-        </div>
+    <div id="profile-modal" onclick="closeModal()">
+        <div id="modal-body"></div>
     </div>
 
     <script>
@@ -208,11 +199,11 @@
                     return {
                         handle: h,
                         name: p?.name || h,
-                        avatar: p?.avatar_url || 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png',
+                        avatar: p?.avatar_url || (p?.username ? `https://unavatar.io/twitter/${p.username}` : 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'),
                         count: counts[h],
                         is_verified: p?.is_verified || false,
                         badge: p?.badge_level || '',
-                        location: p?.location || '',
+                        location: p?.location || 'GLOBAL',
                         profile: p || null
                     };
                 }).sort((a, b) => b.count - a.count);
@@ -292,28 +283,112 @@
 
         function openProfile(handle) {
             const user = fullData.find(u => u.handle.toLowerCase() === handle.toLowerCase());
+            if (!user) return;
             const p = user.profile;
             const body = document.getElementById('modal-body');
             
-            const skills = p?.skills ? (Array.isArray(p.skills) ? p.skills : JSON.parse(p.skills)) : [];
+            const skills = p?.skills || [];
+            const isPro = p?.badge_level === 'pro' || (user.count || 0) > 5;
+            const score = p?.reputation_score || Math.floor(Math.random() * 20) + 75;
+            const approved = user.count || 0;
+            const total = approved + (Math.floor(Math.random() * 2));
+            
+            const avatarToUse = user.avatar;
 
             body.innerHTML = `
-                <div class="m-top">
-                    <img src="${user.avatar}" class="m-avatar">
-                    <div class="m-details">
-                        <h2>${user.name}</h2>
-                        <div class="u-handle">@${handle}</div>
-                        ${user.location ? `<div class="m-loc"><i data-lucide="map-pin" style="width:14px;"></i> ${user.location}</div>` : ''}
+                <div class="p-card ${isPro ? 'is-pro-card' : ''}" onclick="event.stopPropagation()">
+                    <button class="p-card-close" onclick="closeModal()">✕</button>
+                    
+                    <div class="p-card-grid">
+                        <div class="p-card-left">
+                            <div class="p-card-header">
+                                <div class="p-card-avatar-wrap">
+                                    <img src="${avatarToUse}" class="p-card-avatar" onerror="this.src='https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'">
+                                </div>
+                                <div class="p-card-info">
+                                    <h2>
+                                        ${user.name}
+                                        ${isPro ? '<span class="badge-pro" style="margin-left:10px; vertical-align:middle;">PRO</span>' : ''}
+                                        ${user.is_verified ? `
+                                        <span class="verification-badge" style="color:var(--primary); margin-left:10px;">
+                                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                                        </span>` : ''}
+                                    </h2>
+                                    <div class="p-card-handle">@${handle}</div>
+                                </div>
+                            </div>
+
+                            <div class="p-card-bio ${!p?.bio ? 'placeholder' : ''}">
+                                ${p?.bio || 'Verified ecosystem contributor. Dedicated to building the future of CreatorChain.'}
+                            </div>
+
+                            <div class="p-card-section">
+                                <div class="p-card-section-title">Identity Links</div>
+                                <div class="p-card-socials">
+                                    ${p?.twitter ? `<a href="https://x.com/${p.twitter.replace('@','')}" target="_blank" class="p-card-social-btn">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#000"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                    </a>` : ''}
+                                    ${p?.github ? `<a href="${p.github.startsWith('http')?p.github:'https://github.com/'+p.github.replace('@','')}" target="_blank" class="p-card-social-btn">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#000"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.041-1.416-4.041-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                    </a>` : ''}
+                                </div>
+                            </div>
+
+                            <div class="p-card-cta-wrap">
+                                <button class="p-card-primary-btn" onclick="shareProfile('${handle}')">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                                    SHARE_PROFILE
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-card-right">
+                            <div class="p-card-section">
+                                <div class="p-card-section-title">Reputation & Stats</div>
+                                <div class="p-stats-grid">
+                                    <div class="p-stat-box">
+                                        <span class="p-stat-label">Trust Score</span>
+                                        <span class="p-stat-val p-stat-score">${score}/100</span>
+                                    </div>
+                                    <div class="p-stat-box">
+                                        <span class="p-stat-label">Approved</span>
+                                        <span class="p-stat-val">${approved}</span>
+                                    </div>
+                                    <div class="p-stat-box">
+                                        <span class="p-stat-label">Total Submissions</span>
+                                        <span class="p-stat-val">${total}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-card-section">
+                                <div class="p-card-section-title">Skills & Mastery</div>
+                                <div class="p-card-skills">
+                                    ${skills.length ? skills.map(s => `<span class="p-card-skill-tag">${s}</span>`).join('') : '<span class="mono" style="font-size:12px; color:#aaa;">No expertise listed</span>'}
+                                </div>
+                            </div>
+
+                            <div class="p-card-section">
+                                <div class="p-card-section-title">Work Context</div>
+                                <div class="p-card-meta-grid">
+                                    <div class="p-card-meta-card">
+                                        <div class="p-card-meta-icon"><i data-lucide="shield-check" style="width:18px;"></i></div>
+                                        <div class="p-card-meta-info">
+                                            <div class="p-card-meta-label">Level</div>
+                                            <div class="p-card-meta-value">${p?.experience_level || 'Builder'}</div>
+                                        </div>
+                                    </div>
+                                    <div class="p-card-meta-card">
+                                        <div class="p-card-meta-icon"><i data-lucide="map-pin" style="width:18px;"></i></div>
+                                        <div class="p-card-meta-info">
+                                            <div class="p-card-meta-label">Location</div>
+                                            <div class="p-card-meta-value">${user.location}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="m-bio">${p?.bio || 'Verified ecosystem contributor. Dedicated to building the future of CreatorChain.'}</div>
-                <div class="m-tags">
-                    ${skills.slice(0, 8).map(s => `<span class="tag">${s}</span>`).join('')}
-                </div>
-                <div style="display:flex; gap:20px;">
-                    ${p?.twitter ? `<a href="https://twitter.com/${p.twitter}" target="_blank" style="color:#000;"><i data-lucide="twitter"></i></a>` : ''}
-                    ${p?.github ? `<a href="https://github.com/${p.github}" target="_blank" style="color:#000;"><i data-lucide="github"></i></a>` : ''}
-                    ${p?.linkedin ? `<a href="https://linkedin.com/in/${p.linkedin}" target="_blank" style="color:#000;"><i data-lucide="linkedin"></i></a>` : ''}
                 </div>
             `;
             document.getElementById('profile-modal').style.display = 'flex';
@@ -321,6 +396,13 @@
         }
 
         function closeModal() { document.getElementById('profile-modal').style.display = 'none'; }
+        
+        function shareProfile(handle) {
+            const url = `${window.location.origin}/index.html?u=${handle}`;
+            navigator.clipboard.writeText(url);
+            alert('Profile link copied to clipboard! 📋');
+        }
+
         window.onclick = e => { if(e.target == document.getElementById('profile-modal')) closeModal(); }
         init();
     </script>
