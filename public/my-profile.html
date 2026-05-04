@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | CreatorChain</title>
+    <meta name="description" content="Your CreatorChain builder profile with skill-matched Web3 opportunities.">
+    <link rel="icon" type="image/png" href="/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root{--primary:#00F5A0;--accent:#8B5CF6;--bg:#0A0A0A;--card:#111;--border:#222;--white:#fff;--muted:#888;--yellow:#FFD600;--font:'Plus Jakarta Sans',sans-serif;--mono:'Space Mono',monospace}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:var(--bg);font-family:var(--font);color:var(--white);min-height:100vh}
+
+        /* NAV */
+        nav{background:#000;border-bottom:2px solid var(--border);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:1000}
+        .logo{font-size:18px;font-weight:900;text-decoration:none;color:var(--white);display:flex;align-items:center;gap:8px}
+        .logo img{height:36px}
+        .nav-back{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:700;padding:8px 16px;border:2px solid var(--primary);background:transparent;cursor:pointer;text-decoration:none;color:var(--primary);transition:all .15s}
+        .nav-back:hover{background:var(--primary);color:#000}
+
+        /* LAYOUT */
+        .page{max-width:1100px;margin:0 auto;padding:40px 24px 80px;display:grid;grid-template-columns:340px 1fr;gap:28px}
+
+        /* LEFT PANEL */
+        .panel{background:var(--card);border:2px solid var(--border);display:flex;flex-direction:column;position:sticky;top:80px;height:fit-content}
+        .panel-top{background:linear-gradient(135deg,#111 0%,#1a1a2e 100%);padding:32px;text-align:center;position:relative;border-bottom:2px solid var(--border)}
+        .avatar{width:88px;height:88px;border:3px solid var(--primary);object-fit:cover;background:#222}
+        .name{font-size:22px;font-weight:900;margin-top:14px;text-transform:uppercase;letter-spacing:-0.5px;display:flex;align-items:center;gap:8px;justify-content:center}
+        .handle{color:var(--primary);font-family:var(--mono);font-size:12px;margin-top:4px}
+        .bio{color:var(--muted);font-size:13px;margin-top:10px;line-height:1.6;font-style:italic}
+        .badge-seal{position:absolute;top:12px;right:12px;background:var(--yellow);color:#000;padding:3px 9px;font-family:var(--mono);font-weight:900;font-size:9px;border:2px solid #000;transform:rotate(2deg)}
+
+        .panel-body{padding:24px;display:flex;flex-direction:column;gap:22px}
+        .sec-label{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+        .sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+        .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+        .stat{border:2px solid var(--border);padding:14px 8px;text-align:center;background:#0d0d0d}
+        .stat b{font-family:var(--mono);font-size:20px;display:block;color:var(--primary)}
+        .stat small{font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:700;display:block;margin-top:3px}
+
+        .skills{display:flex;flex-wrap:wrap;gap:6px}
+        .skill{font-family:var(--mono);font-size:10px;font-weight:700;padding:4px 10px;border:1.5px solid var(--primary);color:var(--primary);text-transform:uppercase;background:rgba(0,245,160,.06)}
+
+        .wgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+        .witem{border:2px solid var(--border);padding:10px;background:#0d0d0d;display:flex;align-items:center;gap:8px}
+        .witem .ico{width:28px;height:28px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .witem .wk{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;display:block}
+        .witem .wv{font-size:12px;font-weight:800;display:block;text-transform:capitalize}
+
+        .socials{display:flex;gap:8px}
+        .sbtn{width:36px;height:36px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;background:transparent;color:var(--white);text-decoration:none;transition:.15s}
+        .sbtn:hover{border-color:var(--primary);color:var(--primary)}
+
+        .share-btn{width:100%;padding:14px;background:var(--primary);color:#000;border:none;font-family:var(--mono);font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;text-transform:uppercase;transition:.15s}
+        .share-btn:hover{background:var(--accent);color:var(--white)}
+        .edit-btn{width:100%;padding:14px;background:transparent;color:var(--primary);border:2px solid var(--primary);font-family:var(--mono);font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;text-transform:uppercase;transition:.15s}
+        .edit-btn:hover{background:var(--primary);color:#000}
+
+        /* RIGHT PANEL */
+        .right{display:flex;flex-direction:column;gap:20px}
+        .oheader{background:var(--card);border:2px solid var(--border);padding:24px 26px}
+        .oheader h2{font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:-0.5px}
+        .oheader p{font-size:12px;color:var(--muted);margin-top:6px;font-family:var(--mono)}
+        .mtag{display:inline-block;background:var(--primary);color:#000;font-family:var(--mono);font-size:10px;font-weight:900;padding:3px 10px;margin-top:10px}
+
+        .ocard{background:var(--card);border:2px solid var(--border);transition:all .2s;cursor:pointer;text-decoration:none;display:block;color:var(--white)}
+        .ocard:hover{border-color:var(--primary);transform:translateY(-3px)}
+        .ocard-top{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;gap:14px;align-items:flex-start}
+        .ologo{width:44px;height:44px;border:2px solid var(--border);object-fit:cover;background:#222;flex-shrink:0}
+        .otitle{font-size:15px;font-weight:800;line-height:1.3}
+        .oproj{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px}
+        .odesc{font-size:12px;color:#666;margin-top:6px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .ocard-bot{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+        .oreward{font-family:var(--mono);font-size:14px;font-weight:900;color:var(--primary)}
+        .otags{display:flex;gap:5px;flex-wrap:wrap}
+        .otag{font-family:var(--mono);font-size:9px;font-weight:700;padding:3px 8px;border:1.5px solid var(--border);color:var(--muted)}
+        .otag.match{border-color:var(--primary);color:var(--primary);background:rgba(0,245,160,.08)}
+        .oapply{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;font-weight:900;padding:7px 14px;background:var(--primary);color:#000;border:none;text-decoration:none;transition:.15s}
+        .oapply:hover{background:var(--accent);color:#fff}
+        .omatch{padding:8px 20px;background:#0d0d0d;border-top:1px solid var(--border);display:flex;align-items:center;gap:6px}
+        .mdot{width:7px;height:7px;border-radius:50%;background:var(--primary)}
+        .mtxt{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--muted)}
+
+        .empty{background:var(--card);border:2px dashed var(--border);padding:60px 30px;text-align:center}
+        .empty h3{font-family:var(--mono);font-size:14px;margin-bottom:8px;color:var(--muted)}
+        .empty p{font-size:12px;color:#555}
+
+        .loading{text-align:center;padding:100px 20px}
+        .loading p{font-family:var(--mono);font-size:13px;color:var(--muted)}
+
+        .nf{max-width:500px;margin:100px auto;text-align:center;padding:0 24px}
+        .nf h1{font-size:72px;font-weight:900;font-family:var(--mono);opacity:.1}
+        .nf h2{font-size:22px;font-weight:900;margin-top:-18px;margin-bottom:12px}
+
+        @media(max-width:900px){.page{grid-template-columns:1fr}.panel{position:static}}
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="/" class="logo"><img src="/logo.png" alt="CC">CREATOR<span style="-webkit-text-stroke:1.5px var(--primary);color:transparent;">CHAIN</span></a>
+    <a href="/" class="nav-back"><i data-lucide="arrow-left" style="width:14px;height:14px;"></i> BACK TO HOME</a>
+</nav>
+
+<div id="root"></div>
+
+<script>
+const SB_URL='https://mwefmtmcljdsptcgowmb.supabase.co';
+const SB_KEY='sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
+const db=supabase.createClient(SB_URL,SB_KEY);
+
+function badge(p){
+    if(!p)return'';
+    const pro=p.badge_level==='pro'||(p.approved_submissions||0)>5;
+    const v=p.is_verified;if(!pro&&!v)return'';
+    const c=pro?'#FFD600':'#00E676',k=pro?'#000':'#fff';
+    return `<svg viewBox="0 0 24 24" width="18" height="18" fill="none"><circle cx="12" cy="12" r="11" fill="${c}"/><path d="M17.33 8.33L10 15.67L6.67 12.33" stroke="${k}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+function score(skills,l){
+    if(!skills||!skills.length)return 0;
+    const h=[l.title,l.description,l.project,l.section,l.about_project,l.mission,l.scope_requirements].join(' ').toLowerCase();
+    let n=0;skills.forEach(s=>{if(h.includes(s.toLowerCase()))n++});return n;
+}
+
+function oppCard(l,sk){
+    const sc=score(sk,l);
+    const logo=l.logo||`https://ui-avatars.com/api/?name=${encodeURIComponent(l.project||'P')}&background=111&color=00F5A0&size=44`;
+    const matched=(sk||[]).filter(s=>[l.title,l.description,l.section,l.about_project,l.scope_requirements].join(' ').toLowerCase().includes(s.toLowerCase()));
+    return `
+    <a class="ocard" href="${l.apply_url||'#'}" target="_blank" rel="noopener">
+        <div class="ocard-top">
+            <img class="ologo" src="${logo}" alt="${l.project}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(l.project||'P')}&background=111&color=00F5A0&size=44'">
+            <div style="flex:1;min-width:0">
+                <div class="otitle">${l.title||'Opportunity'}</div>
+                <div class="oproj">${l.project||'Project'} · ${(l.section||'opportunity').toUpperCase()}</div>
+                <div class="odesc">${l.description||''}</div>
+            </div>
+        </div>
+        <div class="ocard-bot">
+            <span class="oreward">${l.reward||'TBA'}</span>
+            <div class="otags">
+                <span class="otag">${(l.section||'OPP').toUpperCase()}</span>
+                ${matched.slice(0,3).map(s=>`<span class="otag match">${s}</span>`).join('')}
+            </div>
+            <span class="oapply">APPLY NOW <i data-lucide="external-link" style="width:10px;height:10px"></i></span>
+        </div>
+        ${sc>0?`<div class="omatch"><div class="mdot"></div><span class="mtxt">${sc} SKILL MATCH${sc>1?'ES':''} · STRONG FIT</span></div>`:''}
+    </a>`;
+}
+
+async function init(){
+    const root=document.getElementById('root');
+    root.innerHTML='<div class="loading"><p>⬡ AUTHENTICATING...</p></div>';
+
+    const{data:{user}}=await db.auth.getUser();
+    if(!user){
+        root.innerHTML=`<div class="nf"><h1>🔒</h1><h2>Login Required</h2><p style="color:var(--muted);margin-bottom:20px">Sign in to view your profile and matched opportunities.</p><a href="/" class="nav-back">← SIGN IN</a></div>`;
+        lucide.createIcons();return;
+    }
+
+    const{data:p,error}=await db.from('user_profiles').select('*').eq('user_id',user.id).single();
+    if(error||!p){
+        root.innerHTML=`<div class="nf"><h1>⚠</h1><h2>Profile Not Found</h2><p style="color:var(--muted);margin-bottom:20px">Complete your profile setup to access this page.</p><a href="/?profile=true" class="nav-back">← SETUP PROFILE</a></div>`;
+        lucide.createIcons();return;
+    }
+
+    const sk=p.skills||[];
+    const av=p.avatar_url||`https://unavatar.io/twitter/${p.username}`;
+    const isPro=p.badge_level==='pro'||(p.approved_submissions||0)>5;
+    const rep=p.reputation_score||p.score||0;
+    const handle=p.username||'builder';
+
+    // Fetch opportunities
+    const{data:listings}=await db.from('listings').select('*').eq('approval_status','approved').order('created_at',{ascending:false}).limit(100);
+    let scored=(listings||[]).map(l=>({...l,_sc:score(sk,l)}));
+    scored.sort((a,b)=>b._sc-a._sc||new Date(b.created_at)-new Date(a.created_at));
+    const top5=scored.slice(0,5);
+
+    const socials=[
+        {k:'github',i:'github',pre:'https://github.com/'},
+        {k:'discord',i:'message-circle',pre:'https://discord.com/users/'},
+        {k:'telegram',i:'send',pre:'https://t.me/'},
+        {k:'website',i:'globe',pre:''}
+    ].map(({k,i,pre})=>{
+        let v=p[k];if(!v)return'';
+        if(!v.startsWith('http'))v=pre+v.replace('@','');
+        return `<a class="sbtn" href="${v}" target="_blank" title="${k}"><i data-lucide="${i}" style="width:15px;height:15px"></i></a>`;
+    }).join('');
+
+    const xBtn=`<a class="sbtn" href="https://x.com/${handle}" target="_blank" title="X"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>`;
+
+    const oppsHtml=top5.length===0
+        ?`<div class="empty"><h3>NO MATCHING OPPORTUNITIES</h3><p>No approved listings match your skills right now. Check back soon!</p></div>`
+        :top5.map(l=>oppCard(l,sk)).join('');
+
+    root.innerHTML=`
+    <div class="page">
+        <aside class="panel">
+            <div class="panel-top">
+                ${isPro?'<div class="badge-seal">★ PRO BUILDER</div>':p.is_verified?'<div class="badge-seal">✓ VERIFIED</div>':''}
+                <img class="avatar" src="${av}" alt="${handle}" onerror="this.src='https://ui-avatars.com/api/?name=${handle}&background=111&color=00F5A0&size=88'">
+                <div class="name">${p.name||handle} ${badge(p)}</div>
+                <div class="handle">@${handle}</div>
+                ${p.bio?`<div class="bio">"${p.bio}"</div>`:''}
+            </div>
+            <div class="panel-body">
+                <div>
+                    <div class="sec-label">REPUTATION</div>
+                    <div class="stats">
+                        <div class="stat"><b>${rep}</b><small>TRUST</small></div>
+                        <div class="stat"><b>${p.approved_submissions||0}</b><small>APPROVED</small></div>
+                        <div class="stat"><b>${p.total_submissions||0}</b><small>TOTAL</small></div>
+                    </div>
+                </div>
+                ${sk.length?`<div><div class="sec-label">SKILLS</div><div class="skills">${sk.map(s=>`<span class="skill">${s}</span>`).join('')}</div></div>`:''}
+                <div>
+                    <div class="sec-label">WORK CONTEXT</div>
+                    <div class="wgrid">
+                        <div class="witem"><div class="ico"><i data-lucide="bar-chart-2" style="width:13px;height:13px"></i></div><div><span class="wk">Level</span><span class="wv">${p.experience_level||'N/A'}</span></div></div>
+                        <div class="witem"><div class="ico"><i data-lucide="briefcase" style="width:13px;height:13px"></i></div><div><span class="wk">Pref</span><span class="wv">${p.work_preference||'N/A'}</span></div></div>
+                        <div class="witem"><div class="ico"><i data-lucide="map-pin" style="width:13px;height:13px"></i></div><div><span class="wk">Location</span><span class="wv">${p.location||'Global'}</span></div></div>
+                        <div class="witem"><div class="ico"><i data-lucide="building-2" style="width:13px;height:13px"></i></div><div><span class="wk">Company</span><span class="wv">${p.company||'Freelance'}</span></div></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="sec-label">LINKS</div>
+                    <div class="socials">${xBtn}${socials}</div>
+                </div>
+            </div>
+            <a href="/?profile=true" class="edit-btn"><i data-lucide="edit-3" style="width:14px;height:14px"></i> EDIT PROFILE</a>
+            <button class="share-btn" onclick="shareProfile()"><i data-lucide="share-2" style="width:14px;height:14px"></i> SHARE PROFILE</button>
+        </aside>
+
+        <main class="right">
+            <div class="oheader">
+                <h2>Your <span style="-webkit-text-stroke:1.5px var(--primary);color:transparent;">Opportunities</span></h2>
+                <p>Curated based on your skills and expertise.</p>
+                ${sk.length?`<div class="mtag">⬡ MATCHING: ${sk.slice(0,4).join(' · ')}</div>`:''}
+            </div>
+            ${oppsHtml}
+            <a href="/" style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--muted);text-decoration:none;margin-top:8px">
+                <i data-lucide="grid" style="width:13px;height:13px"></i> VIEW ALL OPPORTUNITIES →
+            </a>
+        </main>
+    </div>`;
+
+    document.title=`${p.name||handle} | My Profile · CreatorChain`;
+    lucide.createIcons();
+}
+
+function shareProfile(){
+    const url=window.location.origin+'/my-profile.html';
+    if(navigator.share){navigator.share({title:'My CreatorChain Profile',url})}
+    else{navigator.clipboard.writeText(url).then(()=>{const b=document.querySelector('.share-btn');const o=b.innerHTML;b.innerHTML='✓ LINK COPIED!';setTimeout(()=>{b.innerHTML=o;lucide.createIcons()},2000)})}
+}
+
+init();
+</script>
+</body>
+</html>
