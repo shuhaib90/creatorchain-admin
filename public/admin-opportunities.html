@@ -523,35 +523,31 @@
             btn.disabled = true;
             btn.textContent = 'FETCHING USERS...';
 
-            let { data: users, error } = await supabase
+            // 1. Fetch from user_profiles
+            const { data: profiles, error: pError } = await supabase
                 .from('user_profiles')
                 .select('email')
                 .not('email', 'is', null)
-                .eq('email_notifications', true)
-                .eq('status', 'active');
+                .eq('email_notifications', true);
             
-            if (error) {
-                console.error("Trying 'users' table because user_profiles failed:", error);
-                const res = await supabase.from('users').select('email').not('email', 'is', null).eq('email_notifications', true).eq('status', 'active');
-                users = res.data;
-                if (res.error) {
-                    btn.disabled = false;
-                    btn.textContent = 'SEND GLOBAL BROADCAST';
-                    return alert('Query failed: ' + res.error.message);
-                }
-            }
+            // 2. Fetch from subscribers
+            const { data: subscribers, error: sError } = await supabase
+                .from('subscribers')
+                .select('email');
 
-            if (!users || users.length === 0) {
-                btn.disabled = false;
-                btn.textContent = 'SEND GLOBAL BROADCAST';
-                return alert('No eligible users found matching the criteria.');
-            }
+            if (pError) console.error('Profiles error:', pError);
+            if (sError) console.error('Subscribers error:', sError);
 
-            const emails = users.map(u => u.email).filter(Boolean);
+            const profileEmails = (profiles || []).map(u => u.email).filter(Boolean);
+            const subEmails = (subscribers || []).map(s => s.email).filter(Boolean);
+            
+            // 3. Combine and Deduplicate
+            const emails = Array.from(new Set([...profileEmails, ...subEmails]));
+
             if (emails.length === 0) {
                 btn.disabled = false;
                 btn.textContent = 'SEND GLOBAL BROADCAST';
-                return alert('No valid emails.');
+                return alert('No valid emails found in profiles or subscribers.');
             }
 
             if (!confirm(`Found ${emails.length} eligible users. Proceed with batch broadcast?`)) {
