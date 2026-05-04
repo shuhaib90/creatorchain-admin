@@ -51,7 +51,7 @@ export default async (req, res) => {
 
   try {
     let message = '';
-    let chatIds = payload.chat_ids; // Can be a string or array of strings
+    let chatIds = payload.chat_ids || process.env.ADMIN_TELEGRAM_CHAT_ID || '2127320399'; // Can be a string or array of strings
 
     if (type === 'admin_alert') {
       message = `🚨 <b>NEW SUBMISSION</b>\n\n` +
