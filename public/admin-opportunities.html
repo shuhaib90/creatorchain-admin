@@ -659,15 +659,17 @@
 
                 // Calculate updated stats
                 const newApproved = (profile.approved_submissions || 0) + 1;
-                const newTotal = (profile.total_submissions || 0) + 1;
+                // Note: total_submissions was already incremented at submission time in opportunity.html
+                const currentTotal = profile.total_submissions || 0;
+                
                 // Reputation formula: 10 points per approved submission + 1 point per total submission
-                const newReputation = (newApproved * 10) + newTotal;
+                // Since total_submissions already includes this submission, we just add 10 to the score
+                const newReputation = (newApproved * 10) + currentTotal;
 
                 const { error: updateErr } = await supabase
                     .from('user_profiles')
                     .update({
                         approved_submissions: newApproved,
-                        total_submissions: newTotal,
                         reputation_score: newReputation,
                         score: newReputation
                     })

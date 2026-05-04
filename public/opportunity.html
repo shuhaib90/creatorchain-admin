@@ -582,13 +582,20 @@
                 if (userEmail) {
                     const { data: profile } = await db
                         .from('user_profiles')
-                        .select('id, total_submissions')
+                        .select('id, total_submissions, reputation_score, score')
                         .eq('email', userEmail)
                         .maybeSingle();
                     
                     if (profile) {
+                        const newTotal = (profile.total_submissions || 0) + 1;
+                        const newReputation = (profile.reputation_score || 0) + 1;
+                        
                         await db.from('user_profiles')
-                            .update({ total_submissions: (profile.total_submissions || 0) + 1 })
+                            .update({ 
+                                total_submissions: newTotal,
+                                reputation_score: newReputation,
+                                score: newReputation
+                            })
                             .eq('id', profile.id);
                     }
                 }
