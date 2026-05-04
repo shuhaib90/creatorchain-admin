@@ -62,9 +62,10 @@ export default async (req, res) => {
         </div>
       `;
     } else if (type === 'new_opportunity') {
-      to = payload.to; // Can be a string or array
-      if (!to) return res.status(400).json({ error: 'Recipient email is required' });
+      const bccList = payload.bcc || payload.to;
+      if (!bccList || !bccList.length) return res.status(400).json({ error: 'Recipient emails are required' });
 
+      to = ['notifications@creatorchain.site'];
       subject = `⚡ New Opportunity matching your skills: ${payload.project_name}`;
       html = `
         <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; border: 4px solid #000; padding: 30px; background: #fff; box-shadow: 10px 10px 0 #000;">
@@ -84,9 +85,30 @@ export default async (req, res) => {
           </a>
           <div style="margin-top: 30px; border-top: 2px solid #000; padding-top: 20px; text-align: center;">
             <p style="font-weight: 800; font-size: 12px; text-transform: uppercase;">CreatorChain Notification Engine</p>
+            <p style="font-size: 11px; color: #666; margin-top: 10px;">
+              You received this email because you opted in to notifications. 
+              <br><br>
+              <a href="https://creatorchain.site/unsubscribe.html" style="color: #666; text-decoration: underline;">Unsubscribe from these emails</a>
+            </p>
           </div>
         </div>
       `;
+      
+      // Update resend send options
+      const { data, error } = await resend.emails.send({
+        from: fromEmail,
+        to: to,
+        bcc: bccList,
+        subject: subject,
+        html: html,
+      });
+
+      if (error) {
+        console.error('Resend Error:', error);
+        return res.status(400).json({ error });
+      }
+
+      return res.status(200).json({ success: true, data });
     } else if (type === 'opportunity_approved') {
       to = payload.to;
       if (!to) return res.status(400).json({ error: 'Recipient email is required' });
@@ -140,6 +162,28 @@ export default async (req, res) => {
           </a>
         </div>
       `;
+    } else if (type === 'global_announcement') {
+      const bccList = payload.bcc;
+      if (!bccList || !bccList.length) return res.status(400).json({ error: 'Recipient emails are required' });
+
+      to = ['notifications@creatorchain.site'];
+      subject = payload.subject;
+      html = payload.html;
+
+      const { data, error } = await resend.emails.send({
+        from: fromEmail,
+        to: to,
+        bcc: bccList,
+        subject: subject,
+        html: html,
+      });
+
+      if (error) {
+        console.error('Resend Error:', error);
+        return res.status(400).json({ error });
+      }
+
+      return res.status(200).json({ success: true, data });
     }
     
     if (!to || !subject || !html) {
