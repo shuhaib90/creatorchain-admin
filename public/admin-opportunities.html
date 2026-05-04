@@ -614,21 +614,74 @@
                 alert(error.message);
             } else {
                 if (status === 'live') {
-                    // Update rank logic based on approved submit
+                    // Update submitter's profile stats (reputation, approved count, score)
                     if (oppData) {
-                        const submitterId = oppData.submitter_id || oppData.user_id;
-                        if (submitterId) {
-                            const { data: profile } = await supabase.from('user_profiles').select('approved_submissions').eq('id', submitterId).single();
-                            if (profile) {
-                                await supabase.from('user_profiles').update({ approved_submissions: (profile.approved_submissions || 0) + 1 }).eq('id', submitterId);
-                            }
-                        }
+                        await updateSubmitterReputation(oppData);
                     }
                     broadcastExclusive(id);
                 }
                 loadData();
             }
         };
+
+        // Find submitter by email or team_contact handle, then update their reputation
+        async function updateSubmitterReputation(oppData) {
+            try {
+                let profile = null;
+
+                // Strategy 1: Match by submitter_email
+                if (oppData.submitter_email && oppData.submitter_email.includes('@')) {
+                    const { data } = await supabase
+                        .from('user_profiles')
+                        .select('id, approved_submissions, total_submissions, reputation_score, score')
+                        .eq('email', oppData.submitter_email.trim())
+                        .maybeSingle();
+                    if (data) profile = data;
+                }
+
+                // Strategy 2: Match by team_contact (Telegram handle → username)
+                if (!profile && oppData.team_contact) {
+                    const handle = oppData.team_contact.replace('@', '').trim();
+                    if (handle) {
+                        const { data } = await supabase
+                            .from('user_profiles')
+                            .select('id, approved_submissions, total_submissions, reputation_score, score')
+                            .or(`username.ilike.${handle},telegram.ilike.%${handle}%`)
+                            .maybeSingle();
+                        if (data) profile = data;
+                    }
+                }
+
+                if (!profile) {
+                    console.warn('No matching user_profile found for submitter:', oppData.submitter_email || oppData.team_contact);
+                    return;
+                }
+
+                // Calculate updated stats
+                const newApproved = (profile.approved_submissions || 0) + 1;
+                const newTotal = (profile.total_submissions || 0) + 1;
+                // Reputation formula: 10 points per approved submission + 1 point per total submission
+                const newReputation = (newApproved * 10) + newTotal;
+
+                const { error: updateErr } = await supabase
+                    .from('user_profiles')
+                    .update({
+                        approved_submissions: newApproved,
+                        total_submissions: newTotal,
+                        reputation_score: newReputation,
+                        score: newReputation
+                    })
+                    .eq('id', profile.id);
+
+                if (updateErr) {
+                    console.error('Failed to update submitter reputation:', updateErr.message);
+                } else {
+                    console.log(`✅ Reputation updated for profile ${profile.id}: approved=${newApproved}, score=${newReputation}`);
+                }
+            } catch (err) {
+                console.error('Reputation update error:', err);
+            }
+        }
 
         window.showSection = (id) => {
             document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));

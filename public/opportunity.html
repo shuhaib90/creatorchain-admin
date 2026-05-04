@@ -576,6 +576,24 @@
         if (error) {
             alert('Failed: ' + error.message);
         } else {
+            // Track community submission on the user's profile
+            try {
+                const userEmail = currentUser.email;
+                if (userEmail) {
+                    const { data: profile } = await db
+                        .from('user_profiles')
+                        .select('id, total_submissions')
+                        .eq('email', userEmail)
+                        .maybeSingle();
+                    
+                    if (profile) {
+                        await db.from('user_profiles')
+                            .update({ total_submissions: (profile.total_submissions || 0) + 1 })
+                            .eq('id', profile.id);
+                    }
+                }
+            } catch (trackErr) { console.warn('Submission tracking failed:', trackErr); }
+
             alert('🚀 Proposal sent successfully!');
             closeApplicationForm();
         }

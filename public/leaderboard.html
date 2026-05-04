@@ -433,11 +433,14 @@
 
                 if (pErr) throw pErr;
 
-                // Merge app counts and sort
+                // Use approved_submissions from profile directly (maintained by admin-opportunities)
+                // Only fall back to application counts for profiles with zero approved_submissions
                 profiles.forEach(p => {
-                    p.approved_submissions = (p.approved_submissions || 0) + (appCounts[p.id] || 0);
+                    if ((p.approved_submissions || 0) === 0 && appCounts[p.id]) {
+                        p.approved_submissions = appCounts[p.id];
+                    }
                 });
-                profiles.sort((a, b) => b.approved_submissions - a.approved_submissions);
+                profiles.sort((a, b) => (b.approved_submissions || 0) - (a.approved_submissions || 0));
 
                 // Filter out users with zero submissions
                 const activeProfiles = profiles.filter(p => (p.approved_submissions || 0) > 0);

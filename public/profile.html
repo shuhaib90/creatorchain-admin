@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -502,12 +502,15 @@
 
                 if (error || !p) throw error || new Error('Builder not found');
 
-                // Fetch community opportunity submissions for this user
+                // Fetch community opportunity submissions for this user (fallback data)
                 const { count: appCount } = await db.from('applications')
                     .select('*', { count: 'exact', head: true })
                     .eq('user_id', p.id);
                 
-                p.approved_submissions = (p.approved_submissions || 0) + (appCount || 0);
+                // Use approved_submissions from profile directly; only fallback to appCount if zero
+                if ((p.approved_submissions || 0) === 0 && appCount > 0) {
+                    p.approved_submissions = appCount;
+                }
 
                 const builderName = p.name || h;
                 document.title = `${builderName} | CreatorChain`;

@@ -530,6 +530,25 @@
                     });
                 } catch (notifyErr) { console.warn('Alerts failed:', notifyErr); }
 
+                // Track total submissions on the submitter's profile
+                try {
+                    const submitterEmail = formData.submitter_email?.trim();
+                    if (submitterEmail && submitterEmail.includes('@')) {
+                        const { data: profile } = await supabase
+                            .from('user_profiles')
+                            .select('id, total_submissions')
+                            .eq('email', submitterEmail)
+                            .maybeSingle();
+                        
+                        if (profile) {
+                            await supabase
+                                .from('user_profiles')
+                                .update({ total_submissions: (profile.total_submissions || 0) + 1 })
+                                .eq('id', profile.id);
+                        }
+                    }
+                } catch (trackErr) { console.warn('Submission tracking failed:', trackErr); }
+
                 document.getElementById('opportunity-form').style.display = 'none';
                 document.getElementById('header-area').style.display = 'none';
                 document.getElementById('success-msg').style.display = 'block';
