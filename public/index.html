@@ -1817,7 +1817,7 @@
                 twitter_url: document.getElementById('s-twitter').value,
                 submitted_by: document.getElementById('s-submitter').value.replace('@', ''),
                 submitter_email: document.getElementById('s-email').value,
-                submitter_telegram: document.getElementById('s-telegram').value || '',
+                submitter_twitter: document.getElementById('s-telegram').value || '',
                 share_image: document.getElementById('s-banner')?.value || '',
                 about_project: document.getElementById('s-about')?.value || '',
                 mission: document.getElementById('s-mission')?.value || '',
@@ -1850,7 +1850,7 @@
                             project_name: item.project,
                             submitted_by: item.submitted_by,
                             submitter_email: item.submitter_email,
-                            submitter_telegram: item.submitter_telegram,
+                            submitter_telegram: item.submitter_twitter,
                             category: item.section
                         }
                     })

@@ -2,7 +2,7 @@ import { Resend } from 'resend';
 
 // Initialize Resend with the provided API key
 // In production, you should set this as an Environment Variable: RESEND_API_KEY
-const resend = new Resend(process.env.RESEND_API_KEY || 're_WwWNkFUF_DX3Chmj7uvgH54Pcrv25aQwN');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async (req, res) => {
   // Enable CORS
@@ -139,7 +139,7 @@ export default async (req, res) => {
         </div>
       `;
     } else if (type === 'admin_alert') {
-      to = payload.to || 'shuhaibvlogs0@gmail.com'; // Default admin email
+      to = payload.to || process.env.ADMIN_EMAIL || 'shuhaibvlogs0@gmail.com'; // Default admin email
       if (!to) return res.status(400).json({ error: 'Recipient email is required' });
 
       subject = `🚨 New Submission: ${payload.project_name}`;

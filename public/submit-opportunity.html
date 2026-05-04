@@ -1,18 +1,38 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submit Opportunity | CreatorChain</title>
+    <title>Submit Opportunity | CreatorChain Terminal</title>
     <link rel="stylesheet" href="index.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --orange: #FF4D00;
-            --black: #000000;
-            --white: #FFFFFF;
+            --primary: #FF4D00;
+            --primary-glow: rgba(255, 77, 0, 0.3);
+            --bg: #050505;
+            --card-bg: #0a0a0a;
+            --border: #1a1a1a;
+            --text: #ffffff;
+            --text-dim: #888888;
+            --font-main: 'Inter', sans-serif;
             --font-mono: 'Space Mono', monospace;
+        }
+
+        * { box-sizing: border-box; }
+
+        body { 
+            background: var(--bg); 
+            color: var(--text);
+            font-family: var(--font-main);
+            margin: 0;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 2px 2px, #111 1px, transparent 0);
+            background-size: 40px 40px;
         }
 
         /* ─── Mobile Restriction ─────────────────────────────── */
@@ -20,254 +40,387 @@
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             if (isMobile && !window.location.search.includes('bypass=true')) {
                 const overlay = document.createElement('div');
-                overlay.style = "position:fixed; inset:0; background:#0a0a0a; z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px; text-align:center; color:#fff;";
+                overlay.style = "position:fixed; inset:0; background:#000; z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px; text-align:center; color:#fff;";
                 overlay.innerHTML = `
-                    <div style="font-size:60px; margin-bottom:20px;">💻</div>
-                    <h1 style="font-size:32px; color:#FF4D00; -webkit-text-stroke:0;">SWITCH TO DESKTOP</h1>
-                    <p style="font-family: 'Space Mono', monospace; font-size:14px; margin-top:20px; color:#888; max-width:300px;">CreatorChain submission terminal requires a desktop interface for professional project configuration.</p>
+                    <div style="font-size:60px; margin-bottom:20px; filter: drop-shadow(0 0 20px var(--primary));">💻</div>
+                    <h1 style="font-size:32px; color:#FF4D00; font-family: 'Space Mono', monospace;">DESKTOP REQUIRED</h1>
+                    <p style="font-family: 'Space Mono', monospace; font-size:14px; margin-top:20px; color:#888; max-width:300px;">CreatorChain terminal requires an expanded viewport for complex project configuration.</p>
                 `;
                 document.documentElement.appendChild(overlay);
                 document.body.style.display = 'none';
             }
         })();
 
-        body { background: #fafafa; font-family: 'Inter', sans-serif; }
-        
-        .submit-container { max-width: 800px; margin: 80px auto; padding: 20px; }
-        
-        .brutal-header {
-            background: var(--black);
-            color: var(--white);
+        .submit-container { 
+            max-width: 900px; 
+            margin: 60px auto; 
+            padding: 0 20px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .terminal-header {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             padding: 40px;
-            border: 4px solid var(--black);
-            box-shadow: 15px 15px 0 var(--orange);
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .terminal-header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            animation: scanline 3s linear infinite;
+        }
+        @keyframes scanline {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .terminal-header h1 { 
+            font-size: 42px; 
+            font-weight: 900; 
+            margin: 0; 
+            text-transform: uppercase; 
+            letter-spacing: -1px;
+            background: linear-gradient(to bottom, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .terminal-header p { 
+            font-family: var(--font-mono); 
+            font-size: 13px; 
+            color: var(--primary);
+            margin-top: 10px;
+            letter-spacing: 2px;
+        }
+
+        .brutal-form {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 40px;
+            position: relative;
+        }
+
+        .form-section {
             margin-bottom: 50px;
+            border-bottom: 1px solid #1a1a1a;
+            padding-bottom: 30px;
         }
-        .brutal-header h1 { font-size: 48px; font-weight: 900; margin: 0; text-transform: uppercase; letter-spacing: -2px; }
-        .brutal-header p { font-family: var(--font-mono); font-size: 14px; opacity: 0.8; margin-top: 10px; }
-
-        .brutal-card {
-            background: var(--white);
-            border: 4px solid var(--black);
-            padding: 40px;
-            box-shadow: 15px 15px 0 var(--black);
+        .form-section:last-child { border: none; }
+        .section-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #1a1a1a;
         }
 
-        .form-group { margin-bottom: 30px; }
-        .form-label { display: block; font-weight: 900; text-transform: uppercase; font-size: 13px; margin-bottom: 10px; color: var(--black); letter-spacing: 1px; }
+        .form-group { margin-bottom: 25px; }
+        .form-label { 
+            display: block; 
+            font-weight: 700; 
+            font-size: 12px; 
+            margin-bottom: 10px; 
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
         
         .form-input, .form-select, .form-textarea {
             width: 100%;
-            padding: 15px;
-            border: 3px solid var(--black);
-            font-family: inherit;
-            font-size: 16px;
-            font-weight: 600;
-            background: #fff;
-            transition: 0.1s;
+            padding: 14px 18px;
+            background: #000;
+            border: 1px solid var(--border);
+            color: #fff;
+            font-family: var(--font-main);
+            font-size: 15px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             outline: none;
         }
-        .form-input:focus, .form-textarea:focus { box-shadow: 6px 6px 0 var(--black); transform: translate(-2px, -2px); }
+        .form-input:focus, .form-textarea:focus { 
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
 
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+
+        .upload-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+        .upload-btn {
+            background: #111;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0 20px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .upload-btn:hover { background: #1a1a1a; border-color: #333; }
 
         .submit-btn {
-            background: var(--orange);
+            background: var(--primary);
             color: white;
-            border: 4px solid var(--black);
+            border: none;
             padding: 20px 40px;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 900;
             text-transform: uppercase;
             cursor: pointer;
             width: 100%;
-            box-shadow: 8px 8px 0 var(--black);
-            transition: 0.1s;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 15px;
+            letter-spacing: 1px;
+            margin-top: 20px;
         }
-        .submit-btn:hover { transform: translate(-2px, -2px); box-shadow: 10px 10px 0 var(--black); }
-        .submit-btn:active { transform: translate(2px, 2px); box-shadow: 4px 4px 0 var(--black); }
+        .submit-btn:hover { 
+            transform: scale(1.02);
+            box-shadow: 0 0 30px var(--primary-glow);
+        }
+        .submit-btn:disabled {
+            background: #222;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
 
         #success-msg {
             display: none;
-            background: #00E676;
-            color: #000;
-            padding: 30px;
-            border: 4px solid #000;
-            box-shadow: 10px 10px 0 #000;
+            background: #000;
+            border: 1px solid #00E676;
+            padding: 60px 40px;
             text-align: center;
             margin-bottom: 40px;
+            animation: slideUp 0.5s ease-out;
         }
-        #success-msg h2 { margin: 0; font-weight: 900; text-transform: uppercase; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #success-msg h2 { 
+            margin: 0; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            font-size: 32px;
+            color: #00E676;
+            text-shadow: 0 0 20px rgba(0, 230, 118, 0.3);
+        }
+        #success-msg p { color: var(--text-dim); margin: 20px 0; }
+
+        .req { color: var(--primary); }
 
         @media (max-width: 600px) {
             .form-grid { grid-template-columns: 1fr; }
-            .brutal-header h1 { font-size: 32px; }
+            .terminal-header h1 { font-size: 32px; }
+        }
+
+        /* ─── Custom Select ─────────────────────────────────── */
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
         }
     </style>
 </head>
 <body>
-    <nav style="background:var(--white); border-bottom:4px solid var(--black); padding:15px 0; position:sticky; top:0; z-index:1000;">
+    <nav style="background:rgba(10,10,10,0.8); backdrop-filter:blur(10px); border-bottom:1px solid var(--border); padding:20px 0; position:sticky; top:0; z-index:1000;">
         <div style="max-width:1100px; margin:0 auto; padding:0 20px; display:flex; justify-content:space-between; align-items:center;">
-            <a href="/" style="text-decoration:none; display:flex; align-items:center; gap:10px;">
-                <img src="/logo.png" alt="Logo" style="height:44px;">
-                <span style="font-weight:900; font-size:20px; color:var(--black); font-family:var(--font-mono);">CREATOR<span style="-webkit-text-stroke: 1px var(--black); color:transparent;">CHAIN</span></span>
+            <a href="/" style="text-decoration:none; display:flex; align-items:center; gap:12px;">
+                <img src="/logo.png" alt="Logo" style="height:36px; filter: drop-shadow(0 0 10px var(--primary-glow));">
+                <span style="font-weight:900; font-size:18px; color:var(--text); font-family:var(--font-mono); letter-spacing:-1px;">CREATOR<span style="color:var(--primary);">CHAIN</span></span>
             </a>
-            <div style="display:flex; gap:20px;">
-                <a href="/" style="font-family:var(--font-mono); font-weight:700; font-size:12px; color:var(--black); text-decoration:none;">HOME</a>
-                <a href="/launch-opportunities.html" style="font-family:var(--font-mono); font-weight:700; font-size:12px; color:var(--black); text-decoration:none;">FOR TEAMS</a>
+            <div style="display:flex; gap:30px;">
+                <a href="/" style="font-family:var(--font-mono); font-weight:700; font-size:11px; color:var(--text-dim); text-decoration:none; transition:0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--text-dim)'">TERMINAL</a>
+                <a href="/launch-opportunities.html" style="font-family:var(--font-mono); font-weight:700; font-size:11px; color:var(--primary); text-decoration:none;">POST_JOB</a>
             </div>
         </div>
     </nav>
+
     <div class="submit-container">
         <div id="success-msg">
-            <h2>Submission Received!</h2>
-            <p>Our admin will review your opportunity and make it live soon.</p>
-            <a href="index.html" style="font-weight:900; text-decoration:underline; color:#000; margin-top:15px; display:inline-block;">RETURN HOME</a>
+            <div style="font-size:64px; margin-bottom:20px;">⚡</div>
+            <h2>Transmission Successful</h2>
+            <p>Your opportunity has been queued for validation. Admin review pending.</p>
+            <a href="index.html" style="font-family:var(--font-mono); font-weight:900; color:var(--primary); text-decoration:none; border:1px solid var(--primary); padding:10px 25px; display:inline-block; margin-top:20px; transition:0.2s;" onmouseover="this.style.background='var(--primary)'; this.style.color='#fff'" onmouseout="this.style.background='transparent'; this.style.color='var(--primary)'">RETURN_TO_BASE</a>
         </div>
 
-        <div class="brutal-header">
-            <h1>Pitch Your Project</h1>
-            <p>// ATTRACT TOP BUILDERS TO YOUR ECOSYSTEM</p>
+        <div class="terminal-header" id="header-area">
+            <h1>Launch Opportunity</h1>
+            <p>// ACCESSING_CREATOR_NETWORK_PROTOCOL</p>
         </div>
 
-        <form id="opportunity-form" class="brutal-card">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label class="form-label">Project Name</label>
-                    <input type="text" id="project_name" class="form-input" placeholder="e.g. CreatorChain" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Opportunity Title</label>
-                    <input type="text" id="title" class="form-input" placeholder="e.g. Senior Smart Contract Auditor" required>
-                </div>
-            </div>
-
-            <div class="form-grid">
-                <div class="form-group" style="position:relative;">
-                    <label class="form-label">Project Logo</label>
-                    <div style="display:flex; gap:10px;">
-                        <input type="text" id="logo_url" class="form-input" placeholder="https://... or Upload" style="flex:1;">
-                        <input type="file" id="logo_file" accept="image/*" style="display:none;" onchange="document.getElementById('logo_url').value = this.files[0] ? 'File: ' + this.files[0].name : '';">
-                        <button type="button" class="form-input" onclick="document.getElementById('logo_file').click()" style="width:auto; padding:0 20px; background:#000; color:#fff; cursor:pointer;"><i data-lucide="upload" style="width:16px; height:16px;"></i></button>
+        <form id="opportunity-form" class="brutal-form">
+            <div class="form-section">
+                <div class="section-title">01_PROJECT_IDENTITY</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Project Name <span class="req">*</span></label>
+                        <input type="text" id="project_name" class="form-input" placeholder="e.g. CreatorChain" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Opportunity Title <span class="req">*</span></label>
+                        <input type="text" id="title" class="form-input" placeholder="e.g. Lead Smart Contract Architect" required>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Project Image / Banner</label>
-                    <div style="display:flex; gap:10px;">
-                        <input type="text" id="banner_url" class="form-input" placeholder="https://... or Upload" style="flex:1;">
-                        <input type="file" id="banner_file" accept="image/*" style="display:none;" onchange="document.getElementById('banner_url').value = this.files[0] ? 'File: ' + this.files[0].name : '';">
-                        <button type="button" class="form-input" onclick="document.getElementById('banner_file').click()" style="width:auto; padding:0 20px; background:#000; color:#fff; cursor:pointer;"><i data-lucide="upload" style="width:16px; height:16px;"></i></button>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Project Logo</label>
+                        <div class="upload-wrapper">
+                            <input type="text" id="logo_url" class="form-input" placeholder="Paste URL or Upload" style="flex:1;">
+                            <input type="file" id="logo_file" accept="image/*" style="display:none;" onchange="handleFileSelect(this, 'logo_url')">
+                            <button type="button" class="upload-btn" onclick="document.getElementById('logo_file').click()"><i data-lucide="upload" style="width:16px;"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Banner Image</label>
+                        <div class="upload-wrapper">
+                            <input type="text" id="banner_url" class="form-input" placeholder="Paste URL or Upload" style="flex:1;">
+                            <input type="file" id="banner_file" accept="image/*" style="display:none;" onchange="handleFileSelect(this, 'banner_url')">
+                            <button type="button" class="upload-btn" onclick="document.getElementById('banner_file').click()"><i data-lucide="upload" style="width:16px;"></i></button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Type of Opportunity</label>
-                <select id="type" class="form-select" required>
-                    <option value="developer_bounty">Developer Bounty</option>
-                    <option value="content_bounty">Content Bounty</option>
-                    <option value="ambassador">Ambassador Role</option>
-                    <option value="full_time">Full-time Role</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Detailed Description <span class="req">*</span></label>
-                <textarea id="description" class="form-textarea" rows="4" placeholder="Describe the opportunity..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Mission (Optional)</label>
-                <textarea id="mission" class="form-textarea" rows="2" placeholder="What is the core goal of this opportunity?"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">About Project (Optional)</label>
-                <textarea id="about_project" class="form-textarea" rows="3" placeholder="Brief background about your project..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Scope & Requirements (Optional)</label>
-                <textarea id="scope_requirements" class="form-textarea" rows="4" placeholder="List specific tasks, eligibility criteria, and submission requirements..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Required Skills</label>
-                <input type="text" id="skills" class="form-input" placeholder="Solidity, Rust, Video Editing, etc (comma separated)">
-            </div>
-
-            <div class="form-grid">
+            <div class="form-section">
+                <div class="section-title">02_OPPORTUNITY_DETAILS</div>
                 <div class="form-group">
-                    <label class="form-label">Total Reward (Optional)</label>
-                    <input type="text" id="reward" class="form-input" placeholder="e.g. $500 / 1000 STRK">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Deadline (Optional)</label>
-                    <input type="date" id="deadline" class="form-input">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Reward Breakdown</label>
-                <p style="font-size:11px; color:var(--orange); font-family:var(--font-mono); margin-bottom:10px;">// SELECT HOW MANY TIERS YOU NEED AND DEFINE REWARDS</p>
-                <div style="margin-bottom: 15px;">
-                    <select id="tier_count" class="form-select" onchange="renderTiers(this.value)" style="max-width: 200px;">
-                        <option value="1">1 Tier</option>
-                        <option value="2">2 Tiers</option>
-                        <option value="3" selected>3 Tiers</option>
-                        <option value="4">4 Tiers</option>
-                        <option value="5">5 Tiers</option>
+                    <label class="form-label">Category <span class="req">*</span></label>
+                    <select id="type" class="form-select" required>
+                        <option value="developer_bounty">Developer Bounty</option>
+                        <option value="content_bounty">Content Bounty</option>
+                        <option value="ambassador">Ambassador Role</option>
+                        <option value="full_time">Full-time Role</option>
                     </select>
                 </div>
-                <div id="tiers_container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px;">
-                    <input type="text" id="prize_1" class="form-input" placeholder="1st Place Reward">
-                    <input type="text" id="prize_2" class="form-input" placeholder="2nd Place Reward">
-                    <input type="text" id="prize_3" class="form-input" placeholder="3rd Place Reward">
+
+                <div class="form-group">
+                    <label class="form-label">Detailed Description <span class="req">*</span></label>
+                    <textarea id="description" class="form-textarea" rows="5" placeholder="Define the scope, expectations, and deliverables..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Required Skills</label>
+                    <input type="text" id="skills" class="form-input" placeholder="e.g. Solidity, Cairo, Video Editing (comma separated)">
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Total Reward</label>
+                        <input type="text" id="reward" class="form-input" placeholder="e.g. $500 / 1000 STRK">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Deadline</label>
+                        <input type="date" id="deadline" class="form-input">
+                    </div>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">External / Portfolio Link</label>
-                <input type="url" id="external_link" class="form-input" placeholder="https://docs.yourproject.com">
+            <div class="form-section">
+                <div class="section-title">03_REWARD_DISTRIBUTION</div>
+                <div class="form-group">
+                    <label class="form-label">Number of Tiers</label>
+                    <div style="margin-bottom: 20px;">
+                        <select id="tier_count" class="form-select" onchange="renderTiers(this.value)" style="max-width: 150px;">
+                            <option value="1">1 Tier</option>
+                            <option value="2">2 Tiers</option>
+                            <option value="3" selected>3 Tiers</option>
+                            <option value="4">4 Tiers</option>
+                            <option value="5">5 Tiers</option>
+                        </select>
+                    </div>
+                    <div id="tiers_container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px;">
+                        <input type="text" id="prize_1" class="form-input" placeholder="1st Place Reward">
+                        <input type="text" id="prize_2" class="form-input" placeholder="2nd Place Reward">
+                        <input type="text" id="prize_3" class="form-input" placeholder="3rd Place Reward">
+                    </div>
+                </div>
             </div>
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label class="form-label">Project X (Twitter) URL</label>
-                    <input type="url" id="twitter_url" class="form-input" placeholder="https://x.com/yourproject" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Specific Post Link (Optional)</label>
-                    <input type="url" id="post_link" class="form-input" placeholder="https://x.com/yourproject/status/...">
+            <div class="form-section">
+                <div class="section-title">04_EXTERNAL_LINKS</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Project X (Twitter) <span class="req">*</span></label>
+                        <input type="url" id="twitter_url" class="form-input" placeholder="https://x.com/project" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">External Docs / Link</label>
+                        <input type="url" id="external_link" class="form-input" placeholder="https://docs.project.com">
+                    </div>
                 </div>
             </div>
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label class="form-label">Contact Email <span class="req">*</span></label>
-                    <input type="email" id="submitter_email" class="form-input" placeholder="For status updates" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Telegram Username (Optional)</label>
-                    <input type="text" id="submitter_telegram" class="form-input" placeholder="@username">
+            <div class="form-section">
+                <div class="section-title">05_CONTACT_INFORMATION</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Submitter Email <span class="req">*</span></label>
+                        <input type="email" id="submitter_email" class="form-input" placeholder="For status updates" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Telegram Handle</label>
+                        <input type="text" id="submitter_telegram" class="form-input" placeholder="@username">
+                    </div>
                 </div>
             </div>
 
             <button type="submit" class="submit-btn" id="submit-btn">
-                <i data-lucide="send"></i>
-                SUBMIT FOR REVIEW
+                <i data-lucide="zap" style="width:20px;"></i>
+                BROADCAST OPPORTUNITY
             </button>
         </form>
     </div>
 
     <script type="module">
-        // Supabase configuration from main site
         const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
+
+        window.handleFileSelect = (input, urlInputId) => {
+            const file = input.files[0];
+            if (file) {
+                document.getElementById(urlInputId).value = `FILE: ${file.name}`;
+                document.getElementById(urlInputId).style.color = '#FF4D00';
+            }
+        };
+
+        window.renderTiers = (count) => {
+            const container = document.getElementById('tiers_container');
+            container.innerHTML = '';
+            for (let i = 1; i <= parseInt(count); i++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = `prize_${i}`;
+                input.className = 'form-input';
+                input.placeholder = i === 1 ? '1st Place' : i === 2 ? '2nd Place' : i === 3 ? '3rd Place' : `${i}th Place`;
+                container.appendChild(input);
+            }
+        };
 
         document.getElementById('opportunity-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -277,31 +430,36 @@
 
             const btn = document.getElementById('submit-btn');
             btn.disabled = true;
-            btn.innerHTML = 'SUBMITTING...';
+            btn.innerHTML = '<span style="animation: pulse 1s infinite;">ENCRYPTING_DATA...</span>';
 
             try {
-                // File Upload Logic
+                // File Upload Logic with Improved Error Handling
                 const uploadFile = async (inputId, fileId, bucket) => {
                     const fileInput = document.getElementById(fileId);
                     const urlInput = document.getElementById(inputId);
+                    
                     if (fileInput.files && fileInput.files.length > 0) {
                         try {
                             const file = fileInput.files[0];
                             const fileExt = file.name.split('.').pop();
                             const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+                            
                             const { data, error } = await supabase.storage.from(bucket).upload(`public/${fileName}`, file);
+                            
                             if (error) {
-                                if (error.message.includes('Bucket not found')) {
-                                    console.warn(`Storage bucket ${bucket} is missing. Falling back to URL/Placeholder.`);
-                                    return urlInput.value.trim() || 'https://creatorchain.site/logo.png';
+                                console.warn(`Storage issue for ${bucket}:`, error.message);
+                                if (error.message.includes('bucket not found') || error.message.includes('Bucket not found')) {
+                                    console.error(`ERROR: Storage bucket '${bucket}' is missing. Please create it in Supabase dashboard.`);
                                 }
-                                throw error;
+                                // Fallback to provided URL if any
+                                return urlInput.value.startsWith('FILE: ') ? '' : urlInput.value.trim();
                             }
+                            
                             const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(`public/${fileName}`);
                             return urlData.publicUrl;
                         } catch (err) {
-                            console.warn(`Upload failed for ${bucket}:`, err.message);
-                            return urlInput.value.trim();
+                            console.warn(`Upload exception for ${bucket}:`, err.message);
+                            return urlInput.value.startsWith('FILE: ') ? '' : urlInput.value.trim();
                         }
                     }
                     return urlInput.value.trim();
@@ -315,26 +473,21 @@
                     title: document.getElementById('title').value,
                     type: document.getElementById('type').value,
                     description: document.getElementById('description').value,
-                    mission: document.getElementById('mission').value,
-                    about_project: document.getElementById('about_project').value,
-                    scope_requirements: document.getElementById('scope_requirements').value,
-                    logo: logoUrl,
-                    share_image: bannerUrl,
-                    prize_breakdown: {
-                        first: document.getElementById('prize_1')?.value || '',
-                        second: document.getElementById('prize_2')?.value || '',
-                        third: document.getElementById('prize_3')?.value || '',
-                        fourth: document.getElementById('prize_4')?.value || '',
-                        fifth: document.getElementById('prize_5')?.value || ''
-                    },
+                    logo: logoUrl || 'https://creatorchain.site/logo.png',
+                    share_image: bannerUrl || '',
+                    prize_breakdown: Object.fromEntries(
+                        Array.from({length: 5}, (_, i) => [
+                            ['first', 'second', 'third', 'fourth', 'fifth'][i],
+                            document.getElementById(`prize_${i+1}`)?.value || ''
+                        ]).filter(([_, v]) => v)
+                    ),
                     skills: document.getElementById('skills').value,
                     reward: document.getElementById('reward').value,
                     deadline: document.getElementById('deadline').value || null,
                     external_link: document.getElementById('external_link').value,
                     twitter_url: document.getElementById('twitter_url').value,
-                    post_link: document.getElementById('post_link').value,
                     submitter_email: document.getElementById('submitter_email').value,
-                    submitted_by: document.getElementById('project_name').value, // Map project name to submitted_by
+                    submitted_by: document.getElementById('project_name').value,
                     team_contact: document.getElementById('submitter_telegram').value || '',
                     status: 'pending',
                     created_at: new Date().toISOString()
@@ -346,7 +499,7 @@
 
                 if (error) throw error;
 
-                // Notify Admin via Email and Telegram
+                // Fire notifications
                 try {
                     fetch('/api/send-email', {
                         method: 'POST',
@@ -371,37 +524,33 @@
                             payload: {
                                 project_name: formData.project_name,
                                 submitted_by: formData.submitted_by,
-                                category: formData.type,
-                                chat_ids: '2127320399' // Verified admin chat_id
+                                category: formData.type
                             }
                         })
                     });
-                } catch (notifyErr) { console.warn('Admin alert failed:', notifyErr); }
+                } catch (notifyErr) { console.warn('Alerts failed:', notifyErr); }
 
                 document.getElementById('opportunity-form').style.display = 'none';
+                document.getElementById('header-area').style.display = 'none';
                 document.getElementById('success-msg').style.display = 'block';
                 window.scrollTo(0,0);
             } catch (err) {
-                alert('Error submitting: ' + err.message);
+                console.error('Submission Error:', err);
+                alert('CRITICAL_ERROR: ' + err.message);
                 btn.disabled = false;
-                btn.innerHTML = 'SUBMIT FOR REVIEW';
+                btn.innerHTML = 'RETRY_BROADCAST';
             }
         });
-        
-        window.renderTiers = (count) => {
-            const container = document.getElementById('tiers_container');
-            container.innerHTML = '';
-            for (let i = 1; i <= parseInt(count); i++) {
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.id = `prize_${i}`;
-                input.className = 'form-input';
-                input.placeholder = i === 1 ? '1st Place Reward' : i === 2 ? '2nd Place Reward' : i === 3 ? '3rd Place Reward' : `${i}th Place Reward`;
-                container.appendChild(input);
-            }
-        };
 
         lucide.createIcons();
     </script>
+    <style>
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
 </body>
 </html>
+
