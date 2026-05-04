@@ -262,9 +262,14 @@ async function render() {
                     <div class="socials">${xBtn}${otherSocials}</div>
                 </div>
 
-                <a href="https://x.com/${handle}" target="_blank" class="collab-btn" style="text-decoration:none;">
-                    DEPLOY COLLABORATION ⚡
-                </a>
+                ${(() => {
+                    const emailLink = p.email ? `mailto:${p.email}?subject=Collaboration%20Inquiry%20via%20CreatorChain` : null;
+                    const tgLink = p.telegram ? `https://t.me/${p.telegram.replace('@', '')}` : null;
+                    const collabLink = emailLink || tgLink || `https://x.com/${handle}`;
+                    return `<a href="${collabLink}" target="_blank" class="collab-btn" style="text-decoration:none;">
+                        DEPLOY COLLABORATION ⚡
+                    </a>`;
+                })()}
             </div>
 
             <!-- RIGHT -->
