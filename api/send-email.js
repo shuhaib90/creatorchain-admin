@@ -65,7 +65,7 @@ export default async (req, res) => {
       const bccList = payload.bcc || payload.to;
       if (!bccList || !bccList.length) return res.status(400).json({ error: 'Recipient emails are required' });
 
-      to = ['notifications@creatorchain.site'];
+      to = ['hello@creatorchain.site'];
       subject = `⚡ New Opportunity matching your skills: ${payload.project_name}`;
       html = `
         <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; border: 4px solid #000; padding: 30px; background: #fff; box-shadow: 10px 10px 0 #000;">
@@ -166,7 +166,7 @@ export default async (req, res) => {
       const bccList = payload.bcc;
       if (!bccList || !bccList.length) return res.status(400).json({ error: 'Recipient emails are required' });
 
-      to = ['notifications@creatorchain.site'];
+      to = ['hello@creatorchain.site'];
       subject = payload.subject;
       html = payload.html;
 

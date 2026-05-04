@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unsubscribe - CreatorChain</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f0f0;
+      color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      border: 4px solid #000;
+      box-shadow: 10px 10px 0 #000;
+      padding: 40px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-top: 0;
+      letter-spacing: -1px;
+    }
+    p {
+      color: #555;
+      line-height: 1.6;
+    }
+    input[type="email"] {
+      width: 100%;
+      padding: 15px;
+      margin: 20px 0;
+      border: 2px solid #000;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      background: #000;
+      color: #fff;
+      border: 2px solid #000;
+      padding: 15px 30px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.2s ease;
+    }
+    button:hover {
+      background: #00f5a0;
+      color: #000;
+    }
+    #message {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Unsubscribe</h1>
+    <p>Enter your email below to unsubscribe from CreatorChain notifications.</p>
+    <input type="email" id="emailInput" placeholder="your@email.com" required>
+    <button id="unsubscribeBtn">Unsubscribe</button>
+    <div id="message"></div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const emailParam = urlParams.get('email');
+    if (emailParam) {
+      document.getElementById('emailInput').value = emailParam;
+    }
+
+    document.getElementById('unsubscribeBtn').addEventListener('click', async () => {
+      const email = document.getElementById('emailInput').value.trim();
+      const messageEl = document.getElementById('message');
+      
+      if (!email) {
+        messageEl.style.color = 'red';
+        messageEl.textContent = 'Please enter a valid email address.';
+        return;
+      }
+
+      messageEl.style.color = '#333';
+      messageEl.textContent = 'Processing...';
+
+      try {
+        const response = await fetch('/api/unsubscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          messageEl.style.color = 'green';
+          messageEl.textContent = 'Successfully unsubscribed from notifications.';
+        } else {
+          messageEl.style.color = 'red';
+          messageEl.textContent = data.error || 'Failed to unsubscribe. Please try again.';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        messageEl.style.color = 'red';
+        messageEl.textContent = 'An error occurred. Please try again later.';
+      }
+    });
+  </script>
+</body>
+</html>
