@@ -4,30 +4,330 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Builder Profile | CreatorChain</title>
+    <meta name="description" content="View this builder's profile on CreatorChain.">
     <link rel="icon" type="image/png" href="/logo.png">
-    <script>
-        // Public profile page — redirects to the talent search
-        // The actual user profile is at /my-profile.html
-        const params = new URLSearchParams(location.search);
-        const handle = params.get('u');
-        if (!handle) {
-            window.location.href = '/talent.html';
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F4F4F0; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .box { text-align: center; padding: 40px; }
-        .box h2 { font-size: 20px; margin-bottom: 10px; }
-        .box p { color: #888; font-size: 14px; margin-bottom: 20px; }
-        .box a { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; padding: 10px 20px; border: 2px solid #000; background: #fff; text-decoration: none; color: #000; }
-        .box a:hover { background: #000; color: #fff; }
+        :root {
+            --primary: #00F5A0;
+            --black: #111;
+            --bg: #F4F4F0;
+            --white: #fff;
+            --font: 'Plus Jakarta Sans', sans-serif;
+            --mono: 'Space Mono', monospace;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background: var(--bg); font-family: var(--font); color: var(--black); min-height: 100vh; }
+
+        /* Subtle pattern */
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        /* NAV */
+        nav {
+            background: var(--white); border-bottom: 3px solid var(--black);
+            padding: 14px 24px; display: flex; justify-content: space-between;
+            align-items: center; position: sticky; top: 0; z-index: 1000;
+        }
+        .logo { font-size: 18px; font-weight: 900; text-decoration: none; color: var(--black); display: flex; align-items: center; gap: 8px; }
+        .logo img { height: 36px; }
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-family: var(--mono); font-size: 11px; font-weight: 700;
+            padding: 8px 16px; border: 2px solid var(--black);
+            background: var(--white); cursor: pointer; text-decoration: none;
+            color: var(--black); box-shadow: 3px 3px 0 var(--black); transition: all .15s;
+        }
+        .nav-back:hover { transform: translate(-2px,-2px); box-shadow: 5px 5px 0 var(--black); }
+
+        /* CARD WRAPPER */
+        .card-wrap {
+            max-width: 900px; margin: 50px auto; padding: 0 24px; position: relative; z-index: 1;
+        }
+        .profile-card {
+            background: var(--white);
+            border: 4px solid var(--black);
+            box-shadow: 12px 12px 0 var(--black);
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            min-height: 500px;
+        }
+
+        /* LEFT COLUMN */
+        .left {
+            padding: 40px 35px;
+            border-right: 4px solid var(--black);
+            display: flex; flex-direction: column;
+        }
+        .avatar-frame {
+            width: 160px; height: 160px;
+            border: 4px solid var(--black);
+            box-shadow: 6px 6px 0 var(--black);
+            overflow: hidden; background: #eee;
+        }
+        .avatar-frame img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-name {
+            font-size: 32px; font-weight: 900; margin-top: 20px;
+            text-transform: uppercase; letter-spacing: -1px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .profile-handle {
+            display: inline-block; background: var(--black); color: var(--primary);
+            font-family: var(--mono); font-size: 12px; font-weight: 700;
+            padding: 3px 10px; margin-top: 6px;
+        }
+        .profile-bio {
+            font-size: 14px; line-height: 1.6; color: #555;
+            margin-top: 16px; flex-grow: 1;
+        }
+
+        .sec-label {
+            font-family: var(--mono); font-size: 11px; font-weight: 700;
+            color: #999; text-transform: uppercase; letter-spacing: 1.5px;
+            margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
+        }
+        .sec-label::after { content: ''; flex: 1; height: 2px; background: #e0e0e0; }
+
+        /* SOCIAL ICONS */
+        .socials { display: flex; gap: 8px; margin-top: 5px; }
+        .soc-btn {
+            width: 38px; height: 38px; border: 3px solid var(--black);
+            display: flex; align-items: center; justify-content: center;
+            background: var(--white); color: var(--black); text-decoration: none;
+            transition: .15s; box-shadow: 3px 3px 0 var(--black);
+        }
+        .soc-btn:hover { transform: translate(-2px,-2px); box-shadow: 5px 5px 0 var(--black); background: var(--primary); }
+
+        /* COLLAB BUTTON */
+        .collab-btn {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; padding: 18px; margin-top: 24px;
+            background: var(--black); color: var(--white);
+            border: none; font-family: var(--mono); font-weight: 700; font-size: 14px;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: .15s;
+        }
+        .collab-btn:hover { background: var(--primary); color: var(--black); }
+
+        /* RIGHT COLUMN */
+        .right { padding: 40px 35px; display: flex; flex-direction: column; gap: 28px; }
+
+        /* STATS */
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .stat-box {
+            border: 3px solid var(--black); padding: 18px 14px;
+            text-align: center; background: var(--white);
+        }
+        .stat-val {
+            font-family: var(--mono); font-size: 28px; font-weight: 900;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .stat-val .dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--primary); border: 2px solid var(--black);
+        }
+        .stat-key {
+            font-family: var(--mono); font-size: 10px; font-weight: 700;
+            color: #999; text-transform: uppercase; margin-top: 6px; display: block;
+        }
+
+        /* SKILLS */
+        .skills { display: flex; flex-wrap: wrap; gap: 8px; }
+        .skill-chip {
+            font-family: var(--mono); font-size: 11px; font-weight: 700;
+            padding: 6px 14px; border: 2.5px solid var(--black);
+            text-transform: uppercase; background: var(--white);
+        }
+
+        /* CONTEXT GRID */
+        .ctx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .ctx-box {
+            border: 3px solid var(--black); padding: 16px;
+            display: flex; align-items: center; gap: 12px; background: var(--white);
+        }
+        .ctx-box.available {
+            background: var(--primary); border-color: var(--black);
+        }
+        .ctx-icon {
+            width: 40px; height: 40px; border: 2px solid var(--black);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; background: #FFD600;
+        }
+        .ctx-box.available .ctx-icon { background: var(--white); }
+        .ctx-key {
+            font-family: var(--mono); font-size: 9px; font-weight: 700;
+            color: #888; text-transform: uppercase; display: block;
+        }
+        .ctx-box.available .ctx-key { color: #333; }
+        .ctx-val { font-size: 14px; font-weight: 900; text-transform: uppercase; display: block; }
+
+        /* BADGE */
+        .badge-svg { display: inline-block; vertical-align: middle; }
+
+        /* LOADING / NOT FOUND */
+        .state { max-width: 500px; margin: 120px auto; text-align: center; padding: 0 24px; position: relative; z-index: 1; }
+        .state h1 { font-size: 72px; font-weight: 900; font-family: var(--mono); opacity: .1; }
+        .state h2 { font-size: 22px; font-weight: 900; margin-top: -16px; margin-bottom: 12px; }
+        .state p { color: #888; font-size: 14px; margin-bottom: 20px; }
+
+        @media (max-width: 800px) {
+            .profile-card { grid-template-columns: 1fr; }
+            .left { border-right: none; border-bottom: 4px solid var(--black); }
+        }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>🔍 Public Profile</h2>
-        <p>Looking for a builder? Find them on the talent network.</p>
-        <a href="/talent.html">BROWSE BUILDERS →</a>
-    </div>
+
+<nav>
+    <a href="/" class="logo"><img src="/logo.png" alt="CC">CREATOR<span style="-webkit-text-stroke:1.5px #000;color:transparent;">CHAIN</span></a>
+    <a href="/talent.html" class="nav-back"><i data-lucide="arrow-left" style="width:14px;height:14px;"></i> BUILDER NETWORK</a>
+</nav>
+
+<div id="root"></div>
+
+<script>
+const SB_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
+const SB_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
+const db = supabase.createClient(SB_URL, SB_KEY);
+
+const params = new URLSearchParams(location.search);
+const handle = (params.get('u') || '').replace('@','').trim();
+
+function badgeSvg(p) {
+    if (!p) return '';
+    const isPro = p.badge_level === 'pro' || (p.approved_submissions || 0) > 5;
+    const isV = p.is_verified;
+    if (!isPro && !isV) return '';
+    const c = isPro ? '#FFD600' : '#00E676', k = isPro ? '#000' : '#fff';
+    return `<span class="badge-svg"><svg viewBox="0 0 24 24" width="22" height="22" fill="none"><circle cx="12" cy="12" r="11" fill="${c}"/><path d="M17.33 8.33L10 15.67L6.67 12.33" stroke="${k}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+}
+
+async function render() {
+    const root = document.getElementById('root');
+
+    if (!handle) {
+        root.innerHTML = `<div class="state"><h1>404</h1><h2>No handle provided</h2><p>A username is required to load a profile.</p><a href="/talent.html" class="nav-back">← BROWSE BUILDERS</a></div>`;
+        lucide.createIcons(); return;
+    }
+
+    root.innerHTML = `<div class="state"><p style="font-family:var(--mono);font-size:13px;color:#999;">⬡ LOADING PROFILE...</p></div>`;
+
+    const { data: p, error } = await db.from('user_profiles').select('*').eq('username', handle).single();
+
+    if (error || !p) {
+        root.innerHTML = `<div class="state"><h1>404</h1><h2>Builder not found</h2><p>@${handle} doesn't exist or hasn't set up their profile yet.</p><a href="/talent.html" class="nav-back">← BROWSE BUILDERS</a></div>`;
+        lucide.createIcons(); return;
+    }
+
+    const av = p.avatar_url || `https://unavatar.io/twitter/${handle}`;
+    const sk = p.skills || [];
+    const rep = p.reputation_score || p.score || 0;
+    const missions = p.approved_submissions || 0;
+    const trust = missions > 0 ? Math.min(100, Math.round((missions / (p.total_submissions || 1)) * 100)) : 100;
+    const isAvail = p.available_for_work !== false;
+
+    // Social links
+    const socialMap = [
+        { key: 'github', icon: 'github', pre: 'https://github.com/' },
+        { key: 'discord', icon: 'message-circle', pre: 'https://discord.com/users/' },
+        { key: 'telegram', icon: 'send', pre: 'https://t.me/' },
+        { key: 'website', icon: 'globe', pre: '' },
+    ];
+    const xBtn = `<a class="soc-btn" href="https://x.com/${handle}" target="_blank" title="X / Twitter">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    </a>`;
+    const otherSocials = socialMap.map(({ key, icon, pre }) => {
+        let v = p[key]; if (!v) return '';
+        if (!v.startsWith('http')) v = pre + v.replace('@', '');
+        return `<a class="soc-btn" href="${v}" target="_blank" title="${key}"><i data-lucide="${icon}" style="width:16px;height:16px;"></i></a>`;
+    }).join('');
+
+    root.innerHTML = `
+    <div class="card-wrap">
+        <div class="profile-card">
+            <!-- LEFT -->
+            <div class="left">
+                <div class="avatar-frame">
+                    <img src="${av}" alt="${handle}" onerror="this.src='https://ui-avatars.com/api/?name=${handle}&background=eee&color=111&size=160'">
+                </div>
+                <div class="profile-name">${p.name || handle} ${badgeSvg(p)}</div>
+                <div class="profile-handle">@${handle}</div>
+                <div class="profile-bio">${p.bio || `Building the future of Web3 at CreatorChain.`}</div>
+
+                <div style="margin-top:24px;">
+                    <div class="sec-label">IDENTITY & SOCIALS</div>
+                    <div class="socials">${xBtn}${otherSocials}</div>
+                </div>
+
+                <a href="https://x.com/${handle}" target="_blank" class="collab-btn" style="text-decoration:none;">
+                    DEPLOY COLLABORATION ⚡
+                </a>
+            </div>
+
+            <!-- RIGHT -->
+            <div class="right">
+                <!-- PERFORMANCE METRICS -->
+                <div>
+                    <div class="sec-label">PERFORMANCE METRICS</div>
+                    <div class="stats">
+                        <div class="stat-box">
+                            <div class="stat-val"><span class="dot"></span> ${rep}</div>
+                            <span class="stat-key">REPUTATION</span>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-val">${missions}</div>
+                            <span class="stat-key">MISSIONS</span>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-val">${trust}%</div>
+                            <span class="stat-key">TRUST</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SKILLS -->
+                ${sk.length > 0 ? `
+                <div>
+                    <div class="sec-label">CORE STACK & EXPERTISE</div>
+                    <div class="skills">
+                        ${sk.map(s => `<span class="skill-chip">${s}</span>`).join('')}
+                    </div>
+                </div>` : ''}
+
+                <!-- CURRENT CONTEXT -->
+                <div>
+                    <div class="sec-label">CURRENT CONTEXT</div>
+                    <div class="ctx-grid">
+                        <div class="ctx-box">
+                            <div class="ctx-icon"><i data-lucide="award" style="width:18px;height:18px;"></i></div>
+                            <div><span class="ctx-key">LEVEL</span><span class="ctx-val">${p.experience_level || 'N/A'}</span></div>
+                        </div>
+                        <div class="ctx-box">
+                            <div class="ctx-icon"><i data-lucide="building-2" style="width:18px;height:18px;"></i></div>
+                            <div><span class="ctx-key">TEAM</span><span class="ctx-val">${p.company || 'INDEPENDENT BUILDER'}</span></div>
+                        </div>
+                        <div class="ctx-box">
+                            <div class="ctx-icon"><i data-lucide="map-pin" style="width:18px;height:18px;"></i></div>
+                            <div><span class="ctx-key">LOCATION</span><span class="ctx-val">${p.location || 'GLOBAL'}</span></div>
+                        </div>
+                        <div class="ctx-box ${isAvail ? 'available' : ''}">
+                            <div class="ctx-icon"><i data-lucide="${isAvail ? 'check-circle' : 'x-circle'}" style="width:18px;height:18px;"></i></div>
+                            <div><span class="ctx-key">STATUS</span><span class="ctx-val">${isAvail ? 'AVAILABLE' : 'UNAVAILABLE'}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+
+    document.title = `${p.name || handle} | CreatorChain Builder Profile`;
+    lucide.createIcons();
+}
+
+render();
+</script>
 </body>
 </html>

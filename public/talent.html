@@ -1250,7 +1250,7 @@
             const card = document.createElement('div');
             const isPro = p.badge_level === 'pro' || (p.approved_submissions || 0) > 5;
             card.className = 'profile-card' + (isPro ? ' is-pro-card' : '');
-            card.onclick = () => openHireModal(p.id, p.name || p.username);
+            card.onclick = () => openPublicProfile(p.username);
             
             const avatar = p.avatar_url || `https://unavatar.io/twitter/${p.username}`;
             const userSkills = p.skills || [];
