@@ -138,6 +138,7 @@
             <button class="tab-btn active" onclick="showSection('pending-sec')">Pending Requests</button>
             <button class="tab-btn" onclick="showSection('live-sec')">Live Opps</button>
             <button class="tab-btn" onclick="showSection('applicants-sec')">All Applicants</button>
+            <button class="tab-btn" onclick="showSection('announce-sec')">Announcements</button>
         </div>
 
         <div id="edit-modal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:2000; align-items:center; justify-content:center; padding:20px;">
@@ -232,6 +233,23 @@
         <div id="applicants-sec" class="admin-section">
             <div id="applicant-list" class="applicant-grid">
                 <!-- Dynamic cards -->
+            </div>
+        </div>
+
+        <!-- ANNOUNCEMENTS SECTION -->
+        <div id="announce-sec" class="admin-section">
+            <div style="background:#fff; border:4px solid #000; padding:30px; box-shadow:10px 10px 0 #000; max-width:800px;">
+                <h3 style="margin-top:0; font-weight:900; text-transform:uppercase;">Global Announcement System</h3>
+                <p style="font-size:14px; margin-bottom:20px;">Send a mass email to all opted-in users (Batch processing).</p>
+                <div style="margin-bottom:15px;">
+                    <label style="display:block; font-weight:900; font-size:11px; text-transform:uppercase;">Subject Line</label>
+                    <input type="text" id="announce-subject" style="width:100%; padding:10px; border:2px solid #000;" placeholder="New Opportunity on CreatorChain 🚀">
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label style="display:block; font-weight:900; font-size:11px; text-transform:uppercase;">Email HTML Content</label>
+                    <textarea id="announce-html" style="width:100%; padding:10px; border:2px solid #000; height:200px;" placeholder="<div>Hello...</div>"></textarea>
+                </div>
+                <button class="action-btn btn-view" onclick="sendGlobalAnnouncement()" id="btn-announce" style="padding:15px 30px; font-size:14px; cursor:pointer;">SEND GLOBAL BROADCAST</button>
             </div>
         </div>
     </div>
@@ -456,7 +474,6 @@
                 alert(`🚀 Broadcast sent! Telegram: ${tgRecipients.length} | Email: ${emailRecipients.length}`);
 
                 // 5. Notify Submitter (Email & Telegram)
-                // 5. Notify Submitter (Email & Telegram)
                 if (item.submitter_email && item.submitter_email.includes('@')) {
                     await fetch('/api/send-email', {
                         method: 'POST',
@@ -497,9 +514,101 @@
             }
         }
 
+        window.sendGlobalAnnouncement = async () => {
+            const subject = document.getElementById('announce-subject').value;
+            const html = document.getElementById('announce-html').value;
+            if (!subject || !html) return alert('Subject and HTML required');
+
+            const btn = document.getElementById('btn-announce');
+            btn.disabled = true;
+            btn.textContent = 'FETCHING USERS...';
+
+            let { data: users, error } = await supabase
+                .from('user_profiles')
+                .select('email')
+                .not('email', 'is', null)
+                .eq('email_notifications', true)
+                .eq('status', 'active');
+            
+            if (error) {
+                console.error("Trying 'users' table because user_profiles failed:", error);
+                const res = await supabase.from('users').select('email').not('email', 'is', null).eq('email_notifications', true).eq('status', 'active');
+                users = res.data;
+                if (res.error) {
+                    btn.disabled = false;
+                    btn.textContent = 'SEND GLOBAL BROADCAST';
+                    return alert('Query failed: ' + res.error.message);
+                }
+            }
+
+            if (!users || users.length === 0) {
+                btn.disabled = false;
+                btn.textContent = 'SEND GLOBAL BROADCAST';
+                return alert('No eligible users found matching the criteria.');
+            }
+
+            const emails = users.map(u => u.email).filter(Boolean);
+            if (emails.length === 0) {
+                btn.disabled = false;
+                btn.textContent = 'SEND GLOBAL BROADCAST';
+                return alert('No valid emails.');
+            }
+
+            if (!confirm(`Found ${emails.length} eligible users. Proceed with batch broadcast?`)) {
+                btn.disabled = false;
+                btn.textContent = 'SEND GLOBAL BROADCAST';
+                return;
+            }
+
+            btn.textContent = 'SENDING BATCHES...';
+
+            const delay = ms => new Promise(r => setTimeout(r, ms));
+            let successCount = 0;
+            const batchSize = 50;
+            
+            for (let i = 0; i < emails.length; i += batchSize) {
+                const batchEmails = emails.slice(i, i + batchSize);
+                try {
+                    await fetch('/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'global_announcement',
+                            payload: {
+                                bcc: batchEmails,
+                                subject: subject,
+                                html: html
+                            }
+                        })
+                    });
+                    successCount += batchEmails.length;
+                    
+                    // Delay between batches to respect rate limits
+                    if (i + batchSize < emails.length) {
+                        await delay(1000);
+                    }
+                } catch (e) {
+                    console.error('Batch failed', e);
+                }
+            }
+
+            alert(`✅ Successfully sent to ${successCount} users.`);
+            btn.disabled = false;
+            btn.textContent = 'SEND GLOBAL BROADCAST';
+            document.getElementById('announce-subject').value = '';
+            document.getElementById('announce-html').value = '';
+        };
+
         window.broadcastExclusive = broadcastExclusive;
 
         window.updateStatus = async (id, status) => {
+            // Get the opportunity data to identify the submitter
+            const { data: oppData, error: oppError } = await supabase
+                .from('opportunities')
+                .select('*')
+                .eq('id', id)
+                .single();
+
             const { data, error } = await supabase
                 .from('opportunities')
                 .update({ status: status })
@@ -509,6 +618,16 @@
                 alert(error.message);
             } else {
                 if (status === 'live') {
+                    // Update rank logic based on approved submit
+                    if (oppData) {
+                        const submitterId = oppData.submitter_id || oppData.user_id;
+                        if (submitterId) {
+                            const { data: profile } = await supabase.from('user_profiles').select('approved_submissions').eq('id', submitterId).single();
+                            if (profile) {
+                                await supabase.from('user_profiles').update({ approved_submissions: (profile.approved_submissions || 0) + 1 }).eq('id', submitterId);
+                            }
+                        }
+                    }
                     broadcastExclusive(id);
                 }
                 loadData();
