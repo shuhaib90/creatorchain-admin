@@ -401,30 +401,39 @@
                 btn.disabled = false;
                 btn.innerHTML = 'SUBMIT APPLICATION &rarr;';
             } else {
-                // Track submission on the user's profile
+                // Track submission on the user's profile via atomic RPC
                 try {
-                    const userEmail = currentUser.email;
-                    if (userEmail) {
-                        const { data: profile } = await db
-                            .from('user_profiles')
-                            .select('id, total_submissions, reputation_score, score')
-                            .eq('email', userEmail)
-                            .maybeSingle();
-                        
-                        if (profile) {
-                            const newTotal = (profile.total_submissions || 0) + 1;
-                            const newReputation = (profile.reputation_score || 0) + 1;
-                            
-                            await db.from('user_profiles')
-                                .update({ 
-                                    total_submissions: newTotal,
-                                    reputation_score: newReputation,
-                                    score: newReputation
-                                })
-                                .eq('id', profile.id);
+                    const userEmail = currentUser.email || '';
+                    const userHandle = (currentUser.user_metadata?.user_name || '').replace('@', '');
+                    console.log('[REP] Tracking submission — email:', userEmail, 'handle:', userHandle);
+                    
+                    const { data: rpcResult, error: rpcErr } = await db.rpc('increment_submission_reputation', {
+                        p_email: userEmail,
+                        p_handle: userHandle
+                    });
+                    
+                    if (rpcErr) {
+                        console.warn('[REP] RPC error, falling back to manual update:', rpcErr.message);
+                        // Fallback: manual select+update
+                        const matchField = userEmail.includes('@') ? 'email' : 'username';
+                        const matchValue = userEmail.includes('@') ? userEmail : userHandle;
+                        if (matchValue) {
+                            const { data: profile } = await db.from('user_profiles')
+                                .select('id, total_submissions, reputation_score, score')
+                                .ilike(matchField, matchValue)
+                                .maybeSingle();
+                            if (profile) {
+                                await db.from('user_profiles').update({
+                                    total_submissions: (profile.total_submissions || 0) + 1,
+                                    reputation_score: (profile.reputation_score || 0) + 1,
+                                    score: (profile.reputation_score || 0) + 1
+                                }).eq('id', profile.id);
+                            }
                         }
+                    } else {
+                        console.log('[REP] RPC result:', rpcResult);
                     }
-                } catch (trackErr) { console.warn('Submission tracking failed:', trackErr); }
+                } catch (trackErr) { console.warn('[REP] Submission tracking failed:', trackErr); }
 
                 alert('Application sent successfully!');
                 closeModal();

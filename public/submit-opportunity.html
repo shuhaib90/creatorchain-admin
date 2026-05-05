@@ -530,28 +530,83 @@
                     });
                 } catch (notifyErr) { console.warn('Alerts failed:', notifyErr); }
 
-                // Track total submissions on the submitter's profile
+                // Track total submissions on the submitter's profile via RPC
                 try {
                     const submitterEmail = formData.submitter_email?.trim();
-                    if (submitterEmail && submitterEmail.includes('@')) {
-                        const { data: profile } = await supabase
-                            .from('user_profiles')
-                            .select('id, total_submissions, reputation_score, score')
-                            .eq('email', submitterEmail)
-                            .maybeSingle();
-                        
-                        if (profile) {
-                            const newTotal = (profile.total_submissions || 0) + 1;
-                            const newReputation = (profile.reputation_score || 0) + 1;
+                    const submitterHandle = formData.team_contact?.replace('@', '').trim();
+                    const submitterName = formData.submitted_by?.trim();
+                    
+                    // Prioritize handle if available, fallback to name for matching
+                    const matchHandle = submitterHandle || submitterName;
 
-                            await supabase
-                                .from('user_profiles')
-                                .update({ 
-                                    total_submissions: newTotal,
-                                    reputation_score: newReputation,
-                                    score: newReputation
+                    console.log(`[REP] Opp submission - Attempting RPC for email: ${submitterEmail}, handle: ${matchHandle}`);
+
+                    let rpcSuccess = false;
+                    try {
+                        const { data: rpcData, error: rpcError } = await supabase.rpc('increment_submission_reputation', {
+                            p_email: submitterEmail || null,
+                            p_handle: matchHandle || null
+                        });
+
+                        if (!rpcError && rpcData && rpcData.success) {
+                            console.log(`✅ [REP] Submission tracked via RPC. Matched by: ${rpcData.matched_by}, Profile: ${rpcData.profile_id}`);
+                            rpcSuccess = true;
+                        } else {
+                            console.warn('[REP] RPC returned:', rpcError?.message || 'no match found');
+                        }
+                    } catch (rpcErr) {
+                        console.warn('[REP] RPC call failed:', rpcErr.message);
+                    }
+
+                    // Direct DB fallback if RPC didn't match
+                    if (!rpcSuccess) {
+                        console.log('[REP] RPC did not match — attempting direct DB fallback for submission tracking...');
+                        let profile = null;
+
+                        if (!profile && submitterEmail) {
+                            const { data } = await supabase.from('user_profiles')
+                                .select('id, total_submissions, reputation_score, score')
+                                .ilike('email', submitterEmail)
+                                .limit(1).maybeSingle();
+                            if (data) { profile = data; console.log('[REP] Fallback matched by email'); }
+                        }
+                        if (!profile && submitterHandle) {
+                            const { data } = await supabase.from('user_profiles')
+                                .select('id, total_submissions, reputation_score, score')
+                                .ilike('username', submitterHandle)
+                                .limit(1).maybeSingle();
+                            if (data) { profile = data; console.log('[REP] Fallback matched by username'); }
+                        }
+                        if (!profile && submitterHandle) {
+                            const { data } = await supabase.from('user_profiles')
+                                .select('id, total_submissions, reputation_score, score')
+                                .ilike('telegram', `%${submitterHandle}%`)
+                                .limit(1).maybeSingle();
+                            if (data) { profile = data; console.log('[REP] Fallback matched by telegram'); }
+                        }
+                        if (!profile && submitterName) {
+                            const { data } = await supabase.from('user_profiles')
+                                .select('id, total_submissions, reputation_score, score')
+                                .ilike('name', submitterName)
+                                .limit(1).maybeSingle();
+                            if (data) { profile = data; console.log('[REP] Fallback matched by name'); }
+                        }
+
+                        if (profile) {
+                            const { error: updateErr } = await supabase.from('user_profiles')
+                                .update({
+                                    total_submissions: (profile.total_submissions || 0) + 1,
+                                    reputation_score: (profile.reputation_score || 0) + 1,
+                                    score: (profile.score || 0) + 1
                                 })
                                 .eq('id', profile.id);
+                            if (updateErr) {
+                                console.error('[REP] Fallback update failed:', updateErr.message);
+                            } else {
+                                console.log(`✅ [REP] Submission tracked via direct fallback. Profile: ${profile.id}`);
+                            }
+                        } else {
+                            console.warn('[REP] No matching profile found for submission tracking.');
                         }
                     }
                 } catch (trackErr) { console.warn('Submission tracking failed:', trackErr); }

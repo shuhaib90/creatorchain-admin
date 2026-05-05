@@ -624,64 +624,103 @@
             }
         };
 
-        // Find submitter by email or team_contact handle, then update their reputation
+        // Find submitter by email or team_contact handle, then update their reputation via RPC
+        // Falls back to direct DB update if RPC cannot match a profile
         async function updateSubmitterReputation(oppData) {
             try {
-                let profile = null;
+                let emailToMatch = oppData.submitter_email && oppData.submitter_email.includes('@') ? oppData.submitter_email.trim() : null;
+                let handleToMatch = oppData.team_contact ? oppData.team_contact.replace('@', '').trim() : null;
+                const nameToMatch = oppData.submitted_by || oppData.project_name || null;
 
-                // Strategy 1: Match by submitter_email
-                if (oppData.submitter_email && oppData.submitter_email.includes('@')) {
-                    const { data } = await supabase
-                        .from('user_profiles')
-                        .select('id, approved_submissions, total_submissions, reputation_score, score')
-                        .eq('email', oppData.submitter_email.trim())
-                        .maybeSingle();
-                    if (data) profile = data;
+                console.log(`[REP] Approving opp - Attempting RPC for email: ${emailToMatch}, handle: ${handleToMatch}, name: ${nameToMatch}`);
+
+                // Strategy 1: Try RPC first
+                let rpcSuccess = false;
+                try {
+                    const { data, error } = await supabase.rpc('increment_approved_reputation', {
+                        p_email: emailToMatch,
+                        p_handle: handleToMatch
+                    });
+
+                    if (!error && data && data.success) {
+                        console.log(`✅ [REP] Reputation updated via RPC. Matched by: ${data.matched_by}, Profile: ${data.profile_id}`);
+                        rpcSuccess = true;
+                    } else {
+                        console.warn('[REP] RPC returned:', error?.message || 'no match found');
+                    }
+                } catch (rpcErr) {
+                    console.warn('[REP] RPC call failed:', rpcErr.message);
                 }
 
-                // Strategy 2: Match by team_contact (Telegram handle → username)
-                if (!profile && oppData.team_contact) {
-                    const handle = oppData.team_contact.replace('@', '').trim();
-                    if (handle) {
-                        const { data } = await supabase
-                            .from('user_profiles')
+                // Strategy 2: Direct DB fallback if RPC didn't match
+                if (!rpcSuccess) {
+                    console.log('[REP] RPC did not match — attempting direct DB fallback...');
+                    let profile = null;
+
+                    // Try matching by email
+                    if (!profile && emailToMatch) {
+                        const { data } = await supabase.from('user_profiles')
                             .select('id, approved_submissions, total_submissions, reputation_score, score')
-                            .or(`username.ilike.${handle},telegram.ilike.%${handle}%`)
+                            .ilike('email', emailToMatch)
+                            .limit(1)
                             .maybeSingle();
-                        if (data) profile = data;
+                        if (data) { profile = data; console.log('[REP] Fallback matched by email'); }
+                    }
+
+                    // Try matching by username
+                    if (!profile && handleToMatch) {
+                        const { data } = await supabase.from('user_profiles')
+                            .select('id, approved_submissions, total_submissions, reputation_score, score')
+                            .ilike('username', handleToMatch)
+                            .limit(1)
+                            .maybeSingle();
+                        if (data) { profile = data; console.log('[REP] Fallback matched by username'); }
+                    }
+
+                    // Try matching by telegram field
+                    if (!profile && handleToMatch) {
+                        const { data } = await supabase.from('user_profiles')
+                            .select('id, approved_submissions, total_submissions, reputation_score, score')
+                            .ilike('telegram', `%${handleToMatch}%`)
+                            .limit(1)
+                            .maybeSingle();
+                        if (data) { profile = data; console.log('[REP] Fallback matched by telegram'); }
+                    }
+
+                    // Try matching by name
+                    if (!profile && nameToMatch) {
+                        const { data } = await supabase.from('user_profiles')
+                            .select('id, approved_submissions, total_submissions, reputation_score, score')
+                            .ilike('name', nameToMatch)
+                            .limit(1)
+                            .maybeSingle();
+                        if (data) { profile = data; console.log('[REP] Fallback matched by name'); }
+                    }
+
+                    if (profile) {
+                        const newApproved = (profile.approved_submissions || 0) + 1;
+                        const newTotal = profile.total_submissions || newApproved;
+                        const newRepScore = (newApproved * 10) + newTotal;
+
+                        const { error: updateErr } = await supabase.from('user_profiles')
+                            .update({
+                                approved_submissions: newApproved,
+                                reputation_score: newRepScore,
+                                score: newRepScore
+                            })
+                            .eq('id', profile.id);
+
+                        if (updateErr) {
+                            console.error('[REP] Fallback update failed:', updateErr.message);
+                        } else {
+                            console.log(`✅ [REP] Reputation updated via direct fallback. Profile: ${profile.id}, New approved: ${newApproved}, New score: ${newRepScore}`);
+                        }
+                    } else {
+                        console.error('[REP] ❌ Could not find any matching profile for:', { emailToMatch, handleToMatch, nameToMatch });
                     }
                 }
-
-                if (!profile) {
-                    console.warn('No matching user_profile found for submitter:', oppData.submitter_email || oppData.team_contact);
-                    return;
-                }
-
-                // Calculate updated stats
-                const newApproved = (profile.approved_submissions || 0) + 1;
-                // Note: total_submissions was already incremented at submission time in opportunity.html
-                const currentTotal = profile.total_submissions || 0;
-                
-                // Reputation formula: 10 points per approved submission + 1 point per total submission
-                // Since total_submissions already includes this submission, we just add 10 to the score
-                const newReputation = (newApproved * 10) + currentTotal;
-
-                const { error: updateErr } = await supabase
-                    .from('user_profiles')
-                    .update({
-                        approved_submissions: newApproved,
-                        reputation_score: newReputation,
-                        score: newReputation
-                    })
-                    .eq('id', profile.id);
-
-                if (updateErr) {
-                    console.error('Failed to update submitter reputation:', updateErr.message);
-                } else {
-                    console.log(`✅ Reputation updated for profile ${profile.id}: approved=${newApproved}, score=${newReputation}`);
-                }
             } catch (err) {
-                console.error('Reputation update error:', err);
+                console.error('[REP] Reputation update error:', err);
             }
         }
 

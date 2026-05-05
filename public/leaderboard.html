@@ -419,31 +419,25 @@
         async function loadData() {
             const root = document.getElementById('leaderboard-root');
             try {
-                const { data: apps } = await db.from('applications').select('user_id');
-                const appCounts = {};
-                if (apps) {
-                    apps.forEach(a => {
-                        if (a.user_id) appCounts[a.user_id] = (appCounts[a.user_id] || 0) + 1;
-                    });
-                }
-
                 const { data: profiles, error: pErr } = await db.from('user_profiles')
                     .select('*')
                     .limit(1000);
 
                 if (pErr) throw pErr;
 
-                // Use approved_submissions from profile directly (maintained by admin-opportunities)
-                // Only fall back to application counts for profiles with zero approved_submissions
-                profiles.forEach(p => {
-                    if ((p.approved_submissions || 0) === 0 && appCounts[p.id]) {
-                        p.approved_submissions = appCounts[p.id];
-                    }
+                // Sort by approved_submissions desc, then reputation_score desc
+                profiles.sort((a, b) => {
+                    const aDiff = (b.approved_submissions || 0) - (a.approved_submissions || 0);
+                    if (aDiff !== 0) return aDiff;
+                    return (b.reputation_score || b.score || 0) - (a.reputation_score || a.score || 0);
                 });
-                profiles.sort((a, b) => (b.approved_submissions || 0) - (a.approved_submissions || 0));
 
-                // Filter out users with zero submissions
-                const activeProfiles = profiles.filter(p => (p.approved_submissions || 0) > 0);
+                // Show users who have any activity: approved_submissions > 0 OR reputation_score > 0 OR total_submissions > 0
+                const activeProfiles = profiles.filter(p => 
+                    (p.approved_submissions || 0) > 0 || 
+                    (p.reputation_score || 0) > 0 || 
+                    (p.total_submissions || 0) > 0
+                );
 
                 fullData = activeProfiles.map(p => {
                     const h = p.username || p.twitter?.replace('@','') || 'builder';
@@ -456,7 +450,7 @@
                     
                     const approved = p.approved_submissions || 0;
                     const total = p.total_submissions || approved || 1;
-                    const successRate = Math.round((approved / total) * 100);
+                    const successRate = total > 0 ? Math.round((approved / total) * 100) : 0;
 
                     return {
                         handle: h,

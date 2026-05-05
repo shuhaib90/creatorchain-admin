@@ -1,0 +1,751 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Builder Profile | CreatorChain</title>
+    
+    <!-- Social Sharing Meta Tags -->
+    <meta property="og:title" content="CreatorChain Builder Profile">
+    <meta property="og:description" content="View this high-performance builder on the CreatorChain network.">
+    <meta property="og:image" content="https://creatorchain.site/social-preview-v2.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://creatorchain.site/social-preview-v2.png">
+    
+    <link rel="icon" type="image/png" href="/logo.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@900&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00e87a;
+            --secondary: #ffe600;
+            --accent: #ff3b00;
+            --black: #0a0a0a;
+            --white: #ffffff;
+            --bg: #f5f0e8;
+            --border: 4px solid #000;
+            --shadow: 8px 8px 0px #000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg);
+            background-image: radial-gradient(var(--black) 1px, transparent 1px);
+            background-size: 30px 30px;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--black);
+            overflow-x: hidden;
+        }
+
+        /* NAVIGATION STYLES */
+        nav {
+            background: #fff;
+            border-bottom: 4px solid var(--black);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            width: 100%;
+        }
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--black);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo span { -webkit-text-stroke: 1.5px var(--black); color: transparent; }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--black);
+            font-weight: 900;
+            font-size: 14px;
+            text-transform: uppercase;
+            font-family: 'Space Mono', monospace;
+            transition: 0.2s;
+        }
+        .nav-link:hover { color: var(--primary); transform: translateY(-2px); }
+
+        .profile-container {
+            max-width: 1000px;
+            margin: 60px auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .bg-text {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-10deg);
+            font-family: 'Outfit', sans-serif;
+            font-size: 25vw;
+            font-weight: 900;
+            color: var(--black);
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 1;
+            white-space: nowrap;
+            text-transform: uppercase;
+        }
+
+        /* PREMIUM CARD STYLES */
+        .p-card {
+            background: #fff;
+            border: var(--border);
+            box-shadow: 20px 20px 0 var(--black);
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            animation: cardSlideIn 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        @keyframes cardSlideIn {
+            from { transform: translateY(60px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .p-card-grid {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            min-height: 600px;
+        }
+
+        .p-card-left {
+            padding: 50px;
+            background: #fdfdfd;
+            border-right: var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .p-card-right {
+            padding: 50px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+        }
+
+        .p-card-avatar-wrap {
+            width: 160px;
+            height: 160px;
+            border: var(--border);
+            box-shadow: 10px 10px 0 var(--black);
+            margin-bottom: 30px;
+            background: #eee;
+            position: relative;
+        }
+
+        .p-card-avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .p-card-info h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 42px;
+            line-height: 0.9;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+        }
+
+        .p-card-handle {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            color: var(--primary);
+            background: #000;
+            display: inline-block;
+            padding: 4px 10px;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .p-card-bio {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 40px;
+            font-weight: 500;
+        }
+
+        .p-card-section-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #888;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .p-card-section-title::after { content: ''; flex: 1; height: 2px; background: #eee; }
+
+        .p-stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .p-stat-card {
+            background: #fff;
+            border: 3px solid var(--black);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            transition: 0.2s;
+        }
+        .p-stat-card:hover { transform: translate(-3px, -3px); box-shadow: 5px 5px 0 var(--black); }
+
+        .p-stat-val { font-family: 'Space Mono', monospace; font-size: 28px; font-weight: 900; color: #000; }
+        .p-stat-val.score { color: var(--primary); text-shadow: 2px 2px 0 #000; }
+        .p-stat-lbl { font-size: 10px; font-weight: 900; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+
+        .p-skills-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
+        .p-skill-tag {
+            background: #fff;
+            border: 2px solid var(--black);
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 800;
+            font-family: 'Space Mono', monospace;
+            transition: 0.1s;
+        }
+        .p-skill-tag:hover { background: var(--secondary); transform: rotate(-2deg); }
+
+        .p-socials-row { display: flex; gap: 15px; }
+        .p-social-btn {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            color: var(--black);
+            transition: 0.2s;
+            box-shadow: 5px 5px 0 var(--black);
+        }
+        .p-social-btn:hover { background: var(--primary); transform: translate(-3px, -3px); box-shadow: 8px 8px 0 var(--black); }
+
+        .hire-btn {
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            padding: 24px;
+            font-family: 'Space Mono', monospace;
+            font-weight: 900;
+            font-size: 16px;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: auto;
+            transition: 0.2s;
+            text-decoration: none;
+        }
+        .hire-btn:hover { background: var(--accent); color: #000; transform: translateY(-5px); box-shadow: 0 10px 0 #000; }
+
+        /* LOADER */
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 60vh;
+        }
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            border: 8px solid #ddd;
+            border-top: 8px solid var(--primary);
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: #fff;
+            border: 5px solid var(--black);
+            width: 100%;
+            max-width: 550px;
+            padding: 50px;
+            position: relative;
+            box-shadow: 25px 25px 0 var(--primary);
+        }
+        .modal-content h2 { font-size: 32px; margin-bottom: 10px; letter-spacing: -1px; }
+        
+        .field { margin-bottom: 20px; }
+        .field label { display: block; font-weight: 900; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+        .field input, .field textarea {
+            width: 100%;
+            padding: 15px;
+            border: 3px solid var(--black);
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            outline: none;
+        }
+        .field input:focus { border-color: var(--primary); }
+
+        .p-work-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .p-work-card {
+            border: 3px solid var(--black);
+            padding: 20px;
+            background: #fdfdfd;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .p-work-icon {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--black);
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .p-work-val {
+            font-family: 'Space Mono', monospace;
+            font-weight: 900;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        .p-work-lbl {
+            font-size: 10px;
+            font-weight: 900;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 800px) {
+            .p-card-grid { grid-template-columns: 1fr; }
+            .p-card-left { border-right: none; border-bottom: var(--border); }
+            .p-work-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-inner">
+            <a href="/" class="logo">CREATOR<span>CHAIN</span></a>
+            <div class="nav-links">
+                <a href="/opportunities" class="nav-link">OPPORTUNITIES</a>
+                <a href="/talent" class="nav-link">FIND TALENT</a>
+                <a href="/leaderboard" class="nav-link">LEADERBOARD</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="bg-text" id="bg-username">PROFILE</div>
+
+    <div class="profile-container" id="profile-mount">
+        <div class="loader-container">
+            <div class="loader-spinner"></div>
+            <p class="mono" style="font-weight:900; letter-spacing:2px;">FETCHING BUILDER DATA...</p>
+        </div>
+    </div>
+
+    <!-- Hire Modal -->
+    <div id="hire-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button onclick="closeHireModal()" style="position:absolute; top:20px; right:20px; background:none; border:none; font-size:24px; cursor:pointer; font-weight:900;">Γ£ò</button>
+            <h2>DEPLOY COLLABORATION</h2>
+            <p class="mono" style="font-size:12px; margin-bottom:30px; color:#666;">SENDING REQUEST TO <span id="hire-target-name" style="color:var(--primary); font-weight:900;">...</span></p>
+            
+            <form id="hire-form" onsubmit="submitHireRequest(event)">
+                <input type="hidden" id="hire-target-id">
+                <div class="field">
+                    <label>YOUR TEAM / COMPANY</label>
+                    <input type="text" id="hire-sender-name" placeholder="e.g. CreatorChain Labs" required>
+                </div>
+                <div class="field">
+                    <label>CONTACT EMAIL</label>
+                    <input type="email" id="hire-email" placeholder="you@example.com" required>
+                </div>
+                <div class="field">
+                    <label>TELEGRAM HANDLE / LINK (OPTIONAL)</label>
+                    <input type="text" id="hire-telegram" placeholder="@handle or https://t.me/...">
+                </div>
+                <div class="field">
+                    <label>APPLICATION / FORM URL (OPTIONAL)</label>
+                    <input type="url" id="hire-form-url" placeholder="https://forms.gle/...">
+                </div>
+                <div class="field">
+                    <label>MESSAGE / OPPORTUNITY</label>
+                    <textarea id="hire-message" rows="4" placeholder="Briefly describe the role or collaboration..." required></textarea>
+                </div>
+                <button type="submit" class="hire-btn" id="hire-submit-btn" style="width:100%; margin-top:20px; border:4px solid #000;">
+                    SEND MISSION REQUEST <i data-lucide="send"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://mwefmtmcljdsptcgowmb.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_SdGsB-hhvxF2-rq_fBiM0A_y3_mQn2n';
+        let db;
+
+        function getBadgeHtml(profile, size = 'small') {
+            if (!profile) return '';
+            const isVerified = profile.is_verified === true;
+            const isPro = profile.badge_level === 'pro' || (profile.approved_submissions || 0) > 5;
+
+            let badgeType = null;
+            let tooltip = '';
+
+            if (isPro) {
+                badgeType = 'pro';
+                tooltip = 'PRO BUILDER';
+            } else if (isVerified) {
+                badgeType = 'verified';
+                tooltip = 'VERIFIED IDENTITY';
+            }
+
+            if (!badgeType) return '';
+
+            const sizeClass = size === 'medium' ? 'medium' : '';
+            const color = badgeType === 'pro' ? '#FFD600' : '#00E676';
+            const checkColor = badgeType === 'pro' ? '#000' : '#fff';
+
+            return `
+                <span class="verification-badge ${sizeClass}" title="${tooltip}" style="display: inline-flex; align-items: center; vertical-align: middle;">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="${size === 'medium' ? 'width: 32px; height: 32px;' : 'width: 18px; height: 18px;'}">
+                        <circle cx="12" cy="12" r="11" fill="${color}"/>
+                        <path d="M17.33 8.33L10 15.67L6.67 12.33" stroke="${checkColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+            `;
+        }
+
+        async function init() {
+            console.log("Profile Init - URL:", window.location.href);
+            const params = new URLSearchParams(window.location.search);
+            // Support both ?u= and ?handle= and check hash for SPA-style links
+            let handle = params.get('u') || params.get('handle');
+            
+            if (!handle && window.location.hash) {
+                const hashParams = new URLSearchParams(window.location.hash.split('?')[1]);
+                handle = hashParams.get('u') || hashParams.get('handle');
+            }
+
+            if (!handle) {
+                console.warn("No handle detected in URL.");
+                document.getElementById('profile-mount').innerHTML = `
+                    <div style="text-align:center; padding:100px 20px;">
+                        <h1 style="font-size:48px; color:var(--primary);">IDENTITY MISSING</h1>
+                        <p class="mono" style="margin:20px 0;">NO BUILDER HANDLE PROVIDED IN THE MISSION DEPLOYMENT.</p>
+                        <a href="/talent.html" class="hire-btn" style="display:inline-flex; padding:15px 30px; text-decoration:none;">BACK TO TALENT GRID</a>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                if (typeof supabase === 'undefined') {
+                    throw new Error('Supabase library not loaded yet');
+                }
+                
+                db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                const h = handle.replace('@', '').trim();
+                
+                // Case-insensitive query to handle variations like Zenvicalpha vs zenvicalpha
+                const { data: p, error } = await db.from('user_profiles')
+                    .select('*')
+                    .ilike('username', h)
+                    .maybeSingle();
+
+                if (error || !p) throw error || new Error('Builder not found');
+
+                // Fetch community opportunity submissions for this user
+                const { count: appCount } = await db.from('applications')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', p.id);
+                
+                p.approved_submissions = (p.approved_submissions || 0) + (appCount || 0);
+
+                const builderName = p.name || h;
+                document.title = `${builderName} | CreatorChain`;
+                document.getElementById('bg-username').textContent = h.toUpperCase();
+
+                // Dynamic Meta Tags for Social Sharing
+                updateMetaTags(builderName, p.bio || `Explore ${builderName}'s high-performance builder profile on CreatorChain.`);
+                
+                renderFullPageProfile(p);
+                
+                // CRITICAL: Re-initialize Lucide after innerHTML is set
+                lucide.createIcons();
+            } catch (err) {
+                console.error("Profile fetch error:", err);
+                document.getElementById('profile-mount').innerHTML = `
+                    <div style="text-align:center; padding:100px 20px;">
+                        <h1 style="font-size:120px; color:var(--accent); line-height:1;">404</h1>
+                        <p class="mono" style="font-weight:900; margin:20px 0;">BUILDER NOT FOUND IN THE NETWORK</p>
+                        <a href="/talent.html" class="hire-btn" style="display:inline-flex; padding:15px 30px; text-decoration:none;">RETURN TO TALENT GRID</a>
+                    </div>
+                `;
+            }
+        }
+
+        function renderFullPageProfile(p) {
+            const mount = document.getElementById('profile-mount');
+            const avatar = p.avatar_url || `https://unavatar.io/twitter/${p.username}`;
+            const skills = p.skills || [];
+            
+            // Map data fields accurately to schema
+            const score = p.reputation_score || p.score || 0;
+            const employer = p.current_employer || p.company_name || 'Independent Builder';
+            
+            mount.innerHTML = `
+                <div class="p-card">
+                    <div class="p-card-grid">
+                        <div class="p-card-left">
+                            <div class="p-card-avatar-wrap">
+                                <img src="${avatar}" class="p-card-avatar" alt="${p.name}">
+                            </div>
+                            <div class="p-card-info">
+                                <h2>${(p.name || p.username).toUpperCase()} ${getBadgeHtml(p, 'medium')}</h2>
+                                <div class="p-card-handle">@${p.username}</div>
+                            </div>
+                            <p class="p-card-bio">${p.bio || 'Building the future of Web3 at CreatorChain.'}</p>
+                            
+                            <div class="p-card-section-title">IDENTITY & SOCIALS</div>
+                            <div class="p-socials-row">
+                                <a href="https://x.com/${p.username}" target="_blank" class="p-social-btn"><i data-lucide="twitter" style="width:20px; height:20px;"></i></a>
+                                ${p.github ? `<a href="${p.github.startsWith('http') ? p.github : 'https://github.com/' + p.github.replace('@', '')}" target="_blank" class="p-social-btn"><i data-lucide="github" style="width:20px; height:20px;"></i></a>` : ''}
+                                ${p.website ? `<a href="${p.website.startsWith('http') ? p.website : 'https://' + p.website}" target="_blank" class="p-social-btn"><i data-lucide="globe" style="width:20px; height:20px;"></i></a>` : ''}
+                            </div>
+
+                            <button class="hire-btn" style="margin-top:40px; border:4px solid #000;" onclick="openHireModal('${p.id}', '${(p.name || p.username).replace(/'/g, "\\'")}')">
+                                DEPLOY COLLABORATION <i data-lucide="zap"></i>
+                            </button>
+                        </div>
+
+                        <div class="p-card-right">
+                            <div class="p-card-section-title">PERFORMANCE METRICS</div>
+                            <div class="p-stats-row">
+                                <div class="p-stat-card">
+                                    <span class="p-stat-val score">${score}</span>
+                                    <span class="p-stat-lbl">REPUTATION</span>
+                                </div>
+                                <div class="p-stat-card">
+                                    <span class="p-stat-val">${p.approved_submissions || 0}</span>
+                                    <span class="p-stat-lbl">MISSIONS</span>
+                                </div>
+                                <div class="p-stat-card">
+                                    <span class="p-stat-val">100%</span>
+                                    <span class="p-stat-lbl">TRUST</span>
+                                </div>
+                            </div>
+
+                            <div class="p-card-section-title">CORE STACK & EXPERTISE</div>
+                            <div class="p-skills-wrap">
+                                ${skills.length > 0 ? skills.map(s => `<span class="p-skill-tag">${s.toUpperCase()}</span>`).join('') : '<span class="mono" style="color:#888;">NO EXPERTISE CONNECTED</span>'}
+                            </div>
+
+                            <div class="p-card-section-title">CURRENT CONTEXT</div>
+                            <div class="p-work-grid">
+                                <div class="p-work-card">
+                                    <div class="p-work-icon"><i data-lucide="award"></i></div>
+                                    <div class="p-work-info">
+                                        <span class="p-work-lbl">LEVEL</span>
+                                        <span class="p-work-val">${p.experience_level || 'BEGINNER'}</span>
+                                    </div>
+                                </div>
+                                <div class="p-work-card">
+                                    <div class="p-work-icon"><i data-lucide="briefcase"></i></div>
+                                    <div class="p-work-info">
+                                        <span class="p-work-lbl">TEAM</span>
+                                        <span class="p-work-val" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:150px;">${employer.toUpperCase()}</span>
+                                    </div>
+                                </div>
+                                <div class="p-work-card">
+                                    <div class="p-work-icon"><i data-lucide="map-pin"></i></div>
+                                    <div class="p-work-info">
+                                        <span class="p-work-lbl">LOCATION</span>
+                                        <span class="p-work-val">${p.location || 'GLOBAL'}</span>
+                                    </div>
+                                </div>
+                                <div class="p-work-card" style="background:var(--primary);">
+                                    <div class="p-work-icon" style="background:#000; color:var(--primary);"><i data-lucide="check-circle"></i></div>
+                                    <div class="p-work-info">
+                                        <span class="p-work-lbl" style="color:#000;">STATUS</span>
+                                        <span class="p-work-val" style="color:#000;">AVAILABLE</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openHireModal(id, name) {
+            document.getElementById('hire-target-id').value = id;
+            document.getElementById('hire-target-name').textContent = name.toUpperCase();
+            document.getElementById('hire-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeHireModal() {
+            document.getElementById('hire-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        async function submitHireRequest(e) {
+            e.preventDefault();
+            const btn = document.getElementById('hire-submit-btn');
+            const targetId = document.getElementById('hire-target-id').value;
+            const senderName = document.getElementById('hire-sender-name').value;
+            const senderEmail = document.getElementById('hire-email').value;
+            const telegram = document.getElementById('hire-telegram').value;
+            const formUrl = document.getElementById('hire-form-url').value;
+            const message = document.getElementById('hire-message').value;
+
+            btn.disabled = true;
+            btn.innerHTML = 'DISPATCHING MISSION... <i data-lucide="loader" class="spin"></i>';
+            lucide.createIcons();
+
+            const payload = {
+                receiver_id: targetId,
+                sender_name: senderName,
+                sender_email: senderEmail,
+                telegram: telegram,
+                form_url: formUrl,
+                message: message,
+                status: 'pending',
+                created_at: new Date().toISOString()
+            };
+
+            try {
+                // 1. Log request in database
+                const { error } = await db.from('hire_requests').insert([payload]);
+                if (error) throw error;
+                
+                // 2. Fetch builder profile to get their notification settings
+                const { data: profile } = await db.from('user_profiles')
+                    .select('email, email_notifications, telegram_id, telegram_notifications')
+                    .eq('id', targetId)
+                    .single();
+                
+                // 3. Trigger email if enabled
+                if (profile && profile.email && profile.email_notifications !== false) {
+                    try {
+                        await fetch('/api/send-email', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                type: 'hire_request',
+                                payload: {
+                                    receiver_email: profile.email,
+                                    sender_name: senderName,
+                                    sender_email: senderEmail,
+                                    message: message,
+                                    telegram: telegram,
+                                    form_url: formUrl
+                                }
+                            })
+                        });
+                    } catch (emailErr) { console.warn('Email failed:', emailErr); }
+                }
+
+                // 4. Trigger Telegram if enabled
+                if (profile && profile.telegram_id && profile.telegram_notifications !== false) {
+                    try {
+                        await fetch('/api/send-telegram', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                type: 'hire_request',
+                                payload: {
+                                    chat_ids: [profile.telegram_id],
+                                    sender_name: senderName,
+                                    sender_email: senderEmail,
+                                    message: message,
+                                    telegram: telegram,
+                                    form_url: formUrl
+                                }
+                            })
+                        });
+                    } catch (tgErr) { console.warn('Telegram failed:', tgErr); }
+                }
+                
+                btn.style.background = 'var(--primary)';
+                btn.innerHTML = 'MISSION DISPATCHED! <i data-lucide="check"></i>';
+                setTimeout(() => {
+                    closeHireModal();
+                    btn.disabled = false;
+                    btn.style.background = 'var(--black)';
+                    btn.innerHTML = 'SEND MISSION REQUEST <i data-lucide="send"></i>';
+                    lucide.createIcons();
+                    document.getElementById('hire-form').reset();
+                }, 2000);
+            } catch (err) {
+                console.error("Hire request error:", err);
+                alert("Failed to dispatch request. Please try again.");
+                btn.disabled = false;
+                btn.innerHTML = 'SEND MISSION REQUEST <i data-lucide="send"></i>';
+                lucide.createIcons();
+            }
+        }
+
+        function updateMetaTags(title, desc) {
+            const set = (prop, val) => {
+                const el = document.querySelector(`meta[property="${prop}"]`) || document.querySelector(`meta[name="${prop}"]`);
+                if (el) el.setAttribute('content', val);
+            };
+            set('og:title', `${title} | CreatorChain`);
+            set('og:description', desc);
+            set('twitter:title', `${title} | CreatorChain`);
+            set('twitter:description', desc);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
