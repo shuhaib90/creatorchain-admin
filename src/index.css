@@ -1,17 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
 
 :root {
-  --bg: #0a0a0a;
-  --surface: #111111;
-  --primary: #00f5a0;
-  --accent: #ff3e00;
-  --secondary: #ffee00;
-  --black: #000000;
+  --bg: #f5f0e8;
+  --surface: #ffffff;
+  --primary: #00e87a;
+  --secondary: #ffe600;
+  --accent: #ff3b00;
+  --black: #0a0a0a;
   --white: #ffffff;
-  --text-muted: #666666;
-  --border: 3px solid #000;
-  --shadow: 8px 8px 0 #000;
-  --font-main: 'Plus Jakarta Sans', sans-serif;
+  --text-muted: #555555;
+  --border: 3px solid #0a0a0a;
+  --shadow: 4px 4px 0px #0a0a0a;
+  --font-main: 'Space Grotesk', sans-serif;
   --font-mono: 'Space Mono', monospace;
 }
 
@@ -24,13 +24,14 @@
 body {
   font-family: var(--font-main);
   background-color: var(--bg);
-  color: var(--white);
+  color: var(--black);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
 .mono {
   font-family: var(--font-mono);
+  text-transform: uppercase;
 }
 
 .fade-in {
@@ -50,8 +51,8 @@ body {
 
 .sidebar {
   width: 280px;
-  background: var(--black);
-  border-right: 4px solid var(--primary);
+  background: var(--surface);
+  border-right: var(--border);
   padding: 32px 0;
   display: flex;
   flex-direction: column;
@@ -64,22 +65,22 @@ body {
   flex: 1;
   margin-left: 280px;
   padding: 60px;
-  background-image: radial-gradient(rgba(0, 245, 160, 0.05) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(10, 10, 10, 0.05) 1px, transparent 1px);
   background-size: 30px 30px;
 }
 
 /* Components */
 .card {
   background: var(--surface);
-  border: 4px solid var(--black);
-  box-shadow: 10px 10px 0 var(--black);
+  border: var(--border);
+  box-shadow: var(--shadow);
   padding: 32px;
-  transition: all 0.1s ease;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .card:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 12px 12px 0 var(--black);
+  box-shadow: 6px 6px 0 var(--black);
 }
 
 .btn {
@@ -88,17 +89,25 @@ body {
   gap: 10px;
   padding: 12px 24px;
   font-family: var(--font-mono);
-  font-weight: 800;
-  font-size: 12px;
+  font-weight: 700;
+  font-size: 13px;
   text-transform: uppercase;
   cursor: pointer;
-  transition: 0.1s;
-  border: 3px solid var(--black);
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: var(--border);
+  box-shadow: var(--shadow);
+  border-radius: 0;
+  text-decoration: none;
 }
 
 .btn:hover {
-  transform: translate(-3px, -3px);
+  transform: scale(1.02) translateY(-2px);
   box-shadow: 6px 6px 0 var(--black);
+}
+
+.btn:active {
+  transform: scale(0.98) translate(2px, 2px);
+  box-shadow: none;
 }
 
 .btn-primary {
@@ -116,45 +125,59 @@ body {
   align-items: center;
   gap: 12px;
   padding: 16px 32px;
-  color: var(--text-muted);
+  color: var(--black);
   text-decoration: none;
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 13px;
-  transition: 0.1s;
+  transition: 0.2s;
   border-left: 6px solid transparent;
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--white);
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--primary);
 }
 
 .nav-item.active {
-  background: rgba(0, 245, 160, 0.1);
-  color: var(--primary);
-  border-left: 6px solid var(--primary);
+  background: var(--primary);
+  color: var(--black);
+  border-left: 6px solid var(--black);
+  border-top: 3px solid var(--black);
+  border-bottom: 3px solid var(--black);
+  box-shadow: 4px 0 0 var(--black) inset;
+  font-weight: 900;
 }
 
 /* Tables */
 table {
   width: 100%;
   border-collapse: collapse;
+  background: var(--surface);
+  border: var(--border);
+  box-shadow: var(--shadow);
 }
 
 th {
-  background: var(--black);
-  color: var(--primary);
+  background: #f0f0f0;
+  color: var(--black);
   text-align: left;
   padding: 16px;
   font-family: var(--font-mono);
   font-size: 11px;
+  font-weight: 900;
   text-transform: uppercase;
+  border-bottom: 4px solid var(--black);
 }
 
 td {
   padding: 20px 16px;
-  border-bottom: 2px solid var(--black);
+  border-bottom: 1px solid #eee;
+  color: var(--black);
+}
+
+tr:hover td {
+  background: #fafafa;
 }
 
 /* Form Elements */
@@ -166,26 +189,28 @@ td {
   display: block;
   font-family: var(--font-mono);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   margin-bottom: 10px;
-  color: var(--primary);
+  color: var(--black);
+  text-transform: uppercase;
 }
 
 .form-input {
   width: 100%;
   background: var(--white);
-  border: 3px solid var(--black);
+  border: var(--border);
   padding: 14px;
   color: var(--black);
   font-family: var(--font-mono);
   font-size: 14px;
   outline: none;
   transition: 0.1s;
+  box-shadow: 4px 4px 0 var(--black);
 }
 
 .form-input:focus {
   transform: translate(-2px, -2px);
-  box-shadow: 5px 5px 0 var(--black);
+  box-shadow: 6px 6px 0 var(--black);
   border-color: var(--primary);
 }
 
@@ -194,16 +219,16 @@ td {
   padding: 4px 12px;
   font-family: var(--font-mono);
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 900;
   text-transform: uppercase;
-  border: 2px solid var(--black);
+  border: 1.5px solid var(--black);
   display: inline-block;
 }
 
-.status-pending { background: var(--secondary); color: var(--black); }
+.status-pending { background: #FFF9C4; color: var(--black); }
 .status-approved, .status-live { background: var(--primary); color: var(--black); }
 .status-rejected { background: var(--accent); color: var(--white); }
-.status-closed { background: var(--black); color: var(--white); border-color: var(--white); }
+.status-closed { background: var(--black); color: var(--white); border-color: var(--black); }
 
 /* Modal Overlay */
 .modal-overlay {
@@ -219,8 +244,8 @@ td {
 
 .modal-content {
   background: var(--surface);
-  border: 4px solid var(--black);
-  box-shadow: 20px 20px 0 var(--black);
+  border: 5px solid var(--black);
+  box-shadow: 15px 15px 0 var(--primary);
   max-width: 800px;
   width: 100%;
   max-height: 90vh;
@@ -237,4 +262,6 @@ h1 {
 
 .text-gradient {
   color: var(--primary);
+  -webkit-text-stroke: 2px var(--black);
+  text-shadow: 4px 4px 0 var(--black);
 }

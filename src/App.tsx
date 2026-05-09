@@ -131,7 +131,7 @@ const EditListingModal = ({ listing, onClose, onSave }: { listing: any, onClose:
         onClick={e => e.stopPropagation()}
         style={{ maxWidth: '800px' }}
       >
-        <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
+        <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,)' }}>
           <div>
             <h2 className="mono" style={{ fontSize: '18px', color: 'var(--primary)' }}>EDIT_SYSTEM_ENTRY</h2>
             <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>UUID: {listing.id}</div>
@@ -421,7 +421,7 @@ const Listings = () => {
             <input 
               type="text" 
               placeholder="Filter listings..." 
-              style={{ background: 'var(--glass)', border: '1px solid var(--border)', borderRadius: '8px', padding: '10px 12px 10px 40px', color: 'white', width: '280px', outline: 'none' }}
+              style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid var(--border)', borderRadius: '8px', padding: '10px 12px 10px 40px', color: 'var(--text)', width: '280px', outline: 'none' }}
             />
           </div>
         </div>
@@ -430,7 +430,7 @@ const Listings = () => {
       <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border)' }}>
+            <tr style={{ background: 'rgba(0,0,0,)', borderBottom: '1px solid var(--border)' }}>
               <th className="mono" style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: 'var(--text-muted)' }}>PROJECT / SUBMITTER</th>
               <th className="mono" style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: 'var(--text-muted)' }}>CATEGORY</th>
               <th className="mono" style={{ textAlign: 'left', padding: '16px 24px', fontSize: '11px', color: 'var(--text-muted)' }}>REWARD</th>
@@ -873,7 +873,7 @@ const ApplicantsModal = ({ opportunity, applicants, onClose }: { opportunity: an
         onClick={e => e.stopPropagation()}
         style={{ maxWidth: '900px', maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
       >
-        <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
+        <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,)' }}>
           <div>
             <h2 className="mono" style={{ fontSize: '18px', color: 'var(--primary)' }}>APPLICANTS_FOR: {opportunity.project_name}</h2>
             <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{opportunity.title} • {applicants.length} SUBMISSIONS</div>
@@ -898,7 +898,7 @@ const ApplicantsModal = ({ opportunity, applicants, onClose }: { opportunity: an
           ) : (
             <div style={{ display: 'grid', gap: '20px' }}>
               {applicants.map(app => (
-                <div key={app.id} className="card" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                <div key={app.id} className="card" style={{ background: 'rgba(0,0,0,)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
                     <div className="mono" style={{ fontSize: '11px', color: 'var(--primary)' }}>ID: {app.id.substring(0,8)}...</div>
                     <div className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{new Date(app.created_at).toLocaleString()}</div>
@@ -1029,7 +1029,7 @@ const ProjectAccessModal = ({ opportunity, onClose }: { opportunity: any, onClos
                 <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px' }} className="mono">NO_KEYS_GENERATED_YET</p>
               ) : (
                 keys.map(key => (
-                  <div key={key.id} style={{ padding: '12px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div key={key.id} style={{ padding: '12px', border: '1px solid var(--border)', background: 'rgba(0,0,0,)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                       <div className="mono" style={{ fontSize: '14px', fontWeight: '800', textDecoration: key.status === 'revoked' ? 'line-through' : 'none', opacity: key.status === 'revoked' ? 0.4 : 1 }}>{key.access_key}</div>
                       <div className="mono" style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{key.status.toUpperCase()} • {new Date(key.created_at).toLocaleDateString()}</div>
@@ -1237,7 +1237,7 @@ const Opportunities = () => {
       </div>
 
       <div className="card" style={{ padding: '0', marginBottom: '48px' }}>
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', background: 'rgba(0,0,0,)' }}>
           <h3 className="mono" style={{ fontSize: '12px' }}>SUBMISSION_QUEUE</h3>
         </div>
         <table style={{ width: '100%' }}>
@@ -1259,7 +1259,7 @@ const Opportunities = () => {
                   {opp.logo ? (
                     <img src={opp.logo} style={{ width: '32px', height: '32px', objectFit: 'contain', border: '1px solid var(--border)', padding: '2px', background: 'white' }} />
                   ) : (
-                    <div className="mono" style={{ width: '32px', height: '32px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifySelf: 'center', fontSize: '10px', justifyContent: 'center' }}>N/A</div>
+                    <div className="mono" style={{ width: '32px', height: '32px', background: 'rgba(0,0,0,)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifySelf: 'center', fontSize: '10px', justifyContent: 'center' }}>N/A</div>
                   )}
                   <span>{opp.project_name}</span>
                 </td>
@@ -1636,7 +1636,7 @@ const Layout = ({ children, onLogout }: { children: React.ReactNode, onLogout: (
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--primary)' }}>
             <ShieldCheck size={32} />
             <div>
-              <div style={{ fontWeight: '900', fontSize: '18px', lineHeight: '1', color: 'white' }}>CREATOR<span style={{ color: 'var(--primary)' }}>OPS</span></div>
+              <div style={{ fontWeight: '900', fontSize: '18px', lineHeight: '1', color: 'var(--text)' }}>CREATOR<span style={{ color: 'var(--primary)' }}>OPS</span></div>
               <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>TERMINAL_v2.0</div>
             </div>
           </div>
@@ -1793,7 +1793,7 @@ function App() {
                 placeholder={loginMode === 'project' ? 'PRJ-XXXXXX' : '••••'}
                 style={{ 
                   width: '100%', 
-                  background: 'rgba(255,255,255,0.03)', 
+                  background: 'rgba(0,0,0,)', 
                   border: `1px solid ${error ? 'var(--accent)' : 'var(--border)'}`, 
                   padding: '14px', 
                   color: 'white', 
@@ -1950,7 +1950,7 @@ const SettingsPage = () => {
                 width: '100%', 
                 padding: '16px', 
                 background: settings.developer_mode ? 'var(--secondary)' : 'transparent',
-                color: settings.developer_mode ? 'var(--black)' : 'var(--white)',
+                color: settings.developer_mode ? 'var(--black)' : 'var(--bg)',
                 borderColor: settings.developer_mode ? 'var(--black)' : 'var(--text-muted)',
                 opacity: updating === 'developer_mode' ? 0.5 : 1,
                 cursor: updating === 'developer_mode' ? 'wait' : 'pointer'
@@ -1963,9 +1963,9 @@ const SettingsPage = () => {
         </motion.div>
       </div>
 
-      <div className="card" style={{ marginTop: '40px', background: 'rgba(255,255,255,0.01)', border: '1px dashed var(--border)' }}>
+      <div className="card" style={{ marginTop: '40px', background: 'rgba(0,0,0,)', border: '1px dashed var(--border)' }}>
         <h4 className="mono" style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '10px' }}>SYSTEM_LOGS</h4>
-        <div className="mono" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', lineHeight: '1.6' }}>
+        <div className="mono" style={{ fontSize: '10px', color: 'rgba(0,0,0,)', lineHeight: '1.6' }}>
           [INFO] System initialized at {new Date().toLocaleTimeString()}<br/>
           [INFO] Authentication layer verified<br/>
           {settings.broadcast_enabled ? '[OK] Broadcast cluster active' : '[WARN] BROADCAST_CLUSTER_OFFLINE'}<br/>
