@@ -861,14 +861,17 @@ const ApplicantsModal = ({ opportunity, applicants: initialApplicants, onClose }
   const downloadCSV = () => {
     if (applicants.length === 0) return;
     
-    const headers = ['Name', 'Telegram', 'Wallet Address', 'Experience', 'Portfolio', 'Submit Link', 'Status', 'Date'];
+    const headers = ['Name', 'Email', 'Telegram', 'X (Twitter)', 'Discord', 'Wallet Address', 'Experience', 'Portfolio', 'Submit Link', 'Status', 'Date'];
     const rows = applicants.map(app => {
       const m = parseMsgData(app);
       return [
         m.name || m.full_name || m.user_handle || 'N/A',
+        m.email || 'N/A',
         m.telegram || 'N/A',
+        m.x_url || m.x_handle || 'N/A',
+        m.discord || 'N/A',
         m.wallet_address || app.user_id || 'N/A',
-        (m.experience || '').replace(/,/g, ';'),
+        (m.experience || '').replace(/,/g, ';').replace(/\n/g, ' '),
         m.portfolio || app.portfolio_links || 'N/A',
         m.projectLink || m.submission_link || 'N/A',
         app.status || 'pending',
@@ -945,19 +948,52 @@ const ApplicantsModal = ({ opportunity, applicants: initialApplicants, onClose }
                     <div className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)', paddingRight: '80px' }}>{new Date(app.created_at).toLocaleString()}</div>
                   </div>
 
-                  {/* Telegram & Wallet row */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', background: 'var(--glass)', padding: '16px', border: '1px solid var(--border)', marginBottom: '16px' }}>
+                  {/* Contact Info Grid */}
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+                    gap: '16px', 
+                    background: 'var(--glass)', 
+                    padding: '20px', 
+                    border: '1px solid var(--border)', 
+                    marginBottom: '16px',
+                    borderRadius: '4px'
+                  }}>
                     <div>
-                      <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>TELEGRAM</div>
+                      <div className="mono" style={{ fontSize: '9px', color: 'var(--text-muted)', marginBottom: '4px', letterSpacing: '1px' }}>EMAIL_ADDRESS</div>
+                      <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text)' }}>{m.email || 'Not provided'}</div>
+                    </div>
+
+                    <div>
+                      <div className="mono" style={{ fontSize: '9px', color: 'var(--text-muted)', marginBottom: '4px', letterSpacing: '1px' }}>TELEGRAM</div>
                       {m.telegram ? (
-                        <a href={`https://t.me/${m.telegram.replace('@', '')}`} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: '600', fontSize: '13px', textDecoration: 'underline' }}>@{m.telegram.replace('@', '')}</a>
+                        <a href={`https://t.me/${m.telegram.replace('@', '')}`} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: '700', fontSize: '13px', textDecoration: 'underline' }}>
+                          @{m.telegram.replace('@', '')}
+                        </a>
                       ) : (
-                        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Not provided</span>
+                        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>N/A</span>
                       )}
                     </div>
+
                     <div>
-                      <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>WALLET_ADDRESS</div>
-                      <div className="mono" style={{ fontSize: '11px', wordBreak: 'break-all' }}>{m.wallet_address || 'Not provided'}</div>
+                      <div className="mono" style={{ fontSize: '9px', color: 'var(--text-muted)', marginBottom: '4px', letterSpacing: '1px' }}>X_TWITTER</div>
+                      {(m.x_url || m.x_handle) ? (
+                        <a href={m.x_url || `https://x.com/${m.x_handle.replace('@', '')}`} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: '700', fontSize: '13px', textDecoration: 'underline' }}>
+                          {m.x_handle ? `@${m.x_handle.replace('@', '')}` : 'View Profile'}
+                        </a>
+                      ) : (
+                        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>N/A</span>
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="mono" style={{ fontSize: '9px', color: 'var(--text-muted)', marginBottom: '4px', letterSpacing: '1px' }}>DISCORD</div>
+                      <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text)' }}>{m.discord || 'N/A'}</div>
+                    </div>
+
+                    <div style={{ gridColumn: '1 / -1' }}>
+                      <div className="mono" style={{ fontSize: '9px', color: 'var(--text-muted)', marginBottom: '4px', letterSpacing: '1px' }}>WALLET_ADDRESS</div>
+                      <div className="mono" style={{ fontSize: '11px', wordBreak: 'break-all', opacity: 0.8 }}>{m.wallet_address || 'Not provided'}</div>
                     </div>
                   </div>
 
@@ -970,36 +1006,46 @@ const ApplicantsModal = ({ opportunity, applicants: initialApplicants, onClose }
                   )}
 
                   {/* About */}
-                  {m.about && (
+                  {(m.about_me || m.about) && (
                     <div style={{ marginBottom: '16px' }}>
                       <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '6px' }}>ABOUT_APPLICANT</div>
-                      <p style={{ fontSize: '13px', lineHeight: '1.6', whiteSpace: 'pre-wrap', margin: 0 }}>{m.about}</p>
+                      <p style={{ fontSize: '13px', lineHeight: '1.6', whiteSpace: 'pre-wrap', margin: 0 }}>{m.about_me || m.about}</p>
                     </div>
                   )}
 
-                  {/* Dynamic link fields */}
-                  {(m.portfolio || m.projectLink || app.portfolio_links) && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
-                      {m.portfolio && (
-                        <div>
-                          <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>PORTFOLIO_URL</div>
-                          <a href={m.portfolio} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: '600', fontSize: '12px', wordBreak: 'break-all' }}>{m.portfolio}</a>
-                        </div>
-                      )}
-                      {m.projectLink && (
-                        <div>
-                          <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>PROJECT_LINK</div>
-                          <a href={m.projectLink} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: '600', fontSize: '12px', wordBreak: 'break-all' }}>{m.projectLink}</a>
-                        </div>
-                      )}
-                      {app.portfolio_links && (
-                        <div>
-                          <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>SUBMISSION_LINKS</div>
-                          <a href={app.portfolio_links} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: '600', fontSize: '12px', wordBreak: 'break-all' }}>{app.portfolio_links}</a>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  {/* Dynamic Links Section */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+                    {(m.portfolio || m.portfolio_url) && (
+                      <div>
+                        <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>PORTFOLIO_URL</div>
+                        <a href={m.portfolio || m.portfolio_url} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: '600', fontSize: '12px', wordBreak: 'break-all' }}>{m.portfolio || m.portfolio_url}</a>
+                      </div>
+                    )}
+                    {(m.projectLink || m.live_link) && (
+                      <div>
+                        <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>PROJECT_LIVE_LINK</div>
+                        <a href={m.projectLink || m.live_link} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: '600', fontSize: '12px', wordBreak: 'break-all' }}>{m.projectLink || m.live_link}</a>
+                      </div>
+                    )}
+                    {m.github_link && (
+                      <div>
+                        <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>GITHUB_LINK</div>
+                        <a href={m.github_link} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: '600', fontSize: '12px', wordBreak: 'break-all' }}>{m.github_link}</a>
+                      </div>
+                    )}
+                    {m.resume_portfolio && (
+                      <div>
+                        <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>RESUME_PORTFOLIO</div>
+                        <a href={m.resume_portfolio} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: '600', fontSize: '12px', wordBreak: 'break-all' }}>{m.resume_portfolio}</a>
+                      </div>
+                    )}
+                    {(m.submission_link || app.portfolio_links) && (
+                      <div>
+                        <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>SUBMISSION_LINKS</div>
+                        <a href={m.submission_link || app.portfolio_links} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: '600', fontSize: '12px', wordBreak: 'break-all' }}>{m.submission_link || app.portfolio_links}</a>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Status management row */}
                   <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '8px' }}>
