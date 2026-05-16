@@ -831,25 +831,48 @@ const EditOpportunityModal = ({ opportunity, onClose, onSave }: { opportunity: a
   );
 };
 
-const ApplicantsModal = ({ opportunity, applicants, onClose }: { opportunity: any, applicants: any[], onClose: () => void }) => {
+const ApplicantsModal = ({ opportunity, applicants: initialApplicants, onClose }: { opportunity: any, applicants: any[], onClose: () => void }) => {
+  const [applicants, setApplicants] = useState(initialApplicants);
+
+  const parseMsgData = (app: any) => {
+    let msgData: any = { telegram: '', wallet_address: app.user_id, user_handle: 'Anonymous' };
+    try {
+      const parsed = JSON.parse(app.message);
+      msgData = { ...msgData, ...parsed };
+    } catch (e) {
+      // Fallback for non-JSON messages
+    }
+    return msgData;
+  };
+
+  const updateStatus = async (appId: string, newStatus: string) => {
+    const { error } = await supabase
+      .from('applications')
+      .update({ status: newStatus })
+      .eq('id', appId);
+
+    if (!error) {
+      setApplicants(prev => prev.map(a => a.id === appId ? { ...a, status: newStatus } : a));
+    } else {
+      alert('Status update failed: ' + error.message);
+    }
+  };
+
   const downloadCSV = () => {
     if (applicants.length === 0) return;
     
-    const headers = ['Submit Link', 'Wallet Address', 'Telegram Username'];
+    const headers = ['Name', 'Telegram', 'Wallet Address', 'Experience', 'Portfolio', 'Submit Link', 'Status', 'Date'];
     const rows = applicants.map(app => {
-      let telegram = 'N/A';
-      try {
-        const msgObj = JSON.parse(app.message);
-        telegram = msgObj.telegram || 'N/A';
-      } catch (e) {
-        // Fallback if message is not JSON
-        telegram = app.message.substring(0, 50);
-      }
-
+      const m = parseMsgData(app);
       return [
-        app.portfolio_links || 'N/A',
-        app.user_id,
-        telegram
+        m.name || m.full_name || m.user_handle || 'N/A',
+        m.telegram || 'N/A',
+        m.wallet_address || app.user_id || 'N/A',
+        (m.experience || '').replace(/,/g, ';'),
+        m.portfolio || app.portfolio_links || 'N/A',
+        m.projectLink || m.submission_link || 'N/A',
+        app.status || 'pending',
+        new Date(app.created_at).toLocaleString()
       ];
     });
 
@@ -864,6 +887,13 @@ const ApplicantsModal = ({ opportunity, applicants, onClose }: { opportunity: an
     document.body.removeChild(link);
   };
 
+  const statusColors: Record<string, string> = {
+    pending: 'var(--accent)',
+    reviewed: 'var(--secondary)',
+    shortlisted: 'var(--primary)',
+    rejected: 'var(--black)',
+  };
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <motion.div 
@@ -873,10 +903,10 @@ const ApplicantsModal = ({ opportunity, applicants, onClose }: { opportunity: an
         onClick={e => e.stopPropagation()}
         style={{ maxWidth: '900px', maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
       >
-        <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,)' }}>
+        <div style={{ padding: '24px 32px', borderBottom: '2px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h2 className="mono" style={{ fontSize: '18px', color: 'var(--primary)' }}>APPLICANTS_FOR: {opportunity.project_name}</h2>
-            <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{opportunity.title} • {applicants.length} SUBMISSIONS</div>
+            <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{opportunity.type?.toUpperCase() || 'OPPORTUNITY'} • {applicants.length} SUBMISSIONS</div>
           </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             {applicants.length > 0 && (
@@ -888,7 +918,7 @@ const ApplicantsModal = ({ opportunity, applicants, onClose }: { opportunity: an
                 DOWNLOAD_DATA (.CSV)
               </button>
             )}
-            <button onClick={onClose} style={{ background: 'var(--border)', border: 'none', color: 'white', cursor: 'pointer', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+            <button onClick={onClose} style={{ background: 'var(--border)', border: 'none', color: 'var(--text)', cursor: 'pointer', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
           </div>
         </div>
         
@@ -896,38 +926,119 @@ const ApplicantsModal = ({ opportunity, applicants, onClose }: { opportunity: an
           {applicants.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }} className="mono">NO_APPLICANTS_YET_FOR_THIS_OPPORTUNITY</div>
           ) : (
-            <div style={{ display: 'grid', gap: '20px' }}>
-              {applicants.map(app => (
-                <div key={app.id} className="card" style={{ background: 'rgba(0,0,0,)' }}>
+            <div style={{ display: 'grid', gap: '24px' }}>
+              {applicants.map(app => {
+                const m = parseMsgData(app);
+                return (
+                <div key={app.id} className="card" style={{ position: 'relative' }}>
+                  {/* Status badge */}
+                  <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
+                    <span className={`status-badge status-${app.status || 'pending'}`}>{(app.status || 'pending').toUpperCase()}</span>
+                  </div>
+
+                  {/* Header row */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
-                    <div className="mono" style={{ fontSize: '11px', color: 'var(--primary)' }}>ID: {app.id.substring(0,8)}...</div>
-                    <div className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{new Date(app.created_at).toLocaleString()}</div>
-                  </div>
-                  
-                  <div style={{ marginBottom: '20px' }}>
-                    <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '8px' }}>PITCH_MESSAGE</div>
-                    <p style={{ fontSize: '14px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{app.message}</p>
+                    <div>
+                      <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '4px' }}>{m.name || m.full_name || m.user_handle || 'Anonymous'}</div>
+                      <div className="mono" style={{ fontSize: '11px', color: 'var(--primary)' }}>ID: {app.id.substring(0,8)}...</div>
+                    </div>
+                    <div className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)', paddingRight: '80px' }}>{new Date(app.created_at).toLocaleString()}</div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', background: 'rgba(0,0,0,0.2)', padding: '15px', border: '1px solid var(--border)' }}>
+                  {/* Telegram & Wallet row */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', background: 'var(--glass)', padding: '16px', border: '1px solid var(--border)', marginBottom: '16px' }}>
                     <div>
-                      <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>WALLET_ADDRESS</div>
-                      <div className="mono" style={{ fontSize: '11px', wordBreak: 'break-all' }}>{app.user_id}</div>
+                      <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>TELEGRAM</div>
+                      {m.telegram ? (
+                        <a href={`https://t.me/${m.telegram.replace('@', '')}`} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: '600', fontSize: '13px', textDecoration: 'underline' }}>@{m.telegram.replace('@', '')}</a>
+                      ) : (
+                        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Not provided</span>
+                      )}
                     </div>
                     <div>
-                      <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>PORTFOLIO_LINKS</div>
-                      <div style={{ fontSize: '11px', color: 'var(--primary)', textDecoration: 'underline', cursor: 'pointer' }} onClick={() => window.open(app.portfolio_links, '_blank')}>
-                        {app.portfolio_links || 'N/A'}
-                      </div>
+                      <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>WALLET_ADDRESS</div>
+                      <div className="mono" style={{ fontSize: '11px', wordBreak: 'break-all' }}>{m.wallet_address || 'Not provided'}</div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
-                    <a href={`mailto:?subject=Regarding your application for ${opportunity.title}`} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', fontSize: '11px' }}>EMAIL_APPLICANT</a>
-                    <button className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', fontSize: '11px' }}>CONTACT_VIA_X</button>
+                  {/* Experience */}
+                  {m.experience && (
+                    <div style={{ marginBottom: '16px' }}>
+                      <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '6px' }}>EXPERIENCE</div>
+                      <p style={{ fontSize: '13px', lineHeight: '1.6', whiteSpace: 'pre-wrap', margin: 0 }}>{m.experience}</p>
+                    </div>
+                  )}
+
+                  {/* About */}
+                  {m.about && (
+                    <div style={{ marginBottom: '16px' }}>
+                      <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '6px' }}>ABOUT_APPLICANT</div>
+                      <p style={{ fontSize: '13px', lineHeight: '1.6', whiteSpace: 'pre-wrap', margin: 0 }}>{m.about}</p>
+                    </div>
+                  )}
+
+                  {/* Dynamic link fields */}
+                  {(m.portfolio || m.projectLink || app.portfolio_links) && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+                      {m.portfolio && (
+                        <div>
+                          <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>PORTFOLIO_URL</div>
+                          <a href={m.portfolio} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: '600', fontSize: '12px', wordBreak: 'break-all' }}>{m.portfolio}</a>
+                        </div>
+                      )}
+                      {m.projectLink && (
+                        <div>
+                          <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>PROJECT_LINK</div>
+                          <a href={m.projectLink} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: '600', fontSize: '12px', wordBreak: 'break-all' }}>{m.projectLink}</a>
+                        </div>
+                      )}
+                      {app.portfolio_links && (
+                        <div>
+                          <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>SUBMISSION_LINKS</div>
+                          <a href={app.portfolio_links} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: '600', fontSize: '12px', wordBreak: 'break-all' }}>{app.portfolio_links}</a>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Status management row */}
+                  <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '8px' }}>
+                    <div className="mono" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '10px' }}>UPDATE_STATUS</div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      {['pending', 'reviewed', 'shortlisted', 'rejected'].map(status => (
+                        <button
+                          key={status}
+                          className="btn btn-outline"
+                          style={{
+                            flex: 1,
+                            minWidth: '80px',
+                            padding: '8px 6px',
+                            fontSize: '10px',
+                            fontWeight: '900',
+                            background: (app.status || 'pending') === status ? statusColors[status] : 'transparent',
+                            color: (app.status || 'pending') === status ? (status === 'rejected' ? 'var(--bg)' : 'var(--black)') : 'var(--text)',
+                            borderColor: (app.status || 'pending') === status ? statusColors[status] : 'var(--border)',
+                          }}
+                          onClick={() => updateStatus(app.id, status)}
+                        >
+                          {status.toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Contact actions */}
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                    <a href={`mailto:?subject=Regarding your application for ${opportunity.title}`} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', fontSize: '11px', textAlign: 'center' }}>EMAIL_APPLICANT</a>
+                    {m.telegram ? (
+                      <a href={`https://t.me/${m.telegram.replace('@', '')}`} target="_blank" rel="noreferrer" className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', fontSize: '11px', textAlign: 'center' }}>CONTACT_TELEGRAM</a>
+                    ) : (
+                      <button className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', fontSize: '11px' }}>CONTACT_VIA_X</button>
+                    )}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
